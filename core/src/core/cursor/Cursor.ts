@@ -1,4 +1,4 @@
-import { nextTick } from 'process'
+const nextTick = (fn: () => void) => Promise.resolve().then(fn)
 import { EDITOR_PREFIX } from '../../dataset/constant/Editor'
 import { ElementType } from '../../dataset/enum/Element'
 import { MoveDirection } from '../../dataset/enum/Observer'

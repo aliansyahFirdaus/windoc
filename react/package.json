@@ -1,7 +1,24 @@
 {
   "name": "@windoc/react",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "React bindings for windoc editor",
+  "homepage": "https://aliansyahfirdaus.github.io/windoc/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aliansyahFirdaus/windoc.git",
+    "directory": "react"
+  },
+  "bugs": {
+    "url": "https://github.com/aliansyahFirdaus/windoc/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "editor",
+    "canvas",
+    "document",
+    "react",
+    "windoc"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -27,12 +44,14 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@windoc/core": "^1.0.0"
+    "@windoc/core": "^0.2.0"
   },
   "devDependencies": {
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "lucide-react": "^0.563.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "tsup": "^8.0.0",
     "typescript": "^5"
   }

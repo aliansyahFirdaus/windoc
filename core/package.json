@@ -1,7 +1,24 @@
 {
   "name": "@windoc/core",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "Canvas-based document editor engine",
+  "homepage": "https://aliansyahfirdaus.github.io/windoc/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aliansyahFirdaus/windoc.git",
+    "directory": "core"
+  },
+  "bugs": {
+    "url": "https://github.com/aliansyahFirdaus/windoc/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "editor",
+    "canvas",
+    "document",
+    "wysiwyg",
+    "windoc"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -21,6 +38,7 @@
     "dev": "tsup --watch"
   },
   "devDependencies": {
+    "@types/node": "^25.3.5",
     "tsup": "^8.0.0",
     "typescript": "^5"
   }
