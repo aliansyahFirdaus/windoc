@@ -11,8 +11,12 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://windoc.dev',
-  baseUrl: '/',
+  url: 'https://aliansyahfirdaus.github.io',
+  baseUrl: '/windoc/',
+
+  organizationName: 'aliansyahFirdaus',
+  projectName: 'windoc',
+  trailingSlash: false,
 
   onBrokenLinks: 'throw',
 
