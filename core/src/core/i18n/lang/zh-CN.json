@@ -1,0 +1,92 @@
+{
+  "contextmenu": {
+    "global": {
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste",
+      "selectAll": "Select All",
+      "print": "Print"
+    },
+    "control": {
+      "delete": "Delete Control"
+    },
+    "hyperlink": {
+      "delete": "Delete Hyperlink",
+      "cancel": "Cancel Hyperlink",
+      "edit": "Edit Hyperlink"
+    },
+    "image": {
+      "change": "Change Image",
+      "saveAs": "Save As Image",
+      "textWrap": "Text Wrapping",
+      "textWrapType": {
+        "embed": "Inline",
+        "upDown": "Top and Bottom",
+        "surround": "Square",
+        "floatTop": "Float Over Text",
+        "floatBottom": "Float Below Text"
+      }
+    },
+    "table": {
+      "insertRowCol": "Insert Row/Column",
+      "insertTopRow": "Insert Row Above",
+      "insertBottomRow": "Insert Row Below",
+      "insertLeftCol": "Insert Column Left",
+      "insertRightCol": "Insert Column Right",
+      "deleteRowCol": "Delete Row/Column",
+      "deleteRow": "Delete Row",
+      "deleteCol": "Delete Column",
+      "deleteTable": "Delete Table",
+      "mergeCell": "Merge Cells",
+      "mergeCancelCell": "Cancel Merge",
+      "verticalAlign": "Vertical Alignment",
+      "verticalAlignTop": "Align Top",
+      "verticalAlignMiddle": "Align Middle",
+      "verticalAlignBottom": "Align Bottom",
+      "border": "Table Border",
+      "borderAll": "All Borders",
+      "borderEmpty": "No Border",
+      "borderDash": "Dashed Border",
+      "borderExternal": "Outer Border",
+      "borderInternal": "Inner Border",
+      "borderTd": "Cell Border",
+      "borderTdTop": "Top Border",
+      "borderTdRight": "Right Border",
+      "borderTdBottom": "Bottom Border",
+      "borderTdLeft": "Left Border",
+      "borderTdForward": "Forward Slash",
+      "borderTdBack": "Back Slash"
+    }
+  },
+  "datePicker": {
+    "now": "Now",
+    "confirm": "Confirm",
+    "return": "Return Date",
+    "timeSelect": "Time Select",
+    "weeks": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "year": "Year",
+    "month": "Month",
+    "hour": "Hour",
+    "minute": "Minute",
+    "second": "Second"
+  },
+  "frame": {
+    "header": "Header",
+    "footer": "Footer"
+  },
+  "pageBreak": {
+    "displayName": "Page Break"
+  },
+  "zone": {
+    "headerTip": "Double-click to edit header",
+    "footerTip": "Double-click to edit footer"
+  }
+}

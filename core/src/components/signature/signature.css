@@ -1,0 +1,132 @@
+.signature-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: .5;
+  background: #000000;
+  z-index: 99;
+}
+
+.signature-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: auto;
+  z-index: 999;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.signature {
+  position: absolute;
+  padding: 0 30px 30px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px 0 rgb(56 56 56 / 20%);
+  border: 1px solid #e2e6ed;
+  border-radius: 2px;
+}
+
+.signature-title {
+  position: relative;
+  border-bottom: 1px solid #e2e6ed;
+  margin-bottom: 15px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.signature-title i {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  display: inline-block;
+  background: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.9 8.192l4.242 4.243-.707.707L8.192 8.9 3.95 13.142l-.707-.707 4.242-4.243L3.243 3.95l.707-.707 4.242 4.242 4.243-4.242.707.707L8.9 8.192z' fill='%236A6A6A' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.signature-operation>div {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  color: #3d4757;
+  user-select: none;
+}
+
+.signature-operation>div:hover {
+  color: #6e7175;
+}
+
+.signature-operation>div i {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.signature-operation__undo {
+  background: url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 6h5.5a7 7 0 010 14v-2a5 5 0 000-10H8v3L4 7l4-4v3z' fill='%233d4757' fill-rule='evenodd'/%3E%3C/svg%3E") no-repeat;
+}
+
+.signature-operation__trash {
+  background: url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%233d4757' fill-rule='evenodd'%3E%3Cpath d='M17 3v4h4v2h-2v13H6V9H4V7h4V3h9zm0 6H8v11h9V9zm-2-4h-5v2h5V5z' fill-rule='nonzero'/%3E%3Cpath d='M10 10h2v7h-2zm3 0h2v7h-2z'/%3E%3C/g%3E%3C/svg%3E") no-repeat;
+}
+
+.signature-operation>div span {
+  font-size: 12px;
+  margin: 0 5px;
+}
+
+.signature-canvas {
+  margin: 15px 0;
+  user-select: none;
+}
+
+.signature-canvas canvas {
+  background: #f3f5f7;
+}
+
+.signature-menu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.signature-menu button {
+  position: relative;
+  display: inline-block;
+  border: 1px solid #e2e6ed;
+  border-radius: 2px;
+  background: #ffffff;
+  line-height: 22px;
+  padding: 0 16px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.signature-menu button:hover {
+  background: rgba(25, 55, 88, .04);
+}
+
+.signature-menu__cancel {
+  margin-right: 16px;
+}
+
+.signature-menu button[type='submit'] {
+  color: #ffffff;
+  background: #4991f2;
+  border-color: #4991f2;
+}
+
+.signature-menu button[type='submit']:hover {
+  background: #5b9cf3;
+  border-color: #5b9cf3;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}

@@ -1,0 +1,13 @@
+{
+  "name": "windoc",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "core",
+    "react"
+  ],
+  "scripts": {
+    "build": "yarn workspace @windoc/core build && yarn workspace @windoc/react build",
+    "dev": "yarn workspace @windoc/core dev & yarn workspace @windoc/react dev"
+  }
+}
