@@ -59,13 +59,19 @@ const config: Config = {
           label: 'npm',
           position: 'right',
         },
+        {
+          href: 'https://github.com/aliansyahFirdaus/windoc',
+          position: 'right',
+          className: 'header-github-link',
+          'aria-label': 'GitHub repository',
+        },
       ],
     },
     footer: {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Documentation',
           items: [
             {
               label: 'Getting Started',
@@ -74,6 +80,10 @@ const config: Config = {
             {
               label: 'API Reference',
               to: '/docs/api/core',
+            },
+            {
+              label: 'Guides',
+              to: '/docs/guides/custom-toolbar',
             },
           ],
         },
@@ -90,8 +100,21 @@ const config: Config = {
             },
           ],
         },
+        {
+          title: 'Community',
+          items: [
+            {
+              label: 'GitHub',
+              href: 'https://github.com/aliansyahFirdaus/windoc',
+            },
+            {
+              label: 'Issues',
+              href: 'https://github.com/aliansyahFirdaus/windoc/issues',
+            },
+          ],
+        },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Windoc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Windoc`,
     },
     prism: {
       theme: prismThemes.github,
