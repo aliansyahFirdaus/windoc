@@ -41,6 +41,10 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    ['@docusaurus/plugin-google-gtag', { trackingID: 'G-M5CV6YKRW9' }],
+  ],
+
   themeConfig: {
     colorMode: {
       respectPrefersColorScheme: true,
