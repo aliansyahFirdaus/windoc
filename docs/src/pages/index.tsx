@@ -1,8 +1,30 @@
 import type {ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
+import Head from '@docusaurus/Head';
 import LiveDemo from '@site/src/components/LiveDemo';
 import styles from './index.module.css';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Windoc',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Web',
+  description:
+    'Canvas-based document editor for the web with pixel-perfect pagination, rich text formatting, tables, images, and print support.',
+  url: 'https://aliansyahfirdaus.github.io/windoc/',
+  sameAs: [
+    'https://github.com/aliansyahFirdaus/windoc',
+    'https://www.npmjs.com/package/@windoc/core',
+  ],
+  license: 'https://opensource.org/licenses/MIT',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+};
 
 function Hero() {
   return (
@@ -194,6 +216,9 @@ export default function Home(): ReactNode {
       title="Canvas Document Editor"
       description="Canvas-based document editor for the web with pixel-perfect pagination, rich text, tables, and print support."
     >
+      <Head>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Head>
       <main>
         <Hero />
         <DemoSection />
