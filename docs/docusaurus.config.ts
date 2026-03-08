@@ -55,7 +55,7 @@ const config: Config = {
         alt: 'Windoc',
         src: 'img/logo-text-black.png',
         srcDark: 'img/logo-text-white.png',
-        height: 24,
+        height: 36,
       },
       items: [
         {

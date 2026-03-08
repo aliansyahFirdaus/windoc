@@ -1,7 +1,9 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-white.png">
-  <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png" alt="Windoc" height="36">
-</picture>
+<div align="center">
+
+![Windoc](https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png#gh-light-mode-only)
+![Windoc](https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-white.png#gh-dark-mode-only)
+
+</div>
 
 Canvas-based document editor for the web. High-performance rendering via HTML5 Canvas with pixel-perfect pagination, rich text formatting, tables, images, and print support.
 
