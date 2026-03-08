@@ -119,3 +119,107 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+
+/* ── Fix: @windoc CSS global leaks ────────────────── */
+/* @windoc/react/style.css imported in LiveDemo contains global
+   rules (body bg, ul reset, .menu/.footer classes, scrollbar)
+   that conflict with Docusaurus. These overrides restore defaults. */
+
+/* editor.css line 43: body { background-color: #f2f4f7 }
+   Breaks dark mode — makes bg white instead of dark */
+body {
+  background-color: var(--ifm-background-color) !important;
+}
+
+/* editor.css line 47: ul { list-style: none }
+   Removes bullet points from all doc lists */
+.theme-doc-markdown ul {
+  list-style: disc !important;
+}
+
+/* editor.css: ::-webkit-scrollbar global overrides */
+:root ::-webkit-scrollbar {
+  width: initial;
+  height: initial;
+}
+
+:root ::-webkit-scrollbar-thumb {
+  background-color: initial;
+  background-clip: initial;
+  border: initial;
+  border-radius: initial;
+}
+
+:root ::-webkit-scrollbar-track {
+  background: initial;
+  background-clip: initial;
+}
+
+/* editor.css: .menu { position:fixed; height:60px; z-index:9; ... }
+   and .menu * { margin:0; padding:0 }
+   Conflicts with Docusaurus sidebar <nav class="menu"> — hides sidebar */
+.theme-doc-sidebar-container .menu {
+  width: auto !important;
+  height: auto !important;
+  position: static !important;
+  z-index: auto !important;
+  top: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-family: var(--ifm-font-family-base) !important;
+}
+
+/* Restore sidebar item spacing after .menu * { margin:0; padding:0 } */
+.theme-doc-sidebar-container .menu__link {
+  padding: 0.375rem 0.75rem !important;
+}
+
+.theme-doc-sidebar-container .menu__list .menu__list {
+  padding-left: 0.75rem !important;
+}
+
+.theme-doc-sidebar-container .menu__caret {
+  padding: 0.375rem 0.75rem !important;
+}
+
+/* editor.css: .footer { position:fixed; bottom:0; height:30px; ... }
+   Conflicts with Docusaurus <footer class="footer footer--dark"> */
+footer.footer {
+  width: auto !important;
+  height: auto !important;
+  position: static !important;
+  z-index: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block !important;
+  background-color: var(--ifm-footer-background-color) !important;
+  font-size: var(--ifm-font-size-base) !important;
+  padding: 2rem 0 !important;
+  box-sizing: border-box !important;
+}
+
+footer.footer .footer__links {
+  margin-bottom: 2rem !important;
+}
+
+footer.footer .footer__col {
+  padding: 0 !important;
+}
+
+footer.footer .footer__title {
+  margin-bottom: 0.5rem !important;
+}
+
+footer.footer .footer__item {
+  margin-top: 0.25rem !important;
+}
+
+/* editor.css: .editor > div { margin: 80px auto }
+   Generic .editor class could affect docs content */
+.theme-doc-markdown .editor > div {
+  margin: 0 !important;
+}

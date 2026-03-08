@@ -114,9 +114,7 @@ function MyEditor() {
 You can hide the built-in toolbar and/or footer:
 
 ```tsx
-<Editor toolbar={false} footer={false}>
-  {/* Your custom UI here */}
-</Editor>
+<Editor toolbar={false} footer={false} />
 ```
 
 Or replace them with your own:
