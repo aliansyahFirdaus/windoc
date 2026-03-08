@@ -3,7 +3,7 @@
   <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png#gh-dark-mode-only" alt="Windoc" height="120">
 </div>
 
-## Windoc
+# Windoc
 
 Canvas-based document editor for the web. High-performance rendering via HTML5 Canvas with pixel-perfect pagination, rich text formatting, tables, images, and print support.
 
