@@ -40,9 +40,9 @@ function Hero() {
           <span className={styles.heroTitleAccent}>for the web</span>
         </h1>
         <p className={styles.heroDescription}>
-          Pixel-perfect rendering, true pagination, and print fidelity.
-          A modern alternative to DOM-based editors — designed for documents
-          that need to look exactly right.
+          A React document editor and web document editor built on HTML5 Canvas.
+          Pixel-perfect rendering, true pagination, and print fidelity —
+          a modern alternative to DOM-based editors.
         </p>
         <div className={styles.heroCtas}>
           <Link to="/docs" className={styles.ctaPrimary}>
@@ -213,8 +213,8 @@ function BottomCta() {
 export default function Home(): ReactNode {
   return (
     <Layout
-      title="Canvas Document Editor"
-      description="Canvas-based document editor for web and React with pixel-perfect pagination, rich text, composable UI components, and print support."
+      title="Canvas Document Editor for React & Web"
+      description="Windoc is a canvas document editor for web and React with pixel-perfect pagination, rich text, composable UI components, and print support."
     >
       <Head>
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
