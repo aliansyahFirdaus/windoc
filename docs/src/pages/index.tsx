@@ -36,8 +36,8 @@ function Hero() {
           v0.2.0 — Now available on npm
         </div>
         <h1 className={styles.heroTitle}>
-          The document editor{' '}
-          <span className={styles.heroTitleAccent}>built on Canvas</span>
+          Canvas document editor{' '}
+          <span className={styles.heroTitleAccent}>for the web</span>
         </h1>
         <p className={styles.heroDescription}>
           Pixel-perfect rendering, true pagination, and print fidelity.
@@ -214,7 +214,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Canvas Document Editor"
-      description="Canvas-based document editor for the web with pixel-perfect pagination, rich text, tables, and print support."
+      description="Canvas-based document editor for web and React with pixel-perfect pagination, rich text, composable UI components, and print support."
     >
       <Head>
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>

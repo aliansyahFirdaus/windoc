@@ -68,6 +68,7 @@ const config: Config = {
         src: 'img/logo-text-white.png',
         srcDark: 'img/logo-text-black.png',
         height: 36,
+        href: 'https://aliansyahfirdaus.github.io/windoc/',
       },
       items: [
         {
