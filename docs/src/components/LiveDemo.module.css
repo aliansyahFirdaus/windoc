@@ -113,9 +113,15 @@
   flex-shrink: 0;
 }
 
+/* Center the page canvas within the editor area */
+.editorFrame :global(.editor) {
+  display: flex !important;
+  justify-content: center !important;
+}
+
 /* Reduce page margin since toolbar is now in-flow (not fixed) */
 .editorFrame :global(.editor > div) {
-  margin: 20px auto !important;
+  margin: 20px 0 !important;
 }
 
 /* Editor canvas container */
