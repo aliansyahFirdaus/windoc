@@ -8,7 +8,9 @@ sidebar_position: 2
 
 ```bash
 npm install @windoc/core @windoc/react
-# or
+```
+
+```bash
 yarn add @windoc/core @windoc/react
 ```
 

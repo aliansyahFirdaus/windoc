@@ -75,18 +75,47 @@
 
 /* ── Editor Frame ─────────────────────────────── */
 .editorFrame {
-  height: 560px;
+  height: 650px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: #fff;
-  /* Creates a containing block so the editor's position:fixed footer
-     stays inside this container instead of escaping to the viewport */
-  transform: translateZ(0);
 }
 
 [data-theme='dark'] .editorFrame {
   background: #1a1a1a;
+}
+
+/* Toolbar: make relative (not fixed) so it's part of flex flow,
+   and horizontally scrollable instead of wrapping */
+.editorFrame :global(.menu) {
+  position: relative !important;
+  top: auto !important;
+  flex-shrink: 0;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide toolbar scrollbar for cleaner look */
+.editorFrame :global(.menu)::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+
+/* Editor footer: make relative (not fixed) so it sits at bottom of flex */
+.editorFrame :global(div.footer) {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  flex-shrink: 0;
+}
+
+/* Reduce page margin since toolbar is now in-flow (not fixed) */
+.editorFrame :global(.editor > div) {
+  margin: 20px auto !important;
 }
 
 /* Editor canvas container */
@@ -108,7 +137,7 @@
 
 /* ── Code Frame ───────────────────────────────── */
 .codeFrame {
-  height: 560px;
+  height: 650px;
   overflow: auto;
   background: #1C1917;
 }
@@ -131,7 +160,7 @@
 
 /* ── Loading ──────────────────────────────────── */
 .loading {
-  height: 560px;
+  height: 650px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,6 +179,6 @@
   .editorFrame,
   .codeFrame,
   .loading {
-    height: 420px;
+    height: 480px;
   }
 }

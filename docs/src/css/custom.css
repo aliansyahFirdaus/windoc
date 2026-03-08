@@ -202,12 +202,27 @@ footer.footer {
   box-sizing: border-box !important;
 }
 
+/* Override all editor .footer child selectors */
+footer.footer > div,
+footer.footer > div > div,
+footer.footer > div > div > div {
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Footer links row: top-aligned columns */
 footer.footer .footer__links {
   margin-bottom: 2rem !important;
 }
 
+footer.footer .row {
+  display: flex !important;
+  align-items: flex-start !important;
+}
+
 footer.footer .footer__col {
   padding: 0 !important;
+  flex: 1 !important;
 }
 
 footer.footer .footer__title {
@@ -218,18 +233,8 @@ footer.footer .footer__item {
   margin-top: 0.25rem !important;
 }
 
-/* editor.css: .footer > div:first-child, .footer > div:last-child > div
-   sets width:24px/height:24px on child divs — breaks footer column layout */
-footer.footer > div {
-  width: auto !important;
-  height: auto !important;
-  display: block !important;
-}
-
-footer.footer > div > div,
-footer.footer > div > div > div {
-  width: auto !important;
-  height: auto !important;
+footer.footer .footer__items {
+  list-style: none !important;
 }
 
 /* editor.css: .editor > div { margin: 80px auto }
