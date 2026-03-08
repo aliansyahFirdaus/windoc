@@ -300,10 +300,13 @@ Releases are handled by the maintainer. The general flow:
 
 1. Changes land on `main` via merged PRs
 2. Maintainer bumps versions in `core/package.json` and `react/package.json`
-3. Changelog is updated
-4. Published to npm: `npm publish --access public` from each package directory
-5. Git tag is created: `git tag v0.x.0`
-6. Docs deploy automatically via GitHub Actions on push to `main`
+3. Run `yarn sync-version` — this syncs version numbers in the docs landing page and README automatically
+4. Changelog is updated
+5. Published to npm: `npm publish --access public` from each package directory
+6. Git tag is created: `git tag v0.x.0`
+7. Docs deploy automatically via GitHub Actions on push to `main`
+
+> `yarn sync-version` reads versions from `core/package.json` and `react/package.json` and updates all hardcoded version strings across the docs and README. Always run this after bumping versions.
 
 ---
 
