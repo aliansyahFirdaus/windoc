@@ -78,8 +78,8 @@
   height: 650px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   background: #fff;
+  /* No overflow:hidden — allows toolbar dropdowns to show */
 }
 
 [data-theme='dark'] .editorFrame {
@@ -92,19 +92,13 @@
   position: relative !important;
   top: auto !important;
   flex-shrink: 0;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+  overflow: visible !important;
   flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
   white-space: nowrap;
   padding-left: 16px !important;
   padding-right: 16px !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Hide toolbar scrollbar for cleaner look */
-.editorFrame :global(.menu)::-webkit-scrollbar {
-  height: 0;
-  display: none;
+  z-index: 10;
 }
 
 /* Editor footer: make relative (not fixed) so it sits at bottom of flex */
@@ -113,6 +107,19 @@
   bottom: auto !important;
   left: auto !important;
   flex-shrink: 0;
+  color: #606266 !important;
+  background: #f2f4f7 !important;
+}
+
+/* Keep editor footer text readable in dark mode */
+[data-theme='dark'] .editorFrame :global(div.footer) {
+  color: #a0a0a0 !important;
+  background: #1e1e1e !important;
+}
+
+[data-theme='dark'] .editorFrame :global(div.footer) :global(span),
+[data-theme='dark'] .editorFrame :global(div.footer) :global(i) {
+  color: inherit !important;
 }
 
 /* Center the page canvas — the page container div has
