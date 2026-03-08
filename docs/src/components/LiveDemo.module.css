@@ -75,27 +75,37 @@
 
 /* ── Editor Frame ─────────────────────────────── */
 .editorFrame {
-  height: 520px;
+  height: 560px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #fff;
 }
 
-/* Style the embedded editor */
+[data-theme='dark'] .editorFrame {
+  background: #1a1a1a;
+}
+
+/* Editor canvas container */
 .editorFrame :global(.demo-editor) {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  background: #f5f5f4;
 }
 
-/* Toolbar inside demo */
-.editorFrame :global(.ce-toolbar) {
-  border-bottom: 1px solid var(--w-border);
+[data-theme='dark'] .editorFrame :global(.demo-editor) {
+  background: #252525;
+}
+
+/* Clip any overflow from the page mask */
+.editorFrame :global(.ce-editor) {
+  overflow: hidden;
 }
 
 /* ── Code Frame ───────────────────────────────── */
 .codeFrame {
-  height: 520px;
+  height: 560px;
   overflow: auto;
   background: #1C1917;
 }
@@ -118,7 +128,7 @@
 
 /* ── Loading ──────────────────────────────────── */
 .loading {
-  height: 520px;
+  height: 560px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,6 +147,6 @@
   .editorFrame,
   .codeFrame,
   .loading {
-    height: 400px;
+    height: 420px;
   }
 }

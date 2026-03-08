@@ -15,6 +15,8 @@
   --ifm-font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace;
   --ifm-code-font-size: 90%;
   --ifm-heading-font-weight: 700;
+  --ifm-font-color-base: #1C1917;
+  --ifm-heading-color: #0C0A09;
 
   --ifm-navbar-background-color: rgba(255, 255, 255, 0.8);
   --ifm-navbar-shadow: none;
@@ -54,6 +56,8 @@
   --ifm-navbar-background-color: rgba(9, 9, 11, 0.85);
   --ifm-footer-background-color: #09090B;
   --ifm-background-color: #09090B;
+  --ifm-font-color-base: #E4E4E7;
+  --ifm-heading-color: #FAFAFA;
 
   --docusaurus-highlighted-code-line-bg: rgba(45, 212, 191, 0.1);
 

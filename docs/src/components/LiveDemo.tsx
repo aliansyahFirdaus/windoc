@@ -35,6 +35,8 @@ function EditorRenderer() {
         require('@windoc/react/style.css');
         return (
           <Editor
+            toolbar={true}
+            footer={true}
             defaultValue={{
               main: [
                 {value: 'Welcome to '},
@@ -48,20 +50,16 @@ function EditorRenderer() {
               ],
             }}
             options={{
-              margins: [40, 40, 40, 40],
+              margins: [30, 30, 30, 30],
               defaultBasicRowMarginHeight: 5,
               placeholder: {data: 'Start typing...'},
               watermark: {data: '', size: 120},
-              header: {top: 13},
-              pageNumber: {
-                disabled: false,
-                format: '{pageNo} of {pageCount}',
-                size: 10,
-                rowFlex: 'right',
-                bottom: 11,
-              },
+              header: {disabled: true},
+              footer: {disabled: true},
+              pageNumber: {disabled: true},
               zone: {tipDisabled: true},
-              maskMargin: [60, 0, 30, 0],
+              maskMargin: [0, 0, 0, 0],
+              scrollContainerSelector: '.demo-editor',
             }}
             className="demo-editor"
             style={{flex: 1, minHeight: 0, overflow: 'auto'}}
