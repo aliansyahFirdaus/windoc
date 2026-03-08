@@ -59,6 +59,10 @@ yarn install
 yarn build
 ```
 
+## Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](./CONTRIBUTING.md) before opening a pull request.
+
 ## License
 
 MIT
