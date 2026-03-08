@@ -25,6 +25,7 @@ export class HyperlinkParticle {
   private _createHyperlinkPopupDom() {
     const hyperlinkPopupContainer = document.createElement('div')
     hyperlinkPopupContainer.classList.add(`${EDITOR_PREFIX}-hyperlink-popup`)
+    hyperlinkPopupContainer.style.display = 'none'
     const hyperlinkDom = document.createElement('a')
     hyperlinkDom.target = '_blank'
     hyperlinkDom.rel = 'noopener'

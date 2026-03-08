@@ -130,6 +130,7 @@ export class Previewer {
     resizerImageContainer.classList.add(`${EDITOR_PREFIX}-resizer-image`)
     resizerImageContainer.style.display = 'none'
     const resizerImage = document.createElement('img')
+    resizerImage.alt = ''
     resizerImageContainer.append(resizerImage)
     this.container.append(resizerImageContainer)
     return {
