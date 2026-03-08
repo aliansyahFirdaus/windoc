@@ -218,6 +218,20 @@ footer.footer .footer__item {
   margin-top: 0.25rem !important;
 }
 
+/* editor.css: .footer > div:first-child, .footer > div:last-child > div
+   sets width:24px/height:24px on child divs — breaks footer column layout */
+footer.footer > div {
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+}
+
+footer.footer > div > div,
+footer.footer > div > div > div {
+  width: auto !important;
+  height: auto !important;
+}
+
 /* editor.css: .editor > div { margin: 80px auto }
    Generic .editor class could affect docs content */
 .theme-doc-markdown .editor > div {

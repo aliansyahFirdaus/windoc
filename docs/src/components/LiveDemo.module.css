@@ -80,6 +80,9 @@
   flex-direction: column;
   overflow: hidden;
   background: #fff;
+  /* Creates a containing block so the editor's position:fixed footer
+     stays inside this container instead of escaping to the viewport */
+  transform: translateZ(0);
 }
 
 [data-theme='dark'] .editorFrame {
