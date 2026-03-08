@@ -15,15 +15,26 @@
   --ifm-font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace;
   --ifm-code-font-size: 90%;
   --ifm-heading-font-weight: 700;
-  --ifm-font-color-base: #1C1917;
-  --ifm-heading-color: #0C0A09;
 
-  --ifm-navbar-background-color: rgba(255, 255, 255, 0.8);
+  /* Force text colors explicitly */
+  --ifm-font-color-base: #1C1917;
+  --ifm-font-color-secondary: #57534E;
+  --ifm-heading-color: #0C0A09;
+  --ifm-color-content: #1C1917;
+  --ifm-color-content-secondary: #57534E;
+  --ifm-background-color: #FFFFFF;
+  --ifm-background-surface-color: #FAFAF9;
+
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.85);
   --ifm-navbar-shadow: none;
   --ifm-footer-background-color: #0C0C0C;
   --ifm-footer-color: #A1A1AA;
   --ifm-footer-link-color: #D4D4D8;
   --ifm-footer-title-color: #FAFAFA;
+
+  --ifm-table-head-color: #1C1917;
+  --ifm-table-cell-color: #1C1917;
+  --ifm-toc-link-color: #57534E;
 
   --docusaurus-highlighted-code-line-bg: rgba(13, 116, 107, 0.08);
 
@@ -53,17 +64,25 @@
   --ifm-color-primary-lighter: #58DDCD;
   --ifm-color-primary-lightest: #7AE5D8;
 
-  --ifm-navbar-background-color: rgba(9, 9, 11, 0.85);
-  --ifm-footer-background-color: #09090B;
-  --ifm-background-color: #09090B;
   --ifm-font-color-base: #E4E4E7;
+  --ifm-font-color-secondary: #A1A1AA;
   --ifm-heading-color: #FAFAFA;
+  --ifm-color-content: #E4E4E7;
+  --ifm-color-content-secondary: #A1A1AA;
+  --ifm-background-color: #111113;
+  --ifm-background-surface-color: #18181B;
+  --ifm-navbar-background-color: rgba(17, 17, 19, 0.9);
+  --ifm-footer-background-color: #0A0A0B;
+
+  --ifm-table-head-color: #E4E4E7;
+  --ifm-table-cell-color: #D4D4D8;
+  --ifm-toc-link-color: #A1A1AA;
 
   --docusaurus-highlighted-code-line-bg: rgba(45, 212, 191, 0.1);
 
-  --w-bg: #09090B;
+  --w-bg: #111113;
   --w-bg-subtle: #18181B;
-  --w-bg-card: #111113;
+  --w-bg-card: #1A1A1D;
   --w-border: #27272A;
   --w-border-subtle: #1E1E21;
   --w-text: #FAFAFA;
@@ -72,7 +91,7 @@
   --w-accent: #2DD4BF;
   --w-accent-light: #042F2E;
   --w-accent-muted: rgba(45, 212, 191, 0.08);
-  --w-code-bg: #111113;
+  --w-code-bg: #0A0A0B;
   --w-code-text: #D4D4D8;
   --w-glow: rgba(45, 212, 191, 0.1);
 }
@@ -84,8 +103,31 @@ html {
   text-rendering: optimizeLegibility;
 }
 
-body {
-  background: var(--w-bg);
+/* Force docs text colors directly */
+.markdown,
+.markdown p,
+.markdown li,
+.markdown td,
+.markdown th,
+article {
+  color: var(--ifm-font-color-base);
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  color: var(--ifm-heading-color);
+}
+
+.table-of-contents__link {
+  color: var(--ifm-toc-link-color);
+}
+
+.table-of-contents__link--active {
+  color: var(--ifm-color-primary);
 }
 
 .navbar {
@@ -99,16 +141,6 @@ body {
   letter-spacing: -0.02em;
 }
 
-.footer--dark {
-  border-top: 1px solid #27272A;
-}
-
-.footer__title {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-/* Markdown / docs content refinements */
 .markdown h1 {
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -150,10 +182,10 @@ article {
   opacity: 0.7;
 }
 
-/* ── Footer Refinements ────────────────────────── */
+/* ── Footer ────────────────────────────────────── */
 .footer--dark {
   background: #0A0A0B;
-  border-top: 1px solid #1E1E21;
+  border-top: 1px solid #27272A;
   padding: 3rem 0 2rem;
 }
 
@@ -162,43 +194,28 @@ article {
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #FAFAFA;
+  color: #FAFAFA !important;
   margin-bottom: 1rem;
 }
 
 .footer__link-item {
   font-size: 0.88rem;
-  color: #71717A;
+  color: #A1A1AA !important;
   transition: color 0.15s ease;
 }
 
 .footer__link-item:hover {
-  color: #D4D4D8;
+  color: #FAFAFA !important;
   text-decoration: none;
 }
 
 .footer__bottom {
   margin-top: 2.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #1E1E21;
+  border-top: 1px solid #27272A;
 }
 
 .footer__copyright {
   font-size: 0.8rem;
-  color: #52525B;
-  letter-spacing: 0.01em;
-}
-
-.footer__links {
-  margin-bottom: 0;
-}
-
-.footer__col {
-  padding: 0;
-}
-
-.footer__items {
-  gap: 0.25rem;
-  display: flex;
-  flex-direction: column;
+  color: #71717A !important;
 }
