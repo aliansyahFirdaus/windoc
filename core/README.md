@@ -1,8 +1,6 @@
 <div align="center">
-
-![Windoc](https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png#gh-light-mode-only)
-![Windoc](https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-white.png#gh-dark-mode-only)
-
+  <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png#gh-light-mode-only" alt="Windoc" height="120">
+  <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-white.png#gh-dark-mode-only" alt="Windoc" height="120">
 </div>
 
 # @windoc/core
