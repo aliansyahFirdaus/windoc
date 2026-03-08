@@ -92,16 +92,18 @@
   position: relative !important;
   top: auto !important;
   flex-shrink: 0;
-  overflow: visible !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
   flex-wrap: nowrap !important;
   justify-content: flex-start !important;
   white-space: nowrap;
   padding-left: 16px !important;
   padding-right: 16px !important;
   z-index: 10;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Editor footer: make relative (not fixed) so it sits at bottom of flex */
+/* Editor footer: make relative, always same style regardless of theme */
 .editorFrame :global(div.footer) {
   position: relative !important;
   bottom: auto !important;
@@ -111,14 +113,7 @@
   background: #f2f4f7 !important;
 }
 
-/* Keep editor footer text readable in dark mode */
-[data-theme='dark'] .editorFrame :global(div.footer) {
-  color: #a0a0a0 !important;
-  background: #1e1e1e !important;
-}
-
-[data-theme='dark'] .editorFrame :global(div.footer) :global(span),
-[data-theme='dark'] .editorFrame :global(div.footer) :global(i) {
+.editorFrame :global(div.footer) :global(*) {
   color: inherit !important;
 }
 
