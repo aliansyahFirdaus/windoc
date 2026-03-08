@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-white.png">
+  <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png" alt="Windoc" height="36">
+</picture>
+
 # @windoc/react
 
 React bindings for the [Windoc](https://www.npmjs.com/package/@windoc/core) canvas-based document editor. Provides a ready-to-use `<Editor />` component with a built-in toolbar, footer, and fully composable architecture.

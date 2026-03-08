@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-white.png">
+  <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png" alt="Windoc" height="36">
+</picture>
+
 # @windoc/core
 
 Canvas-based document editor engine for the web. Renders documents using HTML5 Canvas with pixel-perfect pagination, headers, footers, watermarks, and print support.
