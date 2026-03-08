@@ -5,7 +5,14 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Windoc',
   tagline: 'Canvas-based document editor for the web',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon_io/favicon.ico',
+
+  headTags: [
+    { tagName: 'link', attributes: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/windoc/img/favicon_io/favicon-32x32.png' } },
+    { tagName: 'link', attributes: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/windoc/img/favicon_io/favicon-16x16.png' } },
+    { tagName: 'link', attributes: { rel: 'apple-touch-icon', sizes: '180x180', href: '/windoc/img/favicon_io/apple-touch-icon.png' } },
+    { tagName: 'link', attributes: { rel: 'manifest', href: '/windoc/img/favicon_io/site.webmanifest' } },
+  ],
 
   future: {
     v4: true,
