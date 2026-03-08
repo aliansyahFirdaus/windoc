@@ -1,6 +1,7 @@
 import type {ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
+import LiveDemo from '@site/src/components/LiveDemo';
 import styles from './index.module.css';
 
 function Hero() {
@@ -103,117 +104,19 @@ function Features() {
   );
 }
 
-function CodeExample() {
+function DemoSection() {
   return (
-    <section className={styles.codeSection}>
-      <div className={styles.codeSectionInner}>
-        <div className={styles.codeContent}>
-          <h2>Drop in and start building</h2>
-          <p>
-            One component gives you a full editor with toolbar, canvas area,
-            and status bar. Customize everything through props and hooks.
+    <section className={styles.demoSection}>
+      <div className={styles.demoInner}>
+        <div className={styles.featuresHeader}>
+          <div className={styles.sectionLabel}>Try it out</div>
+          <h2 className={styles.sectionTitle}>See it in action</h2>
+          <p className={styles.demoSubtitle}>
+            A fully interactive editor running right here in your browser.
+            Try typing, formatting, or inserting a table.
           </p>
-          <ul className={styles.codeFeatureList}>
-            <li>
-              <span className={styles.checkIcon}>&#10003;</span>
-              Works with Next.js, Vite, and any React setup
-            </li>
-            <li>
-              <span className={styles.checkIcon}>&#10003;</span>
-              TypeScript-first with full type definitions
-            </li>
-            <li>
-              <span className={styles.checkIcon}>&#10003;</span>
-              Customize toolbar, footer, or go headless
-            </li>
-            <li>
-              <span className={styles.checkIcon}>&#10003;</span>
-              Get/set document data as JSON
-            </li>
-            <li>
-              <span className={styles.checkIcon}>&#10003;</span>
-              Register shortcuts and context menus
-            </li>
-          </ul>
         </div>
-        <div className={styles.codeBlock}>
-          <div className={styles.codeBlockHeader}>
-            <span className={styles.codeBlockDot} />
-            <span className={styles.codeBlockDot} />
-            <span className={styles.codeBlockDot} />
-            <span className={styles.codeBlockTitle}>App.tsx</span>
-          </div>
-          <div className={styles.codeBlockBody}>
-            <pre>
-              <span className={styles.codeKeyword}>import</span>
-              {' { Editor } '}
-              <span className={styles.codeKeyword}>from</span>
-              {' '}
-              <span className={styles.codeString}>'@windoc/react'</span>
-              {'\n'}
-              <span className={styles.codeKeyword}>import</span>
-              {' '}
-              <span className={styles.codeString}>'@windoc/core/style.css'</span>
-              {'\n'}
-              <span className={styles.codeKeyword}>import</span>
-              {' '}
-              <span className={styles.codeString}>'@windoc/react/style.css'</span>
-              {'\n\n'}
-              <span className={styles.codeKeyword}>export default</span>
-              {' '}
-              <span className={styles.codeKeyword}>function</span>
-              {' '}
-              <span className={styles.codeFunc}>App</span>
-              <span className={styles.codePunc}>{'() {'}</span>
-              {'\n  '}
-              <span className={styles.codeKeyword}>return</span>
-              {' '}
-              <span className={styles.codePunc}>(</span>
-              {'\n    '}
-              <span className={styles.codeTag}>{'<Editor'}</span>
-              {'\n      '}
-              <span className={styles.codeAttr}>defaultValue</span>
-              <span className={styles.codePunc}>={'{{ '}</span>
-              <span className={styles.codeAttr}>main</span>
-              <span className={styles.codePunc}>{': [] }}'}</span>
-              {'\n      '}
-              <span className={styles.codeAttr}>options</span>
-              <span className={styles.codePunc}>={'={{'}</span>
-              {'\n        '}
-              <span className={styles.codeAttr}>margins</span>
-              <span className={styles.codePunc}>{': '}</span>
-              <span className={styles.codePunc}>{'[40, 40, 40, 40]'}</span>
-              <span className={styles.codePunc}>{','}</span>
-              {'\n        '}
-              <span className={styles.codeAttr}>placeholder</span>
-              <span className={styles.codePunc}>{': { '}</span>
-              <span className={styles.codeAttr}>data</span>
-              <span className={styles.codePunc}>{': '}</span>
-              <span className={styles.codeString}>'Start typing...'</span>
-              <span className={styles.codePunc}>{' }'}</span>
-              {'\n      '}
-              <span className={styles.codePunc}>{'}}'}</span>
-              {'\n      '}
-              <span className={styles.codeAttr}>onReady</span>
-              <span className={styles.codePunc}>{'={(editor) =>'}</span>
-              {'\n        '}
-              <span className={styles.codeFunc}>console</span>
-              <span className={styles.codePunc}>.</span>
-              <span className={styles.codeFunc}>log</span>
-              <span className={styles.codePunc}>(</span>
-              <span className={styles.codeString}>'Ready!'</span>
-              <span className={styles.codePunc}>{', editor)'}</span>
-              {'\n      '}
-              <span className={styles.codePunc}>{'}'}</span>
-              {'\n    '}
-              <span className={styles.codeTag}>{'/>'}</span>
-              {'\n  '}
-              <span className={styles.codePunc}>)</span>
-              {'\n'}
-              <span className={styles.codePunc}>{'}'}</span>
-            </pre>
-          </div>
-        </div>
+        <LiveDemo />
       </div>
     </section>
   );
@@ -293,8 +196,8 @@ export default function Home(): ReactNode {
     >
       <main>
         <Hero />
+        <DemoSection />
         <Features />
-        <CodeExample />
         <Packages />
         <BottomCta />
       </main>

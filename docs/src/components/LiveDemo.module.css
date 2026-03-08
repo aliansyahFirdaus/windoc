@@ -1,0 +1,142 @@
+/* ── Demo Wrapper ──────────────────────────────── */
+.wrapper {
+  border-radius: 14px;
+  border: 1px solid var(--w-border);
+  background: var(--w-bg-card);
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .wrapper {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Tabs ──────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--w-border);
+  background: var(--w-bg-subtle);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--w-text-tertiary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: var(--w-text-secondary);
+}
+
+.tabActive {
+  color: var(--w-text);
+  border-bottom-color: var(--w-accent);
+}
+
+.tabDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--w-text-tertiary);
+}
+
+.tabActive .tabDot {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.tabDot[data-color='green'] {
+  background: #22C55E;
+}
+
+.tabDot[data-color='blue'] {
+  background: #3B82F6;
+}
+
+/* ── Content Area ─────────────────────────────── */
+.content {
+  position: relative;
+}
+
+/* ── Editor Frame ─────────────────────────────── */
+.editorFrame {
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Style the embedded editor */
+.editorFrame :global(.demo-editor) {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Toolbar inside demo */
+.editorFrame :global(.ce-toolbar) {
+  border-bottom: 1px solid var(--w-border);
+}
+
+/* ── Code Frame ───────────────────────────────── */
+.codeFrame {
+  height: 520px;
+  overflow: auto;
+  background: #1C1917;
+}
+
+[data-theme='dark'] .codeFrame {
+  background: #111113;
+}
+
+.codeContent {
+  margin: 0;
+  padding: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: #D4D4D8;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+/* ── Loading ──────────────────────────────────── */
+.loading {
+  height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--w-text-tertiary);
+}
+
+/* ── Animation ────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 768px) {
+  .editorFrame,
+  .codeFrame,
+  .loading {
+    height: 400px;
+  }
+}

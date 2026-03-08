@@ -247,122 +247,29 @@
   margin: 0;
 }
 
-/* ── Code Section ─────────────────────────────── */
-.codeSection {
+
+/* ── Demo Section ─────────────────────────────── */
+.demoSection {
   padding: 5rem 0;
   background: var(--w-bg-subtle);
   border-top: 1px solid var(--w-border);
   border-bottom: 1px solid var(--w-border);
 }
 
-.codeSectionInner {
+.demoInner {
   max-width: 1080px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
 }
 
-.codeContent h2 {
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-size: 2.2rem;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  color: var(--w-text);
-  margin: 0 0 1rem;
-}
-
-.codeContent p {
+.demoSubtitle {
   font-size: 0.95rem;
-  line-height: 1.65;
+  line-height: 1.6;
   color: var(--w-text-secondary);
-  margin: 0 0 1.5rem;
+  max-width: 520px;
+  margin: 0.75rem auto 0;
+  text-align: center;
 }
-
-.codeFeatureList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.codeFeatureList li {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.88rem;
-  color: var(--w-text-secondary);
-}
-
-.checkIcon {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--w-accent-muted);
-  color: var(--w-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  flex-shrink: 0;
-}
-
-.codeBlock {
-  background: var(--w-code-bg);
-  border-radius: 14px;
-  border: 1px solid #27272A;
-  overflow: hidden;
-}
-
-.codeBlockHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid #27272A;
-}
-
-.codeBlockDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #3F3F46;
-}
-
-.codeBlockTitle {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  color: #71717A;
-  margin-left: 0.5rem;
-}
-
-.codeBlockBody {
-  padding: 1.25rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8rem;
-  line-height: 1.7;
-  color: #D4D4D8;
-  overflow-x: auto;
-}
-
-.codeBlockBody pre {
-  margin: 0;
-  background: transparent !important;
-  padding: 0 !important;
-}
-
-/* Syntax colors */
-.codeKeyword { color: #C084FC; }
-.codeString { color: #86EFAC; }
-.codeComment { color: #52525B; }
-.codeTag { color: #67E8F9; }
-.codeAttr { color: #FDE68A; }
-.codePunc { color: #71717A; }
-.codeFunc { color: #93C5FD; }
 
 /* ── Packages Section ─────────────────────────── */
 .packages {
@@ -489,11 +396,6 @@
 
   .featuresGrid {
     grid-template-columns: 1fr;
-  }
-
-  .codeSectionInner {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
   }
 
   .packagesGrid {
