@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aliansyahfirdaus.github.io/windoc/sitemap.xml

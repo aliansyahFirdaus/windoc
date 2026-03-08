@@ -1,0 +1,49 @@
+# Windoc
+
+> Canvas-based document editor for the web
+
+Windoc is an open-source document editor that renders using HTML5 Canvas instead of the DOM. It provides pixel-perfect pagination, rich text formatting, tables, images, watermarks, headers, footers, and native print support. Unlike DOM-based editors (ProseMirror, Tiptap, Quill), Windoc renders on Canvas for true page fidelity.
+
+## Packages
+
+- `@windoc/core` — Framework-agnostic canvas editor engine. Instantiate directly with `new Editor(container, data, options)`.
+- `@windoc/react` — React bindings. Drop-in `<Editor />` component with composable toolbar and footer tools.
+
+## Docs
+
+- [Introduction](https://aliansyahfirdaus.github.io/windoc/docs/): What Windoc is and why it exists
+- [Getting Started](https://aliansyahfirdaus.github.io/windoc/docs/getting-started): Installation and quick start guide
+- [API: @windoc/core](https://aliansyahfirdaus.github.io/windoc/docs/api/core): Constructor, EditorData, EditorOptions, commands, listeners, shortcuts, context menus
+- [API: @windoc/react](https://aliansyahfirdaus.github.io/windoc/docs/api/react): Editor component props, composable tools, useEditor hook, useFooter hook
+- [API: Editor Options](https://aliansyahfirdaus.github.io/windoc/docs/api/editor-options): Full EditorOptions reference
+- [API: Commands](https://aliansyahfirdaus.github.io/windoc/docs/api/commands): Full command API reference
+- [Guide: Custom Toolbar](https://aliansyahfirdaus.github.io/windoc/docs/guides/custom-toolbar): Build a custom toolbar using composable tool components
+- [Guide: Custom Footer](https://aliansyahfirdaus.github.io/windoc/docs/guides/custom-footer): Build a custom footer/statusbar
+- [Guide: Keyboard Shortcuts](https://aliansyahfirdaus.github.io/windoc/docs/guides/keyboard-shortcuts): Register custom keyboard shortcuts
+- [Guide: Drag and Drop](https://aliansyahfirdaus.github.io/windoc/docs/guides/drag-and-drop): Handle drag-and-drop in the editor
+
+## Quick Example
+
+```tsx
+import { Editor } from '@windoc/react'
+import '@windoc/core/style.css'
+import '@windoc/react/style.css'
+
+function App() {
+  return (
+    <Editor
+      defaultValue={{ main: [{ value: 'Hello, Windoc!' }] }}
+      options={{ margins: [40, 40, 40, 40] }}
+      onReady={(editor) => console.log(editor)}
+      onChange={(data) => console.log(data)}
+    />
+  )
+}
+```
+
+## Links
+
+- npm (@windoc/core): https://www.npmjs.com/package/@windoc/core
+- npm (@windoc/react): https://www.npmjs.com/package/@windoc/react
+- GitHub: https://github.com/aliansyahFirdaus/windoc
+- Documentation: https://aliansyahfirdaus.github.io/windoc/

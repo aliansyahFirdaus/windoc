@@ -40,6 +40,10 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           routeBasePath: 'docs',
         },
+        sitemap: {
+          changefreq: 'weekly',
+          priority: 0.5,
+        },
         blog: false,
         theme: {
           customCss: './src/css/custom.css',
@@ -53,6 +57,7 @@ const config: Config = {
   ],
 
   themeConfig: {
+    image: 'img/logo-text-black.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -60,8 +65,8 @@ const config: Config = {
       title: '',
       logo: {
         alt: 'Windoc',
-        src: 'img/logo-text-black.png',
-        srcDark: 'img/logo-text-white.png',
+        src: 'img/logo-text-white.png',
+        srcDark: 'img/logo-text-black.png',
         height: 36,
       },
       items: [
@@ -77,10 +82,9 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://github.com/aliansyahFirdaus/windoc',
+          type: 'html',
           position: 'right',
-          className: 'header-github-link',
-          'aria-label': 'GitHub repository',
+          value: '<a href="https://github.com/aliansyahFirdaus/windoc" class="header-github-link navbar__item navbar__link" aria-label="GitHub repository" target="_blank" rel="noopener noreferrer"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">GitHub</span></a>',
         },
       ],
     },
