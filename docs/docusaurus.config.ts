@@ -50,7 +50,13 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Windoc',
+      title: '',
+      logo: {
+        alt: 'Windoc',
+        src: 'img/logo-text-black.png',
+        srcDark: 'img/logo-text-white.png',
+        height: 24,
+      },
       items: [
         {
           type: 'docSidebar',
