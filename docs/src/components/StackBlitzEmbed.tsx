@@ -101,16 +101,6 @@ export default function App() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Editor
-        defaultValue={{
-          main: [
-            { value: 'Welcome to ' },
-            { value: 'Windoc', bold: true, size: 28 },
-            { value: '\\n' },
-            { value: '\\n' },
-            { value: 'A canvas-based document editor for the web.', size: 14 },
-            { value: ' Try typing, formatting, or inserting a table.', size: 14 },
-          ],
-        }}
         options={{
           margins: [40, 40, 40, 40],
           placeholder: { data: 'Start typing...' },
