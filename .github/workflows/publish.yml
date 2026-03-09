@@ -45,14 +45,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Generate release notes
-        uses: orhun/git-cliff-action@v3
         id: cliff
-        with:
-          config: cliff.toml
-          args: --latest --strip header
+        run: |
+          npx git-cliff@latest --config cliff.toml --latest --strip header > RELEASE_NOTES.md
+          echo "Generated release notes:"
+          cat RELEASE_NOTES.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.cliff.outputs.content }}
+          body_path: RELEASE_NOTES.md
           token: ${{ secrets.GITHUB_TOKEN }}
