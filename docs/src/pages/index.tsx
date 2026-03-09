@@ -33,7 +33,7 @@ function Hero() {
       <div className={styles.heroInner}>
         <div className={styles.badge}>
           <span className={styles.badgeDot} />
-          v0.2.3 — Now available on npm
+          v0.2.4 — Now available on npm
         </div>
         <h1 className={styles.heroTitle}>
           Canvas document editor{' '}
@@ -155,7 +155,7 @@ function Packages() {
         <div className={styles.packageCard}>
           <div>
             <span className={styles.packageName}>@windoc/core</span>
-            <span className={styles.packageVersion}>0.2.3</span>
+            <span className={styles.packageVersion}>0.2.4</span>
           </div>
           <p className={styles.packageDesc}>
             The canvas editor engine. Framework-agnostic — renders documents
