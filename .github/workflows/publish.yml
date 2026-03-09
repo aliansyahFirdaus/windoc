@@ -1,0 +1,40 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: Publish packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build @windoc/core
+        run: yarn workspace @windoc/core build
+
+      - name: Build @windoc/react
+        run: yarn workspace @windoc/react build
+
+      - name: Publish @windoc/core
+        run: npm publish --access public
+        working-directory: core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @windoc/react
+        run: npm publish --access public
+        working-directory: react
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
