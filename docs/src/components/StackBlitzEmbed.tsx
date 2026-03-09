@@ -75,12 +75,18 @@ createRoot(document.getElementById('root')!).render(
   'src/index.css': `* { box-sizing: border-box; margin: 0; padding: 0; }
 body { overflow: hidden; }
 
-/* Make toolbar horizontally scrollable instead of wrapping */
+/* Fix toolbar: relative positioning + horizontal scroll */
 div.menu {
+  position: relative !important;
+  top: auto !important;
+  flex-shrink: 0;
   overflow-x: auto !important;
   overflow-y: visible !important;
   flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
   white-space: nowrap !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
