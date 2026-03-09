@@ -1,6 +1,14 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-white.png#gh-light-mode-only" alt="Windoc" height="120">
   <img src="https://raw.githubusercontent.com/aliansyahFirdaus/windoc/main/docs/static/img/logo-text-black.png#gh-dark-mode-only" alt="Windoc" height="120">
+
+  <br />
+  <br />
+
+  [![npm](https://img.shields.io/npm/v/@windoc/core?label=%40windoc%2Fcore&color=0D746B)](https://www.npmjs.com/package/@windoc/core)
+  [![npm](https://img.shields.io/npm/v/@windoc/react?label=%40windoc%2Freact&color=0D746B)](https://www.npmjs.com/package/@windoc/react)
+  [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+  [![CI](https://github.com/aliansyahFirdaus/windoc/actions/workflows/ci.yml/badge.svg)](https://github.com/aliansyahFirdaus/windoc/actions/workflows/ci.yml)
 </div>
 
 # Windoc

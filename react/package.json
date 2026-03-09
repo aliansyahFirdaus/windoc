@@ -17,7 +17,13 @@
     "canvas",
     "document",
     "react",
-    "windoc"
+    "windoc",
+    "wysiwyg",
+    "rich-text-editor",
+    "document-editor",
+    "react-editor",
+    "html5-canvas",
+    "pagination"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
