@@ -33,28 +33,13 @@ jobs:
       - name: Build @windoc/react
         run: yarn workspace @windoc/react build
 
-      - name: Get npm OIDC token
-        id: npm-oidc
-        run: |
-          TOKEN=$(curl --silent \
-            -H "Accept: application/json; api-version=2.0" \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
-            | jq -r '.value')
-          echo "::add-mask::$TOKEN"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-
       - name: Publish @windoc/core
         run: npm publish --access public --provenance
         working-directory: core
-        env:
-          NODE_AUTH_TOKEN: ${{ steps.npm-oidc.outputs.token }}
 
       - name: Publish @windoc/react
         run: npm publish --access public --provenance
         working-directory: react
-        env:
-          NODE_AUTH_TOKEN: ${{ steps.npm-oidc.outputs.token }}
 
       - name: Generate release notes
         id: cliff
