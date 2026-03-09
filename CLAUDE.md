@@ -42,20 +42,14 @@ Ini update otomatis:
 - Badge versi di `docs/src/pages/index.tsx`
 - Tabel versi di `README.md`
 
-### 4. Update CHANGELOG.md
-Tambahkan section baru di atas dengan format:
-```md
-## [0.x.0] — YYYY-MM-DD
-
-### Added
-- ...
-
-### Fixed
-- ...
-
-### Changed
-- ...
+### 4. Generate CHANGELOG
+```bash
+yarn changelog
 ```
+Ini auto-generate dari commit history menggunakan `git-cliff` + `cliff.toml`.
+Review hasilnya di `CHANGELOG.md` — edit kalau ada yang perlu dipoles atau dihapus.
+Commit messages yang skip otomatis: `chore`, `ci`, `test`, `style`.
+Yang masuk: `feat` → Added, `fix` → Fixed, `refactor` → Changed, `perf` → Performance, `docs` → Documentation.
 
 ### 5. Build untuk verifikasi
 ```bash

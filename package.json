@@ -9,6 +9,7 @@
   "scripts": {
     "build": "yarn workspace @windoc/core build && yarn workspace @windoc/react build",
     "dev": "yarn workspace @windoc/core dev & yarn workspace @windoc/react dev",
-    "sync-version": "node scripts/sync-version.js"
+    "sync-version": "node scripts/sync-version.js",
+    "changelog": "npx git-cliff@latest -o CHANGELOG.md"
   }
 }
