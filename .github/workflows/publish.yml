@@ -21,7 +21,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
       - name: Install dependencies
@@ -36,14 +35,10 @@ jobs:
       - name: Publish @windoc/core
         run: npm publish --access public --provenance
         working-directory: core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @windoc/react
         run: npm publish --access public --provenance
         working-directory: react
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Generate release notes
         id: cliff
