@@ -18,6 +18,7 @@
     "@docusaurus/core": "3.9.2",
     "@docusaurus/preset-classic": "3.9.2",
     "@mdx-js/react": "^3.0.0",
+    "@stackblitz/sdk": "^1.11.0",
     "@windoc/core": "^0.2.0",
     "@windoc/react": "^0.2.0",
     "clsx": "^2.0.0",
