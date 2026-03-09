@@ -31,7 +31,7 @@ export default function SeparatorTool() {
   return (
     <div className="menu-item__separator" ref={triggerRef} title="Separator">
       <Minus size={16} onClick={toggle} style={{ cursor: 'pointer' }} />
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__separator">
         <div style={{ padding: '8px 10px 10px', width: '200px' }}>
           <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
             {DASH_STYLES.map(({ label, dashArray }) => (

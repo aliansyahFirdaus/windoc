@@ -25,7 +25,7 @@ export default function ColumnTool() {
       <span className="select" title="Column Layout">
         {currentColumns === 1 ? '1 Column' : `${currentColumns} Columns`}
       </span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__column">
         <div onClick={(e) => e.stopPropagation()}>
           <ul>
             <li onClick={() => handleColumn(1)}>1 Column</li>

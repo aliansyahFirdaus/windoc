@@ -21,7 +21,7 @@ export default function PageBreakTool() {
       onClick={toggle}
     >
       <i title="Break"></i>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__page-break">
         <ul>
           <li onClick={handlePageBreak}>Page Break</li>
           <li onClick={handleColumnBreak}>Column Break</li>

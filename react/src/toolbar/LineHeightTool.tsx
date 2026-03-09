@@ -18,7 +18,7 @@ export default function LineHeightTool() {
   return (
     <div className="menu-item__line-height" ref={triggerRef} onClick={toggle}>
       <span className="select" title="Line Height">{activeLabel}</span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__line-height">
         <ul>
           {LINE_HEIGHTS.map(h => (
             <li

@@ -21,7 +21,7 @@ export default function InsertElementTool() {
   return (
     <div className="menu-item__insert-element" ref={triggerRef} onClick={toggle}>
       <i title="Insert Element"></i>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__insert-element">
         <ul>
           <li onClick={handleHeader}>Add Header</li>
         </ul>

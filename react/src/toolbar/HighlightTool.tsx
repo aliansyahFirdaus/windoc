@@ -32,7 +32,7 @@ export default function HighlightTool() {
       <Highlighter size={16} />
       <span style={{ backgroundColor: activeColor || '#ffff00' }}></span>
       <input id="highlight" type="color" readOnly tabIndex={-1} />
-      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown">
+      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown" wrapperClassName="menu-item__highlight">
         <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />

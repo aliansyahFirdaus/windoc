@@ -32,7 +32,7 @@ export default function ColorTool() {
       <Baseline size={16} />
       <span style={{ backgroundColor: activeColor }}></span>
       <input id="color" type="color" readOnly tabIndex={-1} />
-      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown">
+      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown" wrapperClassName="menu-item__color">
         <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />

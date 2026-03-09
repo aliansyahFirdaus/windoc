@@ -21,7 +21,7 @@ export default function FontTool() {
   return (
     <div className="menu-item__font" ref={triggerRef} onClick={toggle}>
       <span className="select" title="Font">{activeLabel}</span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__font">
         <ul>
           {FONTS.map(({ family, label }) => (
             <li

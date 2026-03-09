@@ -71,7 +71,7 @@ export default function ListTool() {
   return (
     <div ref={triggerRef} className={`menu-item__list ${isActive ? 'active' : ''}`} title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}>
       <List size={16} onClick={toggle} style={{ cursor: 'pointer' }} />
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" >
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__list">
         <div style={{ padding: '8px', width: '320px' }}>
           {/* Quick Actions */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>

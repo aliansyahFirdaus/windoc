@@ -14,7 +14,7 @@ export default function UnderlineTool() {
     <div className={`menu-item__underline ${isActive ? 'active' : ''}`} ref={triggerRef} title={`Underline(${isApple ? '⌘' : 'Ctrl'}+U)`}>
       <UnderlineIcon size={16} onClick={() => editorRef.current?.command.executeUnderline()} style={{ cursor: 'pointer' }} />
       <span className="select" onClick={toggle}></span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__underline">
         <ul>
           {STYLES.map(style => (
             <li key={style} data-decoration-style={style} onClick={() => {

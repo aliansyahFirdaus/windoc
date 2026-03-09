@@ -7,7 +7,7 @@ export default function ControlTool() {
   return (
     <div className="menu-item__control" ref={triggerRef} onClick={toggle}>
       <i title="Control"></i>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__control">
         <ul>
           <li>Text</li>
           <li>Number</li>

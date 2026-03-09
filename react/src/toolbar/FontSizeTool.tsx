@@ -17,7 +17,7 @@ export default function FontSizeTool() {
   return (
     <div className="menu-item__size" ref={triggerRef} onClick={toggle}>
       <span className="select" title="Font Size">{activeSize}</span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__size">
         <ul>
           {SIZES.map(size => (
             <li

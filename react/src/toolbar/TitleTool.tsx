@@ -26,7 +26,7 @@ export default function TitleTool() {
   return (
     <div className="menu-item__title" ref={triggerRef} onClick={toggle}>
       <span className="select" title="Toggle Heading">{activeLabel}</span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__title">
         <ul>
           {LEVELS.map(({ level, label }) => (
             <li

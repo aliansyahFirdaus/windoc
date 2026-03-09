@@ -15,7 +15,7 @@ export default function RowMarginTool() {
   return (
     <div className="menu-item__row-margin" ref={triggerRef} onClick={toggle}>
       <i title="Line Spacing"></i>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__row-margin">
         <ul>
           {MARGINS.map(margin => (
             <li key={margin} onClick={() => handleRowMargin(margin)}>{margin}</li>
