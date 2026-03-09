@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { Highlighter, RotateCcw } from 'lucide-react'
 import { useEditor } from '../EditorContext'
 
@@ -15,7 +15,7 @@ const HIGHLIGHT_PALETTE = [
 
 export default function HighlightTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [visible, setVisible] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const activeColor = rangeStyle?.highlight || ''
 
   const handleColor = (color: string) => {
@@ -27,11 +27,11 @@ export default function HighlightTool() {
   }
 
   return (
-    <div className="menu-item__highlight" title="Highlight" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__highlight" title="Highlight" onClick={() => dropdownRef.current?.classList.toggle('visible')}>
       <Highlighter size={16} />
       <span style={{ backgroundColor: activeColor || '#ffff00' }}></span>
       <input id="highlight" type="color" readOnly tabIndex={-1} />
-      <div className={'color-palette-dropdown' + (visible ? ' visible' : '')}>
+      <div className="color-palette-dropdown" ref={dropdownRef}>
         <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Minus } from 'lucide-react'
 import { useEditor } from '../EditorContext'
 
@@ -17,7 +17,7 @@ const LINE_WIDTHS: { label: string; value: number }[] = [
 
 export default function SeparatorTool() {
   const { editorRef } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
   const [selectedWidth, setSelectedWidth] = useState(1)
 
   const lineColor = '#344054'
@@ -28,8 +28,8 @@ export default function SeparatorTool() {
 
   return (
     <div className="menu-item__separator" title="Separator">
-      <Minus size={16} onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }} />
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <Minus size={16} onClick={() => optionsRef.current?.classList.toggle('visible')} style={{ cursor: 'pointer' }} />
+      <div className="options" ref={optionsRef}>
         <div style={{ padding: '8px 10px 10px', width: '200px' }}>
           <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
             {DASH_STYLES.map(({ label, dashArray }) => (

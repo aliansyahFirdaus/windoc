@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { Baseline, RotateCcw } from 'lucide-react'
 import { useEditor } from '../EditorContext'
 
@@ -15,7 +15,7 @@ const COLOR_PALETTE = [
 
 export default function ColorTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [visible, setVisible] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const activeColor = rangeStyle?.color || '#000000'
 
   const handleColor = (color: string) => {
@@ -27,11 +27,11 @@ export default function ColorTool() {
   }
 
   return (
-    <div className="menu-item__color" title="Font Color" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__color" title="Font Color" onClick={() => dropdownRef.current?.classList.toggle('visible')}>
       <Baseline size={16} />
       <span style={{ backgroundColor: activeColor }}></span>
       <input id="color" type="color" readOnly tabIndex={-1} />
-      <div className={'color-palette-dropdown' + (visible ? ' visible' : '')}>
+      <div className="color-palette-dropdown" ref={dropdownRef}>
         <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />

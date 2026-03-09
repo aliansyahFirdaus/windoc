@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 
 export default function ControlTool() {
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className="menu-item__control" onClick={() => setIsOpen(!isOpen)}>
+    <div className="menu-item__control" onClick={() => optionsRef.current?.classList.toggle('visible')}>
       <i title="Control"></i>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <ul>
           <li>Text</li>
           <li>Number</li>

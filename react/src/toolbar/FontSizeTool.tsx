@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useEditor } from '../EditorContext'
 
 const SIZES = [56, 48, 34, 32, 29, 24, 21, 20, 18, 16, 14, 12, 10, 8]
 
 export default function FontSizeTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
 
   const activeSize = rangeStyle?.size ?? 16
 
@@ -14,9 +14,9 @@ export default function FontSizeTool() {
   }
 
   return (
-    <div className="menu-item__size" onClick={() => setIsOpen(!isOpen)}>
+    <div className="menu-item__size" onClick={() => optionsRef.current?.classList.toggle('visible')}>
       <span className="select" title="Font Size">{activeSize}</span>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <ul>
           {SIZES.map(size => (
             <li

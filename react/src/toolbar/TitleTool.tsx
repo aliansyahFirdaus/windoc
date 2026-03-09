@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useEditor } from '../EditorContext'
 
 const LEVELS: { level: string | null; label: string }[] = [
@@ -13,7 +13,7 @@ const LEVELS: { level: string | null; label: string }[] = [
 
 export default function TitleTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
 
   const activeLevel = rangeStyle?.level || null
   const activeLabel = LEVELS.find(l => l.level === activeLevel)?.label || 'Body'
@@ -23,9 +23,9 @@ export default function TitleTool() {
   }
 
   return (
-    <div className="menu-item__title" onClick={() => setIsOpen(!isOpen)}>
+    <div className="menu-item__title" onClick={() => optionsRef.current?.classList.toggle('visible')}>
       <span className="select" title="Toggle Heading">{activeLabel}</span>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <ul>
           {LEVELS.map(({ level, label }) => (
             <li

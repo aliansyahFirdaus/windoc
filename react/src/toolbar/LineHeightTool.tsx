@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useEditor } from '../EditorContext'
 
 const LINE_HEIGHTS = ['1.0', '1.15', '1.5', '2.0', '2.5']
 
 export default function LineHeightTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
 
   const activeMargin = rangeStyle?.rowMargin ?? 1
   const activeLabel = Number.isInteger(activeMargin) ? `${activeMargin}.0` : String(activeMargin)
@@ -15,9 +15,9 @@ export default function LineHeightTool() {
   }
 
   return (
-    <div className="menu-item__line-height" onClick={() => setIsOpen(!isOpen)}>
+    <div className="menu-item__line-height" onClick={() => optionsRef.current?.classList.toggle('visible')}>
       <span className="select" title="Line Height">{activeLabel}</span>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <ul>
           {LINE_HEIGHTS.map(h => (
             <li

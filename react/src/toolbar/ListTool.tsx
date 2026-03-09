@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { List, ListOrdered, Indent, Outdent } from 'lucide-react'
 import { useEditor } from '../EditorContext'
 
@@ -45,7 +45,7 @@ function PresetCell({ option, onClick }: { option: PresetOption; onClick: () => 
 
 export default function ListTool() {
   const { editorRef, isApple, rangeStyle } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
   const isActive = !!rangeStyle?.listType
 
   const handleList = (type: string | null, style?: string) => {
@@ -69,8 +69,8 @@ export default function ListTool() {
 
   return (
     <div className={`menu-item__list ${isActive ? 'active' : ''}`} title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}>
-      <List size={16} onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }} />
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <List size={16} onClick={() => optionsRef.current?.classList.toggle('visible')} style={{ cursor: 'pointer' }} />
+      <div className="options" ref={optionsRef}>
         <div style={{ padding: '8px', width: '320px' }}>
           {/* Quick Actions */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>

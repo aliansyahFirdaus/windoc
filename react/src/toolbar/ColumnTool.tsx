@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useEditor } from '../EditorContext'
 
 export default function ColumnTool() {
   const { editorRef } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
   const [currentColumns, setCurrentColumns] = useState(1)
   const [gap, setGap] = useState(20)
 
@@ -19,11 +19,11 @@ export default function ColumnTool() {
   }
 
   return (
-    <div className="menu-item__column" onClick={() => setIsOpen(!isOpen)}>
+    <div className="menu-item__column" onClick={() => optionsRef.current?.classList.toggle('visible')}>
       <span className="select" title="Column Layout">
         {currentColumns === 1 ? '1 Column' : `${currentColumns} Columns`}
       </span>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <div onClick={(e) => e.stopPropagation()}>
           <ul>
             <li onClick={() => handleColumn(1)}>1 Column</li>

@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useEditor } from '../EditorContext'
 
 export default function InsertElementTool() {
   const { editorRef } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
 
   const handleHeader = () => {
     if (!editorRef.current) return
@@ -18,9 +18,9 @@ export default function InsertElementTool() {
   }
 
   return (
-    <div className="menu-item__insert-element" onClick={() => setIsOpen(!isOpen)}>
+    <div className="menu-item__insert-element" onClick={() => optionsRef.current?.classList.toggle('visible')}>
       <i title="Insert Element"></i>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <ul>
           <li onClick={handleHeader}>Add Header</li>
         </ul>

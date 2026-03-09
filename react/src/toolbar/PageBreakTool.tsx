@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useEditor } from '../EditorContext'
 
 export default function PageBreakTool() {
   const { editorRef } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
 
   const handlePageBreak = () => {
     editorRef.current?.command.executePageBreak()
@@ -16,10 +16,10 @@ export default function PageBreakTool() {
   return (
     <div
       className="menu-item__page-break"
-      onClick={() => setIsOpen(!isOpen)}
+      onClick={() => optionsRef.current?.classList.toggle('visible')}
     >
       <i title="Break"></i>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <ul>
           <li onClick={handlePageBreak}>Page Break</li>
           <li onClick={handleColumnBreak}>Column Break</li>

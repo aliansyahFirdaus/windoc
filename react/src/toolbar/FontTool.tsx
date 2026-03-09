@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useEditor } from '../EditorContext'
 
 const FONTS = [
@@ -8,7 +8,7 @@ const FONTS = [
 
 export default function FontTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [isOpen, setIsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
 
   const activeFont = rangeStyle?.font || 'Arial'
   const activeLabel = FONTS.find(f => f.family === activeFont)?.label || activeFont
@@ -18,9 +18,9 @@ export default function FontTool() {
   }
 
   return (
-    <div className="menu-item__font" onClick={() => setIsOpen(!isOpen)}>
+    <div className="menu-item__font" onClick={() => optionsRef.current?.classList.toggle('visible')}>
       <span className="select" title="Font">{activeLabel}</span>
-      <div className={'options' + (isOpen ? ' visible' : '')}>
+      <div className="options" ref={optionsRef}>
         <ul>
           {FONTS.map(({ family, label }) => (
             <li
