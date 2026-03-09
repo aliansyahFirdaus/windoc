@@ -1,10 +1,9 @@
+import { useState } from 'react'
 import { useEditor } from '../EditorContext'
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
 
 export default function PageBreakTool() {
   const { editorRef } = useEditor()
-  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
+  const [isOpen, setIsOpen] = useState(false)
 
   const handlePageBreak = () => {
     editorRef.current?.command.executePageBreak()
@@ -17,16 +16,15 @@ export default function PageBreakTool() {
   return (
     <div
       className="menu-item__page-break"
-      ref={triggerRef}
-      onClick={toggle}
+      onClick={() => setIsOpen(!isOpen)}
     >
       <i title="Break"></i>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__page-break">
+      <div className={'options' + (isOpen ? ' visible' : '')}>
         <ul>
           <li onClick={handlePageBreak}>Page Break</li>
           <li onClick={handleColumnBreak}>Column Break</li>
         </ul>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }

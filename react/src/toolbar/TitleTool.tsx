@@ -1,6 +1,5 @@
+import { useState } from 'react'
 import { useEditor } from '../EditorContext'
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
 
 const LEVELS: { level: string | null; label: string }[] = [
   { level: null, label: 'Body' },
@@ -14,7 +13,7 @@ const LEVELS: { level: string | null; label: string }[] = [
 
 export default function TitleTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
+  const [isOpen, setIsOpen] = useState(false)
 
   const activeLevel = rangeStyle?.level || null
   const activeLabel = LEVELS.find(l => l.level === activeLevel)?.label || 'Body'
@@ -24,9 +23,9 @@ export default function TitleTool() {
   }
 
   return (
-    <div className="menu-item__title" ref={triggerRef} onClick={toggle}>
+    <div className="menu-item__title" onClick={() => setIsOpen(!isOpen)}>
       <span className="select" title="Toggle Heading">{activeLabel}</span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__title">
+      <div className={'options' + (isOpen ? ' visible' : '')}>
         <ul>
           {LEVELS.map(({ level, label }) => (
             <li
@@ -37,7 +36,7 @@ export default function TitleTool() {
             >{label}</li>
           ))}
         </ul>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }

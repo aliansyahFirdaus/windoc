@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import { useEditor } from '../EditorContext'
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
 
 export default function ColumnTool() {
   const { editorRef } = useEditor()
-  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
+  const [isOpen, setIsOpen] = useState(false)
   const [currentColumns, setCurrentColumns] = useState(1)
   const [gap, setGap] = useState(20)
 
@@ -21,11 +19,11 @@ export default function ColumnTool() {
   }
 
   return (
-    <div className="menu-item__column" ref={triggerRef} onClick={toggle}>
+    <div className="menu-item__column" onClick={() => setIsOpen(!isOpen)}>
       <span className="select" title="Column Layout">
         {currentColumns === 1 ? '1 Column' : `${currentColumns} Columns`}
       </span>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__column">
+      <div className={'options' + (isOpen ? ' visible' : '')}>
         <div onClick={(e) => e.stopPropagation()}>
           <ul>
             <li onClick={() => handleColumn(1)}>1 Column</li>
@@ -48,7 +46,7 @@ export default function ColumnTool() {
             </>
           )}
         </div>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }

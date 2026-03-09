@@ -1,13 +1,12 @@
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
+import { useState } from 'react'
 
 export default function ControlTool() {
-  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="menu-item__control" ref={triggerRef} onClick={toggle}>
+    <div className="menu-item__control" onClick={() => setIsOpen(!isOpen)}>
       <i title="Control"></i>
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__control">
+      <div className={'options' + (isOpen ? ' visible' : '')}>
         <ul>
           <li>Text</li>
           <li>Number</li>
@@ -16,7 +15,7 @@ export default function ControlTool() {
           <li>Checkbox</li>
           <li>Radio</li>
         </ul>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }

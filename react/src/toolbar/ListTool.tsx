@@ -1,7 +1,6 @@
+import { useState } from 'react'
 import { List, ListOrdered, Indent, Outdent } from 'lucide-react'
 import { useEditor } from '../EditorContext'
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
 
 interface PresetOption {
   preset: string
@@ -46,7 +45,7 @@ function PresetCell({ option, onClick }: { option: PresetOption; onClick: () => 
 
 export default function ListTool() {
   const { editorRef, isApple, rangeStyle } = useEditor()
-  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
+  const [isOpen, setIsOpen] = useState(false)
   const isActive = !!rangeStyle?.listType
 
   const handleList = (type: string | null, style?: string) => {
@@ -69,9 +68,9 @@ export default function ListTool() {
   }
 
   return (
-    <div ref={triggerRef} className={`menu-item__list ${isActive ? 'active' : ''}`} title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}>
-      <List size={16} onClick={toggle} style={{ cursor: 'pointer' }} />
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__list">
+    <div className={`menu-item__list ${isActive ? 'active' : ''}`} title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}>
+      <List size={16} onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }} />
+      <div className={'options' + (isOpen ? ' visible' : '')}>
         <div style={{ padding: '8px', width: '320px' }}>
           {/* Quick Actions */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
@@ -123,7 +122,7 @@ export default function ListTool() {
             </div>
           </div>
         </div>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }

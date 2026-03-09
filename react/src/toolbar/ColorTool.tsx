@@ -1,7 +1,6 @@
+import { useState } from 'react'
 import { Baseline, RotateCcw } from 'lucide-react'
 import { useEditor } from '../EditorContext'
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
 
 const COLOR_PALETTE = [
   ['#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff'],
@@ -16,7 +15,7 @@ const COLOR_PALETTE = [
 
 export default function ColorTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const { triggerRef, isOpen: visible, toggle, portalStyle } = useDropdown()
+  const [visible, setVisible] = useState(false)
   const activeColor = rangeStyle?.color || '#000000'
 
   const handleColor = (color: string) => {
@@ -28,11 +27,11 @@ export default function ColorTool() {
   }
 
   return (
-    <div className="menu-item__color" ref={triggerRef} title="Font Color" onClick={toggle}>
+    <div className="menu-item__color" title="Font Color" onClick={() => setVisible(!visible)}>
       <Baseline size={16} />
       <span style={{ backgroundColor: activeColor }}></span>
       <input id="color" type="color" readOnly tabIndex={-1} />
-      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown" wrapperClassName="menu-item__color">
+      <div className={'color-palette-dropdown' + (visible ? ' visible' : '')}>
         <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />
@@ -54,7 +53,7 @@ export default function ColorTool() {
             ))}
           </div>
         </div>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }

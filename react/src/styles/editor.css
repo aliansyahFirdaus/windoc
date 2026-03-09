@@ -69,30 +69,6 @@ ul {
     background-color: #cfd2d8;
 }
 
-.menu-item.menu-item-portal {
-    height: auto;
-    display: block;
-    position: fixed;
-    z-index: 9999;
-}
-
-.menu-item-portal > div {
-    width: auto;
-    height: auto;
-    display: block;
-    margin: 0;
-    border: none;
-    background: none;
-    cursor: default;
-}
-
-.menu-item-portal .options {
-    position: static !important;
-    top: auto !important;
-    left: auto !important;
-    display: block !important;
-}
-
 .menu-item {
     height: 24px;
     display: flex;

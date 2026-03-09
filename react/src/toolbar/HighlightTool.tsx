@@ -1,7 +1,6 @@
+import { useState } from 'react'
 import { Highlighter, RotateCcw } from 'lucide-react'
 import { useEditor } from '../EditorContext'
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
 
 const HIGHLIGHT_PALETTE = [
   ['#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff'],
@@ -16,7 +15,7 @@ const HIGHLIGHT_PALETTE = [
 
 export default function HighlightTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const { triggerRef, isOpen: visible, toggle, portalStyle } = useDropdown()
+  const [visible, setVisible] = useState(false)
   const activeColor = rangeStyle?.highlight || ''
 
   const handleColor = (color: string) => {
@@ -28,11 +27,11 @@ export default function HighlightTool() {
   }
 
   return (
-    <div className="menu-item__highlight" ref={triggerRef} title="Highlight" onClick={toggle}>
+    <div className="menu-item__highlight" title="Highlight" onClick={() => setVisible(!visible)}>
       <Highlighter size={16} />
       <span style={{ backgroundColor: activeColor || '#ffff00' }}></span>
       <input id="highlight" type="color" readOnly tabIndex={-1} />
-      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown" wrapperClassName="menu-item__highlight">
+      <div className={'color-palette-dropdown' + (visible ? ' visible' : '')}>
         <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />
@@ -54,7 +53,7 @@ export default function HighlightTool() {
             ))}
           </div>
         </div>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }

@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { Minus } from 'lucide-react'
 import { useEditor } from '../EditorContext'
-import { useDropdown } from '../utils/useDropdown'
-import DropdownPortal from '../utils/DropdownPortal'
 
 const DASH_STYLES: { label: string; dashArray: number[] }[] = [
   { label: 'Solid', dashArray: [] },
@@ -19,7 +17,7 @@ const LINE_WIDTHS: { label: string; value: number }[] = [
 
 export default function SeparatorTool() {
   const { editorRef } = useEditor()
-  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
+  const [isOpen, setIsOpen] = useState(false)
   const [selectedWidth, setSelectedWidth] = useState(1)
 
   const lineColor = '#344054'
@@ -29,9 +27,9 @@ export default function SeparatorTool() {
   }
 
   return (
-    <div className="menu-item__separator" ref={triggerRef} title="Separator">
-      <Minus size={16} onClick={toggle} style={{ cursor: 'pointer' }} />
-      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible" wrapperClassName="menu-item__separator">
+    <div className="menu-item__separator" title="Separator">
+      <Minus size={16} onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }} />
+      <div className={'options' + (isOpen ? ' visible' : '')}>
         <div style={{ padding: '8px 10px 10px', width: '200px' }}>
           <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
             {DASH_STYLES.map(({ label, dashArray }) => (
@@ -78,7 +76,7 @@ export default function SeparatorTool() {
             </div>
           </div>
         </div>
-      </DropdownPortal>
+      </div>
     </div>
   )
 }
