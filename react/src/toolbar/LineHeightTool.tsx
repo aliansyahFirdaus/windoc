@@ -1,24 +1,24 @@
-import { useState } from 'react'
 import { useEditor } from '../EditorContext'
+import { useDropdown } from '../utils/useDropdown'
+import DropdownPortal from '../utils/DropdownPortal'
 
 const LINE_HEIGHTS = ['1.0', '1.15', '1.5', '2.0', '2.5']
 
 export default function LineHeightTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [visible, setVisible] = useState(false)
+  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
 
   const activeMargin = rangeStyle?.rowMargin ?? 1
   const activeLabel = Number.isInteger(activeMargin) ? `${activeMargin}.0` : String(activeMargin)
 
   const handleLineHeight = (value: string) => {
     editorRef.current?.command.executeRowMargin(Number(value))
-    setVisible(false)
   }
 
   return (
-    <div className="menu-item__line-height" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__line-height" ref={triggerRef} onClick={toggle}>
       <span className="select" title="Line Height">{activeLabel}</span>
-      <div className={`options ${visible ? 'visible' : ''}`}>
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
         <ul>
           {LINE_HEIGHTS.map(h => (
             <li
@@ -28,7 +28,7 @@ export default function LineHeightTool() {
             >{h}</li>
           ))}
         </ul>
-      </div>
+      </DropdownPortal>
     </div>
   )
 }

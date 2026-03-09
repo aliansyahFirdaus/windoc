@@ -1,9 +1,10 @@
-import { useState } from 'react'
 import { useEditor } from '../EditorContext'
+import { useDropdown } from '../utils/useDropdown'
+import DropdownPortal from '../utils/DropdownPortal'
 
 export default function InsertElementTool() {
   const { editorRef } = useEditor()
-  const [visible, setVisible] = useState(false)
+  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
 
   const handleHeader = () => {
     if (!editorRef.current) return
@@ -15,17 +16,16 @@ export default function InsertElementTool() {
     }
     // Navigate to header zone for editing
     editorRef.current.command.executeSetZone('header')
-    setVisible(false)
   }
 
   return (
-    <div className="menu-item__insert-element" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__insert-element" ref={triggerRef} onClick={toggle}>
       <i title="Insert Element"></i>
-      <div className={`options ${visible ? 'visible' : ''}`}>
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
         <ul>
           <li onClick={handleHeader}>Add Header</li>
         </ul>
-      </div>
+      </DropdownPortal>
     </div>
   )
 }

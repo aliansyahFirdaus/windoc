@@ -1,5 +1,6 @@
-import { useState } from 'react'
 import { useEditor } from '../EditorContext'
+import { useDropdown } from '../utils/useDropdown'
+import DropdownPortal from '../utils/DropdownPortal'
 
 const FONTS = [
   { family: 'Arial', label: 'Sans Serif' },
@@ -8,20 +9,19 @@ const FONTS = [
 
 export default function FontTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [visible, setVisible] = useState(false)
+  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
 
   const activeFont = rangeStyle?.font || 'Arial'
   const activeLabel = FONTS.find(f => f.family === activeFont)?.label || activeFont
 
   const handleFont = (family: string) => {
     editorRef.current?.command.executeFont(family)
-    setVisible(false)
   }
 
   return (
-    <div className="menu-item__font" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__font" ref={triggerRef} onClick={toggle}>
       <span className="select" title="Font">{activeLabel}</span>
-      <div className={`options ${visible ? 'visible' : ''}`}>
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
         <ul>
           {FONTS.map(({ family, label }) => (
             <li
@@ -33,7 +33,7 @@ export default function FontTool() {
             >{label}</li>
           ))}
         </ul>
-      </div>
+      </DropdownPortal>
     </div>
   )
 }

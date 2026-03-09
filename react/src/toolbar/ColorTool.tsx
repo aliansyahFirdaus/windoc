@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
 import { Baseline, RotateCcw } from 'lucide-react'
 import { useEditor } from '../EditorContext'
+import { useDropdown } from '../utils/useDropdown'
+import DropdownPortal from '../utils/DropdownPortal'
 
 const COLOR_PALETTE = [
   ['#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff'],
@@ -15,38 +16,24 @@ const COLOR_PALETTE = [
 
 export default function ColorTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [visible, setVisible] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { triggerRef, isOpen: visible, toggle, portalStyle } = useDropdown()
   const activeColor = rangeStyle?.color || '#000000'
-
-  useEffect(() => {
-    if (!visible) return
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setVisible(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [visible])
 
   const handleColor = (color: string) => {
     editorRef.current?.command.executeColor(color)
-    setVisible(false)
   }
 
   const handleReset = () => {
     editorRef.current?.command.executeColor(null)
-    setVisible(false)
   }
 
   return (
-    <div className="menu-item__color" ref={containerRef} title="Font Color" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__color" ref={triggerRef} title="Font Color" onClick={toggle}>
       <Baseline size={16} />
       <span style={{ backgroundColor: activeColor }}></span>
       <input id="color" type="color" readOnly tabIndex={-1} />
-      {visible && (
-        <div className="color-palette-dropdown" onClick={(e) => e.stopPropagation()}>
+      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown">
+        <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />
             Reset
@@ -67,7 +54,7 @@ export default function ColorTool() {
             ))}
           </div>
         </div>
-      )}
+      </DropdownPortal>
     </div>
   )
 }

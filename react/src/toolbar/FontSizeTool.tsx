@@ -1,23 +1,23 @@
-import { useState } from 'react'
 import { useEditor } from '../EditorContext'
+import { useDropdown } from '../utils/useDropdown'
+import DropdownPortal from '../utils/DropdownPortal'
 
 const SIZES = [56, 48, 34, 32, 29, 24, 21, 20, 18, 16, 14, 12, 10, 8]
 
 export default function FontSizeTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [visible, setVisible] = useState(false)
+  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
 
   const activeSize = rangeStyle?.size ?? 16
 
   const handleSize = (size: number) => {
     editorRef.current?.command.executeSize(size)
-    setVisible(false)
   }
 
   return (
-    <div className="menu-item__size" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__size" ref={triggerRef} onClick={toggle}>
       <span className="select" title="Font Size">{activeSize}</span>
-      <div className={`options ${visible ? 'visible' : ''}`}>
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
         <ul>
           {SIZES.map(size => (
             <li
@@ -27,7 +27,7 @@ export default function FontSizeTool() {
             >{size}</li>
           ))}
         </ul>
-      </div>
+      </DropdownPortal>
     </div>
   )
 }

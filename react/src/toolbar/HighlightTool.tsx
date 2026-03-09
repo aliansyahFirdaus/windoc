@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
 import { Highlighter, RotateCcw } from 'lucide-react'
 import { useEditor } from '../EditorContext'
+import { useDropdown } from '../utils/useDropdown'
+import DropdownPortal from '../utils/DropdownPortal'
 
 const HIGHLIGHT_PALETTE = [
   ['#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff'],
@@ -15,38 +16,24 @@ const HIGHLIGHT_PALETTE = [
 
 export default function HighlightTool() {
   const { editorRef, rangeStyle } = useEditor()
-  const [visible, setVisible] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { triggerRef, isOpen: visible, toggle, portalStyle } = useDropdown()
   const activeColor = rangeStyle?.highlight || ''
-
-  useEffect(() => {
-    if (!visible) return
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setVisible(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [visible])
 
   const handleColor = (color: string) => {
     editorRef.current?.command.executeHighlight(color)
-    setVisible(false)
   }
 
   const handleReset = () => {
     editorRef.current?.command.executeHighlight(null)
-    setVisible(false)
   }
 
   return (
-    <div className="menu-item__highlight" ref={containerRef} title="Highlight" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__highlight" ref={triggerRef} title="Highlight" onClick={toggle}>
       <Highlighter size={16} />
       <span style={{ backgroundColor: activeColor || '#ffff00' }}></span>
       <input id="highlight" type="color" readOnly tabIndex={-1} />
-      {visible && (
-        <div className="color-palette-dropdown" onClick={(e) => e.stopPropagation()}>
+      <DropdownPortal isOpen={visible} style={portalStyle} className="color-palette-dropdown">
+        <div onClick={(e) => e.stopPropagation()}>
           <button className="color-palette-reset" onClick={handleReset}>
             <RotateCcw size={12} />
             None
@@ -67,7 +54,7 @@ export default function HighlightTool() {
             ))}
           </div>
         </div>
-      )}
+      </DropdownPortal>
     </div>
   )
 }

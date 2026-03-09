@@ -1,17 +1,18 @@
-import { useState } from 'react'
+import { useDropdown } from '../utils/useDropdown'
+import DropdownPortal from '../utils/DropdownPortal'
 
 export default function DateTool() {
-  const [visible, setVisible] = useState(false)
+  const { triggerRef, isOpen, toggle, portalStyle } = useDropdown()
 
   return (
-    <div className="menu-item__date" onClick={() => setVisible(!visible)}>
+    <div className="menu-item__date" ref={triggerRef} onClick={toggle}>
       <i title="Date"></i>
-      <div className={`options ${visible ? 'visible' : ''}`}>
+      <DropdownPortal isOpen={isOpen} style={portalStyle} className="options visible">
         <ul>
           <li data-format="yyyy-MM-dd" suppressHydrationWarning>{new Date().toISOString().split('T')[0]}</li>
           <li data-format="yyyy-MM-dd hh:mm:ss" suppressHydrationWarning>{new Date().toISOString().replace('T', ' ').slice(0, 19)}</li>
         </ul>
-      </div>
+      </DropdownPortal>
     </div>
   )
 }
