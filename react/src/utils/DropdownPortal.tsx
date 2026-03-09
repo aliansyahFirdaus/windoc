@@ -11,8 +11,10 @@ interface DropdownPortalProps {
 export default function DropdownPortal({ isOpen, style, className, children }: DropdownPortalProps) {
   if (!isOpen) return null
   return createPortal(
-    <div className={className} style={style}>
-      {children}
+    <div className="menu-item" style={style}>
+      <div className={className}>
+        {children}
+      </div>
     </div>,
     document.body
   )
