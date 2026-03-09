@@ -12,6 +12,8 @@ const config: Config = {
     { tagName: 'link', attributes: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/windoc/img/favicon_io/favicon-16x16.png' } },
     { tagName: 'link', attributes: { rel: 'apple-touch-icon', sizes: '180x180', href: '/windoc/img/favicon_io/apple-touch-icon.png' } },
     { tagName: 'link', attributes: { rel: 'manifest', href: '/windoc/img/favicon_io/site.webmanifest' } },
+    { tagName: 'meta', attributes: { name: 'twitter:card', content: 'summary_large_image' } },
+    { tagName: 'meta', attributes: { name: 'twitter:image', content: 'https://aliansyahfirdaus.github.io/windoc/img/og-twitter.png' } },
   ],
 
   future: {
@@ -57,7 +59,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/logo-text-black.png',
+    image: 'img/og.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
