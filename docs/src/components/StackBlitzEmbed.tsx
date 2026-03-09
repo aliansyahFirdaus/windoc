@@ -63,6 +63,7 @@ export default defineConfig({ plugins: [react()] })
   ),
   'src/main.tsx': `import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './index.css'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(
@@ -70,6 +71,19 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>
 )
+`,
+  'src/index.css': `* { box-sizing: border-box; margin: 0; padding: 0; }
+body { overflow: hidden; }
+
+/* Make toolbar horizontally scrollable instead of wrapping */
+div.menu {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
 `,
 };
 
