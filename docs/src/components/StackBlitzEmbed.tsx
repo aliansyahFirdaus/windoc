@@ -163,6 +163,7 @@ function EmbedInner({
           hideDevTools: true,
           theme: 'dark',
           terminalHeight: 0,
+          view: 'preview',
         }
       );
     });
