@@ -7,6 +7,7 @@ export interface IDrawOption {
   curIndex?: number
   isSetCursor?: boolean
   isSubmitHistory?: boolean
+  isInputHistory?: boolean
   isCompute?: boolean
   isLazy?: boolean
   isInit?: boolean

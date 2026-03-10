@@ -685,7 +685,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@windoc/core@npm:^0.3.2, @windoc/core@workspace:core":
+"@windoc/core@npm:^0.3.3, @windoc/core@workspace:core":
   version: 0.0.0-use.local
   resolution: "@windoc/core@workspace:core"
   dependencies:
@@ -701,7 +701,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
-    "@windoc/core": "npm:^0.3.2"
+    "@windoc/core": "npm:^0.3.3"
     lucide-react: "npm:^0.563.0"
     react: "npm:^19.2.4"
     react-dom: "npm:^19.2.4"

@@ -2786,6 +2786,7 @@ export class Draw {
     const { header, footer } = this.options
     const {
       isSubmitHistory = true,
+      isInputHistory = false,
       isSetCursor = true,
       isCompute = true,
       isLazy = true,
@@ -2870,7 +2871,7 @@ export class Draw {
       (isSubmitHistory && !isFirstRender) ||
       (curIndex !== undefined && this.historyManager.isStackEmpty())
     ) {
-      this.submitHistory(curIndex)
+      this.submitHistory(curIndex, isInputHistory)
     }
     nextTick(() => {
       this.range.setRangeStyle()
@@ -2944,7 +2945,7 @@ export class Draw {
     return curIndex
   }
 
-  public submitHistory(curIndex: number | undefined) {
+  public submitHistory(curIndex: number | undefined, isInput = false) {
     const positionContext = this.position.getPositionContext()
     const oldElementList = getSlimCloneElementList(this.elementList)
     const oldHeaderElementList = getSlimCloneElementList(
@@ -2957,7 +2958,7 @@ export class Draw {
     const pageNo = this.pageNo
     const oldPositionContext = deepClone(positionContext)
     const zone = this.zone.getZone()
-    this.historyManager.execute(() => {
+    const fn = () => {
       this.zone.setZone(zone)
       this.setPageNo(pageNo)
       this.position.setPositionContext(deepClone(oldPositionContext))
@@ -2970,7 +2971,17 @@ export class Draw {
         isSubmitHistory: false,
         isSourceHistory: true
       })
-    })
+    }
+    if (isInput && this.historyManager.isInputGroupable()) {
+      this.historyManager.replaceLatest(fn)
+    } else {
+      this.historyManager.execute(fn)
+    }
+    if (isInput) {
+      this.historyManager.recordInputTime()
+    } else {
+      this.historyManager.resetInputTime()
+    }
   }
 
   public destroy() {

@@ -1,9 +1,12 @@
 import { Draw } from '../draw/Draw'
 
+const INPUT_GROUP_INTERVAL = 1000
+
 export class HistoryManager {
   private undoStack: Array<Function> = []
   private redoStack: Array<Function> = []
   private maxRecordCount: number
+  private lastInputTime: number = 0
 
   constructor(draw: Draw) {
     this.maxRecordCount = draw.getOptions().historyMaxRecordCount + 1
@@ -35,6 +38,29 @@ export class HistoryManager {
     while (this.undoStack.length > this.maxRecordCount) {
       this.undoStack.shift()
     }
+  }
+
+  public replaceLatest(fn: Function) {
+    if (this.undoStack.length > 0) {
+      this.undoStack[this.undoStack.length - 1] = fn
+    } else {
+      this.execute(fn)
+    }
+    if (this.redoStack.length) {
+      this.redoStack = []
+    }
+  }
+
+  public isInputGroupable(): boolean {
+    return Date.now() - this.lastInputTime < INPUT_GROUP_INTERVAL
+  }
+
+  public recordInputTime() {
+    this.lastInputTime = Date.now()
+  }
+
+  public resetInputTime() {
+    this.lastInputTime = 0
   }
 
   public isCanUndo(): boolean {
