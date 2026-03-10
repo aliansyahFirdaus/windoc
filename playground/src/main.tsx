@@ -7,6 +7,9 @@ function App() {
   return (
     <div style={{ height: '100vh' }}>
       <Editor
+        defaultValue={{
+          main: [{ value: 'Hello, this is a test paragraph.', size: 11 }],
+        }}
         options={{
           placeholder: { data: 'Start typing...' },
         }}

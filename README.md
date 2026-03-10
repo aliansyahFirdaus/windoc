@@ -64,6 +64,16 @@ yarn install
 yarn build
 ```
 
+To run the playground locally with live reload:
+
+```bash
+# Terminal 1 — watch core & react
+yarn dev
+
+# Terminal 2 — start playground
+cd playground && yarn dev
+```
+
 ## Contributing
 
 Contributions are welcome! Please read the [Contributing Guide](./CONTRIBUTING.md) before opening a pull request.
