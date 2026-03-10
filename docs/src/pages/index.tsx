@@ -3,6 +3,7 @@ import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import Head from '@docusaurus/Head';
 import LiveDemo from '@site/src/components/LiveDemo';
+import { useNpmVersion } from '@site/src/hooks/useNpmVersion';
 import styles from './index.module.css';
 
 const jsonLd = {
@@ -27,13 +28,14 @@ const jsonLd = {
 };
 
 function Hero() {
+  const coreVersion = useNpmVersion('@windoc/core')
   return (
     <section className={styles.hero}>
       <div className={styles.gridBg} />
       <div className={styles.heroInner}>
         <div className={styles.badge}>
           <span className={styles.badgeDot} />
-          v0.2.8 — Now available on npm
+          v{coreVersion} — Now available on npm
         </div>
         <h1 className={styles.heroTitle}>
           Canvas document editor{' '}
@@ -145,6 +147,8 @@ function DemoSection() {
 }
 
 function Packages() {
+  const coreVersion = useNpmVersion('@windoc/core')
+  const reactVersion = useNpmVersion('@windoc/react')
   return (
     <section className={styles.packages}>
       <div className={styles.featuresHeader}>
@@ -155,7 +159,7 @@ function Packages() {
         <div className={styles.packageCard}>
           <div>
             <span className={styles.packageName}>@windoc/core</span>
-            <span className={styles.packageVersion}>0.2.8</span>
+            <span className={styles.packageVersion}>{coreVersion}</span>
           </div>
           <p className={styles.packageDesc}>
             The canvas editor engine. Framework-agnostic — renders documents
@@ -169,7 +173,7 @@ function Packages() {
         <div className={styles.packageCard}>
           <div>
             <span className={styles.packageName}>@windoc/react</span>
-            <span className={styles.packageVersion}>0.2.0</span>
+            <span className={styles.packageVersion}>{reactVersion}</span>
           </div>
           <p className={styles.packageDesc}>
             React bindings with a ready-to-use {'<Editor />'} component.
