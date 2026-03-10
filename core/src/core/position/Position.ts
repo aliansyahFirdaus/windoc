@@ -141,7 +141,7 @@ export class Position {
         }
       }
       x += curRow.offsetX || 0
-      y += curRow.offsetY || 0
+      y += (curRow.offsetY || 0) + (curRow.spaceAbove || 0)
       const tablePreX = x
       const tablePreY = y
       for (let j = 0; j < curRow.elementList.length; j++) {
@@ -274,7 +274,7 @@ export class Position {
         }
       }
       x = startX
-      y += curRow.height
+      y += curRow.height + (curRow.spaceBelow || 0)
     }
     return { x, y, index }
   }

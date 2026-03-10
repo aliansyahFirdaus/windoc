@@ -1245,6 +1245,14 @@ export class CommandAdapt {
         ])
         curIndex = startIndex
       }
+      // Ensure there's a blank line after the separator for cursor placement
+      const afterSepIndex = curIndex + 2
+      if (elementList[afterSepIndex]?.value !== ZERO) {
+        this.draw.spliceElementList(elementList, afterSepIndex, 0, [
+          { value: ZERO }
+        ])
+      }
+      curIndex = afterSepIndex - 1
     }
     this.range.setRange(curIndex, curIndex)
     this.draw.render({ curIndex })

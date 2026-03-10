@@ -148,10 +148,13 @@ export class Cursor {
     const curIndex = cursorPosition.index
     const curElement = elementList[curIndex]
     const nextElement = elementList[curIndex + 1]
-    if (
+    const isNearImage =
       (curElement && curElement.type === ElementType.IMAGE) ||
       (nextElement && nextElement.type === ElementType.IMAGE)
-    ) {
+    const isNearSeparator =
+      (curElement && curElement.type === ElementType.SEPARATOR) ||
+      (nextElement && nextElement.type === ElementType.SEPARATOR)
+    if (isNearImage || isNearSeparator) {
       const { defaultSize, defaultFont } = this.options
       const ctx = this.draw.getCtx()
       ctx.save()
@@ -170,8 +173,14 @@ export class Cursor {
     const cursorPadding = 2 * scale
     const cursorHeight =
       effectiveMetrics.boundingBoxAscent + effectiveMetrics.boundingBoxDescent + cursorPadding
-    const cursorTop =
-      leftTop[1] + ascent - effectiveMetrics.boundingBoxAscent - cursorPadding / 2 + preY
+    // For image: cursor sits at bottom of image (Google Docs behavior)
+    const cursorTop = isNearImage
+      ? leftTop[1] +
+        cursorPosition.lineHeight -
+        effectiveMetrics.boundingBoxDescent -
+        cursorPadding / 2 +
+        preY
+      : leftTop[1] + ascent - effectiveMetrics.boundingBoxAscent - cursorPadding / 2 + preY
     const cursorLeft = hitLineStartIndex ? leftTop[0] : rightTop[0]
     agentCursorDom.style.left = `${cursorLeft}px`
     agentCursorDom.style.top = `${

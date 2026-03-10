@@ -1,5 +1,6 @@
 import { version } from '../../version'
 import { ZERO } from '../../dataset/constant/Common'
+import { TitleLevel } from '../../dataset/enum/Title'
 import { RowFlex } from '../../dataset/enum/Row'
 import {
   IAppendElementListOption,
@@ -2107,6 +2108,29 @@ export class Draw {
     return rowList
   }
 
+  private _applyRowSpacing() {
+    const { scale } = this.options
+    const PT_TO_PX = 96 / 72
+    const HEADING_SPACE: Partial<Record<TitleLevel, { above: number; below: number }>> = {
+      [TitleLevel.FIRST]: { above: 20, below: 6 },
+      [TitleLevel.SECOND]: { above: 18, below: 6 },
+      [TitleLevel.THIRD]: { above: 16, below: 4 },
+      [TitleLevel.FOURTH]: { above: 14, below: 4 },
+      [TitleLevel.FIFTH]: { above: 12, below: 4 },
+      [TitleLevel.SIXTH]: { above: 12, below: 4 }
+    }
+    for (const row of this.rowList) {
+      const headingEl = row.elementList.find(el => el.level != null)
+      if (headingEl?.level != null) {
+        const space = HEADING_SPACE[headingEl.level]
+        if (space) {
+          row.spaceAbove = space.above * PT_TO_PX * scale
+          row.spaceBelow = space.below * PT_TO_PX * scale
+        }
+      }
+    }
+  }
+
   private _computePageList(): IRow[][] {
     const pageRowList: IRow[][] = [[]]
     const {
@@ -2123,7 +2147,12 @@ export class Draw {
         this.rowList[i].columnNo = 0
       }
       pageHeight += this.rowList.reduce(
-        (pre, cur) => pre + cur.height + (cur.offsetY || 0),
+        (pre, cur) =>
+          pre +
+          cur.height +
+          (cur.offsetY || 0) +
+          (cur.spaceAbove || 0) +
+          (cur.spaceBelow || 0),
         0
       )
       const dpr = this.getPagePixelRatio()
@@ -2146,11 +2175,9 @@ export class Draw {
         const rowOffsetY = row.offsetY || 0
         const isPageBreak = this.rowList[i - 1]?.isPageBreak
         const isColumnBreak = this.rowList[i - 1]?.isColumnBreak
-        if (
-          row.height + rowOffsetY + pageHeight > height ||
-          isPageBreak ||
-          isColumnBreak
-        ) {
+        const rowTotalHeight =
+          row.height + rowOffsetY + (row.spaceAbove || 0) + (row.spaceBelow || 0)
+        if (rowTotalHeight + pageHeight > height || isPageBreak || isColumnBreak) {
           if (
             (!isPageBreak || isColumnBreak) &&
             columnCount > 1 &&
@@ -2158,7 +2185,7 @@ export class Draw {
           ) {
             // Column break or height overflow → move to next column
             columnNo++
-            pageHeight = marginHeight + row.height + rowOffsetY
+            pageHeight = marginHeight + rowTotalHeight
             row.columnNo = columnNo
             pageRowList[pageNo].push(row)
           } else {
@@ -2167,14 +2194,14 @@ export class Draw {
               break
             }
             columnNo = 0
-            pageHeight = marginHeight + row.height + rowOffsetY
+            pageHeight = marginHeight + rowTotalHeight
             row.columnNo = columnNo
             pageRowList.push([row])
             pageNo++
           }
         } else {
           row.columnNo = columnNo
-          pageHeight += row.height + rowOffsetY
+          pageHeight += rowTotalHeight
           pageRowList[pageNo].push(row)
         }
       }
@@ -2790,6 +2817,7 @@ export class Draw {
         surroundElementList,
         elementList: this.elementList
       })
+      this._applyRowSpacing()
       this.pageRowList = this._computePageList()
       this.position.computePositionList()
       this.area.compute()
