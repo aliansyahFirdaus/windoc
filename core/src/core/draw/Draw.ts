@@ -1347,9 +1347,8 @@ export class Draw {
     const { defaultSize, defaultFont } = this.options
     const font = el.font || defaultFont
     const size = el.actualSize || el.size || defaultSize
-    return `${el.italic ? 'italic ' : ''}${el.bold ? 'bold ' : ''}${
-      size * scale
-    }px ${font}`
+    const sizePx = size * (96 / 72) * scale
+    return `${el.italic ? 'italic ' : ''}${el.bold ? 'bold ' : ''}${sizePx}px ${font}`
   }
 
   public getElementSize(el: IElement) {

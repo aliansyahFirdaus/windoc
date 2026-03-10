@@ -1019,7 +1019,7 @@ export function convertElementToDom(
   if (element.italic) {
     dom.style.fontStyle = "italic";
   }
-  dom.style.fontSize = `${element.size || options.defaultSize}px`;
+  dom.style.fontSize = `${element.size || options.defaultSize}pt`;
   if (element.highlight) {
     dom.style.backgroundColor = element.highlight;
   }
@@ -1386,7 +1386,7 @@ export function convertTextNodeToElement(
     color: style.color,
     bold: Number(style.fontWeight) > 500,
     italic: style.fontStyle.includes("italic"),
-    size: Math.floor(parseFloat(style.fontSize)),
+    size: Math.round(parseFloat(style.fontSize) * 0.75),
   };
   if (anchorNode.nodeName === "SUB" || style.verticalAlign === "sub") {
     element.type = ElementType.SUBSCRIPT;

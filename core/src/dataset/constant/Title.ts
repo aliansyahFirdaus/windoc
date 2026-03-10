@@ -2,12 +2,12 @@ import { ITitleOption, ITitleSizeOption } from '../../interface/Title'
 import { TitleLevel } from '../enum/Title'
 
 export const defaultTitleOption: Readonly<Required<ITitleOption>> = {
-  defaultFirstSize: 26,
-  defaultSecondSize: 24,
-  defaultThirdSize: 22,
-  defaultFourthSize: 20,
-  defaultFifthSize: 18,
-  defaultSixthSize: 16
+  defaultFirstSize: 20,
+  defaultSecondSize: 16,
+  defaultThirdSize: 14,
+  defaultFourthSize: 12,
+  defaultFifthSize: 11,
+  defaultSixthSize: 11
 }
 
 export const titleSizeMapping: Record<TitleLevel, keyof ITitleSizeOption> = {
