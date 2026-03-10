@@ -2,8 +2,14 @@ import { useRef } from 'react'
 import { useEditor } from '../EditorContext'
 
 const FONTS = [
-  { family: 'Arial', label: 'Sans Serif' },
-  { family: 'Times New Roman', label: 'Serif' },
+  { family: 'Arial', label: 'Arial' },
+  { family: 'Times New Roman', label: 'Times New Roman' },
+  { family: 'Georgia', label: 'Georgia' },
+  { family: 'Verdana', label: 'Verdana' },
+  { family: 'Trebuchet MS', label: 'Trebuchet MS' },
+  { family: 'Courier New', label: 'Courier New' },
+  { family: 'Comic Sans MS', label: 'Comic Sans MS' },
+  { family: 'Impact', label: 'Impact' },
 ]
 
 export default function FontTool() {

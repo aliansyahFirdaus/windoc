@@ -13,6 +13,7 @@
   user-select: none;
   border: 1px solid #e4e7ed;
   box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .ce-date-container.active {

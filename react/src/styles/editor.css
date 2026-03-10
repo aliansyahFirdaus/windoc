@@ -58,7 +58,7 @@ ul {
     justify-content: center;
     background: #f2f4f7;
     box-shadow: 0 2px 4px 0 transparent;
-    font-family: var(--font-inter), Inter, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .menu-divider {
@@ -132,7 +132,7 @@ ul {
     font-size: 12px;
     line-height: 28px;
     user-select: none;
-    font-family: var(--font-inter), Inter, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .menu-item .select::after {
@@ -155,7 +155,7 @@ ul {
     padding: 6px;
     background: #fff;
     font-size: 12px;
-    font-family: var(--font-inter), Inter, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     box-shadow: 0 4px 12px 0 rgb(56 56 56 / 15%);
     border: 1px solid #e2e6ed;
     border-radius: 8px;
@@ -1163,6 +1163,7 @@ ul {
     bottom: 0;
     left: 0;
     font-size: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     padding: 0 4px 0 20px;
     box-sizing: border-box;
 }
@@ -1210,7 +1211,7 @@ ul {
     padding: 6px;
     background: #fff;
     font-size: 12px;
-    font-family: var(--font-inter), Inter, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     box-shadow: 0 4px 12px 0 rgb(56 56 56 / 15%);
     border: 1px solid #e2e6ed;
     border-radius: 8px;
@@ -1476,6 +1477,11 @@ ul {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 10px;
     cursor: default;
+    display: none;
+}
+
+.color-palette-dropdown.visible {
+    display: block;
 }
 
 .color-palette-reset {
@@ -1490,7 +1496,7 @@ ul {
     background: none;
     color: #667085;
     cursor: pointer;
-    font-family: var(--font-inter), Inter, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .color-palette-reset:hover {
@@ -1537,125 +1543,192 @@ ul {
     background-image: url("./images/watermark.svg");
 }
 
-.watermark-footer-panel {
-    position: absolute;
-    bottom: 30px;
-    right: 0;
-    width: 280px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px 0 rgb(56 56 56 / 15%);
-    border: 1px solid #e2e6ed;
+.wm-panel-mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+    background: #000;
     z-index: 99;
-    font-family: var(--font-inter), Inter, sans-serif;
-    font-size: 12px;
 }
 
-.wm-panel-tabs {
+.watermark-footer-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e2e6ed;
+    z-index: 999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    padding: 0;
+    margin: 0;
+}
+
+.watermark-footer-panel .wm-panel-title {
+    position: relative;
+    border-bottom: 1px solid #e2e6ed;
+    margin: 0;
+    height: 56px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.watermark-footer-panel .wm-panel-title span {
+    font-weight: 600;
+    font-size: 16px;
+    color: #344054;
+    margin: 0;
+    padding: 0;
+}
+
+.watermark-footer-panel .wm-panel-title i {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: inline-block;
+    background: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.9 8.192l4.242 4.243-.707.707L8.192 8.9 3.95 13.142l-.707-.707 4.242-4.243L3.243 3.95l.707-.707 4.242 4.242 4.243-4.242.707.707L8.9 8.192z' fill='%236A6A6A' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    margin: 0;
+    padding: 0;
+}
+
+.watermark-footer-panel .wm-panel-title i:hover {
+    opacity: 1;
+}
+
+.watermark-footer-panel .wm-panel-tabs {
     display: flex;
     border-bottom: 1px solid #e2e6ed;
+    padding: 0 24px;
+    margin: 0;
 }
 
-.wm-panel-tab {
+.watermark-footer-panel .wm-panel-tab {
     flex: 1;
-    padding: 8px 0;
+    padding: 14px 0;
+    margin: 0;
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     color: #667085;
     transition: all 0.15s;
+    font-family: inherit;
 }
 
-.wm-panel-tab:hover {
+.watermark-footer-panel .wm-panel-tab:hover {
     color: #344054;
 }
 
-.wm-panel-tab.active {
+.watermark-footer-panel .wm-panel-tab.active {
     color: #3b82f6;
     border-bottom-color: #3b82f6;
 }
 
-.wm-panel-body {
-    padding: 10px 12px;
-    max-height: 340px;
+.watermark-footer-panel .wm-panel-body {
+    padding: 20px 24px;
+    margin: 0;
+    max-height: 400px;
     overflow-y: auto;
 }
 
-.wm-panel-field {
-    margin-bottom: 10px;
+.watermark-footer-panel .wm-panel-field {
+    margin-bottom: 18px;
+    padding: 0;
 }
 
-.wm-panel-field label {
+.watermark-footer-panel .wm-panel-field label {
     display: block;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
     color: #344054;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    padding: 0;
 }
 
-.wm-panel-value {
+.watermark-footer-panel .wm-panel-value {
     font-weight: 400;
     color: #667085;
 }
 
-.wm-panel-field input[type="text"],
-.wm-panel-field input[type="number"],
-.wm-panel-field select {
+.watermark-footer-panel .wm-panel-field input[type="text"],
+.watermark-footer-panel .wm-panel-field input[type="number"],
+.watermark-footer-panel .wm-panel-field select {
     width: 100%;
-    height: 28px;
-    border-radius: 4px;
+    height: 36px;
+    border-radius: 6px;
     border: 1px solid #d0d5dd;
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: 8px 12px;
+    margin: 0;
+    font-size: 14px;
     outline: none;
     box-sizing: border-box;
     transition: border 0.2s;
     font-family: inherit;
+    appearance: none;
+    background: #fff;
 }
 
-.wm-panel-field input[type="text"]:focus,
-.wm-panel-field input[type="number"]:focus,
-.wm-panel-field select:focus {
+.watermark-footer-panel .wm-panel-field input[type="text"]:focus,
+.watermark-footer-panel .wm-panel-field input[type="number"]:focus,
+.watermark-footer-panel .wm-panel-field select:focus {
     border-color: #3b82f6;
 }
 
-.wm-panel-field-row {
+.watermark-footer-panel .wm-panel-field-row {
     display: flex;
     gap: 8px;
+    margin: 0;
+    padding: 0;
 }
 
-.wm-panel-field-half {
+.watermark-footer-panel .wm-panel-field-half {
     flex: 1;
 }
 
-.wm-panel-colors {
+.watermark-footer-panel .wm-panel-colors {
     display: flex;
     flex-wrap: wrap;
-    gap: 3px;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
 }
 
-.wm-panel-color {
-    width: 16px;
-    height: 16px;
+.watermark-footer-panel .wm-panel-color {
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: transform 0.1s, border-color 0.1s;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin: 0;
 }
 
-.wm-panel-color:hover {
-    transform: scale(1.2);
+.watermark-footer-panel .wm-panel-color:hover {
+    transform: scale(1.15);
 }
 
-.wm-panel-color.active {
-    border: 1.5px solid #3b82f6;
-    box-shadow: 0 0 0 1px #3b82f6;
+.watermark-footer-panel .wm-panel-color.active {
+    border-color: #3b82f6;
 }
 
-.wm-panel-slider {
+.watermark-footer-panel .wm-panel-slider {
     width: 100%;
     height: 4px;
     -webkit-appearance: none;
@@ -1664,9 +1737,11 @@ ul {
     border-radius: 2px;
     outline: none;
     cursor: pointer;
+    margin: 4px 0;
+    padding: 0;
 }
 
-.wm-panel-slider::-webkit-slider-thumb {
+.watermark-footer-panel .wm-panel-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 14px;
@@ -1678,7 +1753,7 @@ ul {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.wm-panel-slider::-moz-range-thumb {
+.watermark-footer-panel .wm-panel-slider::-moz-range-thumb {
     width: 14px;
     height: 14px;
     border-radius: 50%;
@@ -1688,99 +1763,114 @@ ul {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.wm-panel-toggle {
+.watermark-footer-panel .wm-panel-toggle {
     display: flex;
-    border-radius: 4px;
+    border-radius: 6px;
     overflow: hidden;
     border: 1px solid #d0d5dd;
+    margin: 0;
+    padding: 0;
 }
 
-.wm-panel-toggle button {
+.watermark-footer-panel .wm-panel-toggle button {
     flex: 1;
-    padding: 5px 0;
+    padding: 8px 0;
+    margin: 0;
     background: #fff;
     border: none;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 13px;
     color: #667085;
     transition: all 0.15s;
+    font-family: inherit;
 }
 
-.wm-panel-toggle button:first-child {
+.watermark-footer-panel .wm-panel-toggle button:first-child {
     border-right: 1px solid #d0d5dd;
 }
 
-.wm-panel-toggle button.active {
+.watermark-footer-panel .wm-panel-toggle button.active {
     background: #eff6ff;
     color: #3b82f6;
     font-weight: 500;
 }
 
-.wm-panel-toggle button:hover:not(.active) {
+.watermark-footer-panel .wm-panel-toggle button:hover:not(.active) {
     background: #f9fafb;
 }
 
-.wm-panel-upload {
-    padding: 5px 12px;
+.watermark-footer-panel .wm-panel-upload {
+    padding: 6px 14px;
+    margin: 0;
     background: #fff;
     border: 1px solid #d0d5dd;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 12px;
     color: #344054;
     transition: background 0.15s;
+    font-family: inherit;
 }
 
-.wm-panel-upload:hover {
+.watermark-footer-panel .wm-panel-upload:hover {
     background: #f2f4f7;
 }
 
-.wm-panel-preview {
-    padding: 6px;
+.watermark-footer-panel .wm-panel-preview {
+    padding: 8px;
+    margin: 0;
     border: 1px solid #e2e6ed;
-    border-radius: 4px;
+    border-radius: 6px;
     background: #f9fafb;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.wm-panel-actions {
+.watermark-footer-panel .wm-panel-actions {
     display: flex;
-    justify-content: space-between;
-    padding: 8px 12px;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    margin: 0;
     border-top: 1px solid #e2e6ed;
 }
 
-.wm-panel-btn-delete {
-    padding: 5px 12px;
+.watermark-footer-panel .wm-panel-btn-delete {
+    padding: 6px 20px;
+    margin: 0;
     background: #fff;
-    border: 1px solid #d0d5dd;
-    border-radius: 4px;
+    border: 1px solid #e2e6ed;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
     color: #dc2626;
     transition: all 0.15s;
+    font-family: inherit;
+    line-height: 22px;
 }
 
-.wm-panel-btn-delete:hover {
+.watermark-footer-panel .wm-panel-btn-delete:hover {
     background: #fef2f2;
     border-color: #fca5a5;
 }
 
-.wm-panel-btn-apply {
-    padding: 5px 16px;
+.watermark-footer-panel .wm-panel-btn-apply {
+    padding: 6px 20px;
+    margin: 0;
     background: #3b82f6;
     border: 1px solid #3b82f6;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
     color: #fff;
     font-weight: 500;
     transition: background 0.15s;
+    font-family: inherit;
+    line-height: 22px;
 }
 
-.wm-panel-btn-apply:hover {
+.watermark-footer-panel .wm-panel-btn-apply:hover {
     background: #2563eb;
     border-color: #2563eb;
 }

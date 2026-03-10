@@ -256,7 +256,9 @@ function EditorInner({
       // Global click handler to close dropdowns
       const closeDropdowns = (evt: MouseEvent) => {
         const visibleDom = document.querySelector('.visible')
-        if (!visibleDom || visibleDom.contains(evt.target as Node)) return
+        if (!visibleDom) return
+        const parent = visibleDom.parentElement
+        if (parent && parent.contains(evt.target as Node)) return
         visibleDom.classList.remove('visible')
       }
       window.addEventListener('click', closeDropdowns, { capture: true })

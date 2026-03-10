@@ -189,6 +189,9 @@ export {
   EDITOR_CLIPBOARD
 }
 
+// Unit conversion helpers
+export { cm, cmToPx, pxToCm, mm, inch } from './utils/unit'
+
 // Public enums
 export {
   Editor,

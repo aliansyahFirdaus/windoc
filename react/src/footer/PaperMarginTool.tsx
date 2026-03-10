@@ -1,4 +1,5 @@
 import { useEditor } from '../EditorContext'
+import { pxToCm, cmToPx } from '@windoc/core'
 
 export default function PaperMarginTool() {
   const { editorRef } = useEditor()
@@ -10,10 +11,10 @@ export default function PaperMarginTool() {
     new Dialog({
       title: 'Page Margins',
       data: [
-        { type: 'text', label: 'Top Margin', name: 'top', required: true, value: `${topMargin}`, placeholder: 'Please enter top margin' },
-        { type: 'text', label: 'Bottom Margin', name: 'bottom', required: true, value: `${bottomMargin}`, placeholder: 'Please enter bottom margin' },
-        { type: 'text', label: 'Left Margin', name: 'left', required: true, value: `${leftMargin}`, placeholder: 'Please enter left margin' },
-        { type: 'text', label: 'Right Margin', name: 'right', required: true, value: `${rightMargin}`, placeholder: 'Please enter right margin' }
+        { type: 'text', label: 'Top Margin (cm)', name: 'top', required: true, value: `${pxToCm(topMargin)}`, placeholder: 'e.g. 2.54' },
+        { type: 'text', label: 'Bottom Margin (cm)', name: 'bottom', required: true, value: `${pxToCm(bottomMargin)}`, placeholder: 'e.g. 2.54' },
+        { type: 'text', label: 'Left Margin (cm)', name: 'left', required: true, value: `${pxToCm(leftMargin)}`, placeholder: 'e.g. 2.54' },
+        { type: 'text', label: 'Right Margin (cm)', name: 'right', required: true, value: `${pxToCm(rightMargin)}`, placeholder: 'e.g. 2.54' }
       ],
       onConfirm: (payload: Array<{ name: string; value: string }>) => {
         const top = payload.find(p => p.name === 'top')?.value
@@ -25,7 +26,7 @@ export default function PaperMarginTool() {
         const right = payload.find(p => p.name === 'right')?.value
         if (!right) return
         editorRef.current?.command.executeSetPaperMargin([
-          Number(top), Number(right), Number(bottom), Number(left)
+          cmToPx(Number(top)), cmToPx(Number(right)), cmToPx(Number(bottom)), cmToPx(Number(left))
         ])
       }
     })
