@@ -1766,9 +1766,10 @@ export class Draw {
         const lineWidth = element.lineWidth || defaultLineWidth
         element.width = availableWidth / scale
         metrics.width = availableWidth
-        metrics.height = lineWidth * scale
-        metrics.boundingBoxAscent = -rowMargin
-        metrics.boundingBoxDescent = -rowMargin + metrics.height
+        const separatorHeight = defaultSize * scale
+        metrics.height = separatorHeight
+        metrics.boundingBoxAscent = separatorHeight / 2
+        metrics.boundingBoxDescent = separatorHeight / 2 + lineWidth * scale
       } else if (element.type === ElementType.PAGE_BREAK) {
         element.width = availableWidth / scale
         metrics.width = availableWidth
@@ -2128,6 +2129,13 @@ export class Draw {
           row.spaceBelow = space.below * PT_TO_PX * scale
         }
       }
+      const separatorEl = row.elementList.find(
+        el => el.type === ElementType.SEPARATOR
+      )
+      if (separatorEl) {
+        row.spaceAbove = 4 * PT_TO_PX * scale
+        row.spaceBelow = 1 * PT_TO_PX * scale
+      }
     }
   }
 
@@ -2343,7 +2351,7 @@ export class Draw {
           this.textParticle.complete()
           this.subscriptParticle.render(ctx, element, x, y + offsetY)
         } else if (element.type === ElementType.SEPARATOR) {
-          this.separatorParticle.render(ctx, element, x, y)
+          this.separatorParticle.render(ctx, element, x, y + offsetY)
         } else if (element.type === ElementType.PAGE_BREAK) {
           // no visual rendering
         } else if (element.type === ElementType.COLUMN_BREAK) {
@@ -2505,8 +2513,8 @@ export class Draw {
               const nextElement = elementList[startIndex + 1]
               if (nextElement && nextElement.value === ZERO) {
                 rangeRecord.x = x + metrics.width
-                rangeRecord.y = y
-                rangeRecord.height = curRow.height
+                rangeRecord.y = y - (curRow.spaceAbove || 0)
+                rangeRecord.height = curRow.height + (curRow.spaceAbove || 0) + (curRow.spaceBelow || 0)
                 rangeRecord.width += this.options.rangeMinWidth
               }
             } else {
@@ -2516,8 +2524,8 @@ export class Draw {
               }
               if (!rangeRecord.width) {
                 rangeRecord.x = x
-                rangeRecord.y = y
-                rangeRecord.height = curRow.height
+                rangeRecord.y = y - (curRow.spaceAbove || 0)
+                rangeRecord.height = curRow.height + (curRow.spaceAbove || 0) + (curRow.spaceBelow || 0)
               }
               rangeRecord.width += rangeWidth
             }

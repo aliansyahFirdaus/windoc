@@ -152,8 +152,7 @@ export class Cursor {
       (curElement && curElement.type === ElementType.IMAGE) ||
       (nextElement && nextElement.type === ElementType.IMAGE)
     const isNearSeparator =
-      (curElement && curElement.type === ElementType.SEPARATOR) ||
-      (nextElement && nextElement.type === ElementType.SEPARATOR)
+      curElement?.type === ElementType.SEPARATOR
     if (isNearImage || isNearSeparator) {
       const { defaultSize, defaultFont } = this.options
       const ctx = this.draw.getCtx()
@@ -161,13 +160,24 @@ export class Cursor {
       ctx.font = `${defaultSize * (96 / 72) * scale}px ${defaultFont}`
       const textMetrics = ctx.measureText('M')
       ctx.restore()
-      const textHeight =
-        textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent
-      effectiveMetrics = {
-        width: metrics.width,
-        height: textHeight,
-        boundingBoxAscent: textMetrics.actualBoundingBoxAscent,
-        boundingBoxDescent: textMetrics.actualBoundingBoxDescent
+      if (isNearSeparator) {
+        const textHeight =
+          textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent
+        effectiveMetrics = {
+          width: metrics.width,
+          height: textHeight,
+          boundingBoxAscent: textMetrics.fontBoundingBoxAscent,
+          boundingBoxDescent: textMetrics.fontBoundingBoxDescent
+        }
+      } else {
+        const textHeight =
+          textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent
+        effectiveMetrics = {
+          width: metrics.width,
+          height: textHeight,
+          boundingBoxAscent: textMetrics.actualBoundingBoxAscent,
+          boundingBoxDescent: textMetrics.actualBoundingBoxDescent
+        }
       }
     }
     const cursorPadding = 2 * scale
@@ -179,6 +189,11 @@ export class Cursor {
         cursorPosition.lineHeight -
         effectiveMetrics.boundingBoxDescent -
         cursorPadding / 2 +
+        preY
+      : isNearSeparator
+      ? leftTop[1] +
+        ascent -
+        (effectiveMetrics.boundingBoxAscent + effectiveMetrics.boundingBoxDescent + cursorPadding) / 2 +
         preY
       : leftTop[1] + ascent - effectiveMetrics.boundingBoxAscent - cursorPadding / 2 + preY
     const cursorLeft = hitLineStartIndex ? leftTop[0] : rightTop[0]

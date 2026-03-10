@@ -1252,7 +1252,7 @@ export class CommandAdapt {
           { value: ZERO }
         ])
       }
-      curIndex = afterSepIndex - 1
+      curIndex = afterSepIndex
     }
     this.range.setRange(curIndex, curIndex)
     this.draw.render({ curIndex })

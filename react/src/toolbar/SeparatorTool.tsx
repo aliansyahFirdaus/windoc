@@ -22,20 +22,23 @@ export default function SeparatorTool() {
 
   const lineColor = '#344054'
 
-  const handleSeparator = (dashArray: number[]) => {
+  const handleSeparator = (e: React.MouseEvent, dashArray: number[]) => {
+    e.stopPropagation()
     editorRef.current?.command.executeSeparator(dashArray, { lineWidth: selectedWidth })
+    optionsRef.current?.classList.remove('visible')
   }
 
   return (
-    <div className="menu-item__separator" title="Separator">
-      <Minus size={16} onClick={() => optionsRef.current?.classList.toggle('visible')} style={{ cursor: 'pointer' }} />
-      <div className="options" ref={optionsRef}>
-        <div style={{ padding: '8px 10px 10px', width: '200px' }}>
+    <div className="menu-item" title="Separator">
+      <span className="menu-item__separator" onClick={() => optionsRef.current?.classList.toggle('visible')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', cursor: 'pointer', margin: '0 2px', borderRadius: '8px', color: '#475467', transition: 'all 0.2s', position: 'relative' }}>
+        <Minus size={16} />
+      <div className="options" ref={optionsRef} style={{ width: '220px', height: 'auto' }}>
+        <div style={{ padding: '8px 10px 10px' }}>
           <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
             {DASH_STYLES.map(({ label, dashArray }) => (
               <li
                 key={label}
-                onClick={() => handleSeparator(dashArray)}
+                onClick={(e) => handleSeparator(e, dashArray)}
                 style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 6px', cursor: 'pointer', borderRadius: '4px' }}
               >
                 <svg style={{ flex: 1, minWidth: 0, overflow: 'hidden' }} height="8">
@@ -77,6 +80,8 @@ export default function SeparatorTool() {
           </div>
         </div>
       </div>
+      </span>
     </div>
   )
+
 }

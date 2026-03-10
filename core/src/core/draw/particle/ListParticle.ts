@@ -406,7 +406,7 @@ export class ListParticle {
       }
       if (!text) return
       ctx.save()
-      ctx.font = `${defaultSize * scale}px ${defaultFont}`
+      ctx.font = `${defaultSize * (96 / 72) * scale}px ${defaultFont}`
       ctx.fillText(text, x, y)
       ctx.restore()
     }

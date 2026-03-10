@@ -48,30 +48,36 @@ export default function ListTool() {
   const optionsRef = useRef<HTMLDivElement>(null)
   const isActive = !!rangeStyle?.listType
 
+  const close = () => optionsRef.current?.classList.remove('visible')
+
   const handleList = (type: string | null, style?: string) => {
     editorRef.current?.command.executeList(type, style)
+    close()
   }
 
   const handlePreset = (type: 'ol' | 'ul', preset: string) => {
     const style = type === 'ol' ? 'decimal' : 'disc'
     editorRef.current?.command.executeListWithPreset(type, style, preset)
+    close()
   }
 
   const handleIndent = (e: React.MouseEvent) => {
     e.stopPropagation()
     editorRef.current?.command.executeListIndent()
+    close()
   }
 
   const handleOutdent = (e: React.MouseEvent) => {
     e.stopPropagation()
     editorRef.current?.command.executeListOutdent()
+    close()
   }
 
   return (
     <div className={`menu-item__list ${isActive ? 'active' : ''}`} title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}>
       <List size={16} onClick={() => optionsRef.current?.classList.toggle('visible')} style={{ cursor: 'pointer' }} />
-      <div className="options" ref={optionsRef}>
-        <div style={{ padding: '8px', width: '320px' }}>
+      <div className="options" ref={optionsRef} style={{ width: '320px' }}>
+        <div style={{ padding: '8px' }}>
           {/* Quick Actions */}
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
             <button

@@ -26,11 +26,12 @@ export class SeparatorParticle {
     if (element.dashArray?.length) {
       ctx.setLineDash(element.dashArray)
     }
+    const sideGap = 4 * scale
     const offsetY = Math.round(y)
     ctx.translate(0, ctx.lineWidth / 2)
     ctx.beginPath()
-    ctx.moveTo(x, offsetY)
-    ctx.lineTo(x + element.width! * scale, offsetY)
+    ctx.moveTo(x + sideGap, offsetY)
+    ctx.lineTo(x + element.width! * scale - sideGap, offsetY)
     ctx.stroke()
     ctx.restore()
   }
