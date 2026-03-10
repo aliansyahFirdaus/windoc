@@ -3,6 +3,14 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+- Add heading paragraph spacing, fix separator/image cursor
+
+- Correct cursor height and vertical position calculation
+
+
 ## [0.2.9] — 2026-03-10
 
 ### Added
