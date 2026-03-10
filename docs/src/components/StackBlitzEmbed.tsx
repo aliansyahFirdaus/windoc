@@ -72,6 +72,7 @@ createRoot(document.getElementById('root')!).render(<App />)
 const DEFAULT_APP = `import {
   Editor,
   ColumnTool,
+  PageBreakTool,
   TableTool,
   TitleTool,
   FontTool,
@@ -96,6 +97,8 @@ const D = () => <div className="menu-divider" style={{ margin: '0 3px' }} />
 const toolbar = (
   <div className="menu" editor-component="menu">
     <div className="menu-item"><ColumnTool /></div>
+    <D />
+    <div className="menu-item"><PageBreakTool /></div>
     <D />
     <div className="menu-item"><TableTool /></div>
     <D />
