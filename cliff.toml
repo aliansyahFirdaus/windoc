@@ -32,7 +32,7 @@ commit_parsers = [
   { message = "^fix", group = "Fixed" },
   { message = "^perf", group = "Performance" },
   { message = "^refactor", group = "Changed" },
-  { message = "^docs", group = "Documentation" },
+  { message = "^docs", skip = true },
   { message = "^chore\\(release\\)", skip = true },
   { message = "^chore", skip = true },
   { message = "^ci", skip = true },
