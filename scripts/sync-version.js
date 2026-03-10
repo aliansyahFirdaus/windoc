@@ -62,4 +62,17 @@ replace(
   ]
 )
 
+// ── docs/src/components/StackBlitzEmbed.tsx ─────────────
+replace(
+  path.join(root, 'docs/src/components/StackBlitzEmbed.tsx'),
+  [
+    /'@windoc\/core': '[\d.]+'/,
+    `'@windoc/core': '${coreVersion}'`,
+  ],
+  [
+    /'@windoc\/react': '[\d.]+'/,
+    `'@windoc/react': '${reactVersion}'`,
+  ]
+)
+
 console.log('done.')
