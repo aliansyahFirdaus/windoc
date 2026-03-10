@@ -28,17 +28,22 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
-  { message = "^feat", group = "Added" },
-  { message = "^fix", group = "Fixed" },
-  { message = "^perf", group = "Performance" },
-  { message = "^refactor", group = "Changed" },
+  # Skip non-package scopes regardless of type
+  { message = "^\\w+\\(docs\\)", skip = true },
+  { message = "^\\w+\\(ci\\)", skip = true },
+  # Skip non-package types
   { message = "^docs", skip = true },
   { message = "^chore\\(release\\)", skip = true },
   { message = "^chore", skip = true },
   { message = "^ci", skip = true },
   { message = "^test", skip = true },
   { message = "^style", skip = true },
+  # Package changes that go into changelog
   { breaking = true, group = "⚠️ Breaking Changes" },
+  { message = "^feat", group = "Added" },
+  { message = "^fix", group = "Fixed" },
+  { message = "^perf", group = "Performance" },
+  { message = "^refactor", group = "Changed" },
 ]
 filter_commits = true
 tag_pattern = "v[0-9]*"
