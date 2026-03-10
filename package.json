@@ -10,6 +10,12 @@
     "build": "yarn workspace @windoc/core build && yarn workspace @windoc/react build",
     "dev": "yarn workspace @windoc/core dev & yarn workspace @windoc/react dev",
     "sync-version": "node scripts/sync-version.js",
-    "changelog": "npx git-cliff@latest -o CHANGELOG.md"
+    "changelog": "npx git-cliff@latest -o CHANGELOG.md",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
+    "husky": "^9.1.7"
   }
 }

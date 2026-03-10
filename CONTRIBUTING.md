@@ -188,6 +188,8 @@ chore: upgrade tsup to v9
 - Keep the subject line under 72 characters
 - Reference issues in the footer: `Closes #42`
 
+> **Enforced:** This project uses [commitlint](https://commitlint.js.org/) + [husky](https://typicode.github.io/husky/) to validate commit messages. Non-conventional commits will be rejected automatically.
+
 ---
 
 ## Pull Requests
@@ -296,17 +298,18 @@ The project uses TypeScript strict mode. A few conventions to follow:
 
 ## Release Process
 
-Releases are handled by the maintainer. The general flow:
+Releases are fully automated via CI. The general flow:
 
 1. Changes land on `main` via merged PRs
 2. Maintainer bumps versions in `core/package.json` and `react/package.json`
-3. Run `yarn sync-version` — this syncs version numbers in the docs landing page and README automatically
-4. Changelog is updated
-5. Published to npm: `npm publish --access public` from each package directory
-6. Git tag is created: `git tag v0.x.0`
-7. Docs deploy automatically via GitHub Actions on push to `main`
-
-> `yarn sync-version` reads versions from `core/package.json` and `react/package.json` and updates all hardcoded version strings across the docs and README. Always run this after bumping versions.
+3. Maintainer creates and pushes a git tag: `git tag v0.x.0 && git push origin v0.x.0`
+4. GitHub Actions automatically:
+   - Builds both packages
+   - Publishes to npm (via OIDC trusted publishing)
+   - Generates changelog with [git-cliff](https://git-cliff.org/)
+   - Updates `CHANGELOG.md` and commits it back to `main`
+   - Creates a GitHub Release with release notes
+5. Docs site version badge auto-fetches the latest version from npm
 
 ---
 
