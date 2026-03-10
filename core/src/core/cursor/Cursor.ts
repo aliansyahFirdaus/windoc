@@ -155,7 +155,7 @@ export class Cursor {
       const { defaultSize, defaultFont } = this.options
       const ctx = this.draw.getCtx()
       ctx.save()
-      ctx.font = `${defaultSize * scale}px ${defaultFont}`
+      ctx.font = `${defaultSize * (96 / 72) * scale}px ${defaultFont}`
       const textMetrics = ctx.measureText('M')
       ctx.restore()
       const textHeight =
@@ -167,12 +167,11 @@ export class Cursor {
         boundingBoxDescent: textMetrics.actualBoundingBoxDescent
       }
     }
-    const descent =
-      effectiveMetrics.boundingBoxDescent < 0 ? 0 : effectiveMetrics.boundingBoxDescent
     const cursorPadding = 2 * scale
-    const cursorHeight = effectiveMetrics.height + descent + cursorPadding
+    const cursorHeight =
+      effectiveMetrics.boundingBoxAscent + effectiveMetrics.boundingBoxDescent + cursorPadding
     const cursorTop =
-      leftTop[1] + ascent - effectiveMetrics.height + cursorPadding / 2 + preY
+      leftTop[1] + ascent - effectiveMetrics.boundingBoxAscent - cursorPadding / 2 + preY
     const cursorLeft = hitLineStartIndex ? leftTop[0] : rightTop[0]
     agentCursorDom.style.left = `${cursorLeft}px`
     agentCursorDom.style.top = `${
