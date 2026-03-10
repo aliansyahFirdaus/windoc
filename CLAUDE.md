@@ -84,42 +84,48 @@ Edit both files, change version (e.g., `0.2.0` → `0.3.0`):
 - `core/package.json` → `"version"`
 - `react/package.json` → `"version"` AND `"dependencies"."@windoc/core"`
 
-### 3. Sync versions to docs and README
+### 3. Update lockfile
+```bash
+yarn install
+```
+This MUST be done after bumping versions to keep `yarn.lock` in sync. CI uses `--immutable` and will fail if lockfile is stale.
+
+### 4. Sync versions to docs and README
 ```bash
 yarn sync-version
 ```
 Updates: version badge in `docs/src/pages/index.tsx` and version table in `README.md`.
 
-### 4. Generate CHANGELOG
+### 5. Generate CHANGELOG
 ```bash
 yarn changelog
 ```
 Uses `git-cliff` + `cliff.toml`. Skips: `chore`, `ci`, `test`, `style`. Includes: `feat` → Added, `fix` → Fixed, `refactor` → Changed, `perf` → Performance, `docs` → Documentation.
 
-### 5. Build to verify
+### 6. Build to verify
 ```bash
 yarn build
 ```
 
-### 6. Commit all changes
+### 7. Commit all changes
 ```bash
-git add core/package.json react/package.json docs/src/pages/index.tsx README.md CHANGELOG.md
+git add core/package.json react/package.json docs/src/pages/index.tsx README.md CHANGELOG.md yarn.lock
 git commit -m "chore: release v0.x.0"
 git push origin main
 ```
 
-### 7. Create git tag — this triggers npm publish
+### 8. Create git tag — this triggers npm publish
 ```bash
 git tag v0.x.0
 git push origin v0.x.0
 ```
 Tag push triggers `.github/workflows/publish.yml` → builds and publishes both packages using `NPM_TOKEN` secret.
 
-### 8. Verify publish
+### 9. Verify publish
 - GitHub Actions tab → "Publish to npm" must be green
 - Check npmjs.com for `@windoc/core` and `@windoc/react`
 
-### 9. Create GitHub Release (optional)
+### 10. Create GitHub Release (optional)
 ```bash
 gh release create v0.x.0 --title "v0.x.0" --notes "..."
 ```
