@@ -71,15 +71,11 @@ createRoot(document.getElementById('root')!).render(<App />)
 
 const DEFAULT_APP = `import {
   Editor,
-  UndoTool,
-  RedoTool,
   ColumnTool,
-  PageBreakTool,
   TableTool,
   TitleTool,
   FontTool,
   FontSizeTool,
-  LineHeightTool,
   ColorTool,
   HighlightTool,
   BoldTool,
@@ -91,7 +87,6 @@ const DEFAULT_APP = `import {
   RightAlignTool,
   ListTool,
   ImageTool,
-  WatermarkTool,
 } from '@windoc/react'
 import '@windoc/core/style.css'
 import '@windoc/react/style.css'
@@ -100,15 +95,11 @@ const D = () => <div className="menu-divider" style={{ margin: '0 3px' }} />
 
 const toolbar = (
   <div className="menu" editor-component="menu">
-    <div className="menu-item"><UndoTool /><RedoTool /></div>
-    <D />
     <div className="menu-item"><ColumnTool /></div>
-    <D />
-    <div className="menu-item"><PageBreakTool /></div>
     <D />
     <div className="menu-item"><TableTool /></div>
     <D />
-    <div className="menu-item"><TitleTool /><FontTool /><FontSizeTool /><LineHeightTool /></div>
+    <div className="menu-item"><TitleTool /><FontTool /><FontSizeTool /></div>
     <D />
     <div className="menu-item"><ColorTool /><HighlightTool /><BoldTool /><ItalicTool /><UnderlineTool /><StrikeoutTool /></div>
     <D />
@@ -117,7 +108,6 @@ const toolbar = (
     <div className="menu-item"><ListTool /></div>
     <D />
     <div className="menu-item"><ImageTool /></div>
-    <div className="menu-item"><WatermarkTool /></div>
   </div>
 )
 
