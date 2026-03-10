@@ -69,17 +69,62 @@ createRoot(document.getElementById('root')!).render(<App />)
 `,
 };
 
-const DEFAULT_APP = `import { Editor } from '@windoc/react'
+const DEFAULT_APP = `import {
+  Editor,
+  UndoTool,
+  RedoTool,
+  ColumnTool,
+  PageBreakTool,
+  TableTool,
+  TitleTool,
+  FontTool,
+  FontSizeTool,
+  LineHeightTool,
+  ColorTool,
+  HighlightTool,
+  BoldTool,
+  ItalicTool,
+  UnderlineTool,
+  StrikeoutTool,
+  LeftAlignTool,
+  CenterAlignTool,
+  RightAlignTool,
+  ListTool,
+  ImageTool,
+  WatermarkTool,
+} from '@windoc/react'
 import '@windoc/core/style.css'
 import '@windoc/react/style.css'
+
+const toolbar = (
+  <div className="menu" editor-component="menu">
+    <div className="menu-item"><UndoTool /><RedoTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><ColumnTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><PageBreakTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><TableTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><TitleTool /><FontTool /><FontSizeTool /><LineHeightTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><ColorTool /><HighlightTool /><BoldTool /><ItalicTool /><UnderlineTool /><StrikeoutTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><LeftAlignTool /><CenterAlignTool /><RightAlignTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><ListTool /></div>
+    <div className="menu-divider" />
+    <div className="menu-item"><ImageTool /></div>
+    <div className="menu-item"><WatermarkTool /></div>
+  </div>
+)
 
 function App() {
   return (
     <div style={{ height: '100vh' }}>
       <Editor
-        options={{
-          placeholder: { data: 'Start typing...' },
-        }}
+        options={{ placeholder: { data: 'Start typing...' } }}
+        renderToolbar={toolbar}
       />
     </div>
   )
