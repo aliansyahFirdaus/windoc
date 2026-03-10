@@ -95,7 +95,6 @@ export default function App() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Editor
         options={{
-          margins: [40, 40, 40, 40],
           placeholder: { data: 'Start typing...' },
         }}
         style={{ flex: 1, minHeight: 0, overflow: 'auto' }}
