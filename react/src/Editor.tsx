@@ -60,6 +60,8 @@ interface EditorProps {
   style?: React.CSSProperties
   /** Enable drag-and-drop badge insertion */
   onDrop?: (e: React.DragEvent, editor: EditorInstance) => void
+  /** Called when cursor/selection style changes — use this instead of overwriting editor.listener.rangeStyleChange via onReady */
+  onRangeStyleChange?: (payload: RangeStylePayload) => void
 }
 
 export function Editor({
@@ -67,6 +69,7 @@ export function Editor({
   options: userOptions,
   onChange,
   onReady,
+  onRangeStyleChange,
   toolbar = true,
   footer = true,
   renderToolbar,
@@ -83,6 +86,7 @@ export function Editor({
         options={userOptions}
         onChange={onChange}
         onReady={onReady}
+        onRangeStyleChange={onRangeStyleChange}
         toolbar={toolbar}
         footer={footer}
         renderToolbar={renderToolbar}
@@ -102,6 +106,7 @@ function EditorInner({
   options: userOptions,
   onChange,
   onReady,
+  onRangeStyleChange,
   toolbar = true,
   footer = true,
   renderToolbar,
@@ -154,6 +159,7 @@ function EditorInner({
       // Setup listeners
       instance.listener.rangeStyleChange = (payload: RangeStylePayload) => {
         setRangeStyle(payload)
+        onRangeStyleChange?.(payload)
         const rangeContext = instance?.command.getRangeContext()
         if (rangeContext) {
           setRowNo(rangeContext.startRowNo + 1)
