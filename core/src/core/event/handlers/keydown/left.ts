@@ -51,6 +51,13 @@ export function left(evt: KeyboardEvent, host: CanvasEvent) {
       }
     }
   }
+  // If there's a selection and no shift, collapse to start (Google Docs behavior)
+  if (!isCollapsed && !evt.shiftKey) {
+    rangeManager.setRange(startIndex, startIndex)
+    draw.render({ curIndex: startIndex, isSetCursor: true, isSubmitHistory: false, isCompute: false })
+    evt.preventDefault()
+    return
+  }
   const curIndex = startIndex - moveCount
   let anchorStartIndex = curIndex
   let anchorEndIndex = curIndex

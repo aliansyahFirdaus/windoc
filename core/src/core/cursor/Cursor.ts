@@ -153,42 +153,33 @@ export class Cursor {
       (nextElement && nextElement.type === ElementType.IMAGE)
     const isNearSeparator =
       curElement?.type === ElementType.SEPARATOR
-    if (isNearImage || isNearSeparator) {
+    const isNearTab =
+      curElement?.type === ElementType.TAB
+    if (isNearImage || isNearSeparator || isNearTab) {
       const { defaultSize, defaultFont } = this.options
       const ctx = this.draw.getCtx()
       ctx.save()
       ctx.font = `${defaultSize * (96 / 72) * scale}px ${defaultFont}`
       const textMetrics = ctx.measureText('M')
       ctx.restore()
-      if (isNearSeparator) {
-        const textHeight =
-          textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent
-        effectiveMetrics = {
-          width: metrics.width,
-          height: textHeight,
-          boundingBoxAscent: textMetrics.fontBoundingBoxAscent,
-          boundingBoxDescent: textMetrics.fontBoundingBoxDescent
-        }
-      } else {
-        const textHeight =
-          textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent
-        effectiveMetrics = {
-          width: metrics.width,
-          height: textHeight,
-          boundingBoxAscent: textMetrics.actualBoundingBoxAscent,
-          boundingBoxDescent: textMetrics.actualBoundingBoxDescent
-        }
+      const textHeight =
+        textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent
+      effectiveMetrics = {
+        width: metrics.width,
+        height: textHeight,
+        boundingBoxAscent: textMetrics.fontBoundingBoxAscent,
+        boundingBoxDescent: textMetrics.fontBoundingBoxDescent
       }
+
     }
     const cursorPadding = 2 * scale
     const cursorHeight =
       effectiveMetrics.boundingBoxAscent + effectiveMetrics.boundingBoxDescent + cursorPadding
-    // For image: cursor sits at bottom of image (Google Docs behavior)
+    // For image: bottom of cursor aligns with bottom of image
     const cursorTop = isNearImage
       ? leftTop[1] +
         cursorPosition.lineHeight -
-        effectiveMetrics.boundingBoxDescent -
-        cursorPadding / 2 +
+        cursorHeight +
         preY
       : isNearSeparator
       ? leftTop[1] +
