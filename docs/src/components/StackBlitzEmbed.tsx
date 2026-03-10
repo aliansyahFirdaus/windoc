@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 
-// Base files shared across all embeds
+// Base files — kept identical to playground/ (source of truth)
+// Only difference: packages come from npm instead of local file://
 const BASE_FILES = {
   'package.json': JSON.stringify(
     {
@@ -14,15 +15,15 @@ const BASE_FILES = {
         '@windoc/core': '0.2.8',
         '@windoc/react': '0.2.8',
         'lucide-react': '^0.563.0',
-        react: '^18.3.0',
-        'react-dom': '^18.3.0',
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
       },
       devDependencies: {
-        '@types/react': '^18.3.0',
-        '@types/react-dom': '^18.3.0',
-        '@vitejs/plugin-react': '^4.3.0',
-        typescript: '^5.5.3',
-        vite: '^5.4.2',
+        '@types/react': '^19',
+        '@types/react-dom': '^19',
+        '@vitejs/plugin-react': '^4.5.2',
+        typescript: '^5',
+        vite: '^6',
       },
     },
     null,
@@ -32,28 +33,28 @@ const BASE_FILES = {
 import react from '@vitejs/plugin-react'
 export default defineConfig({ plugins: [react()] })
 `,
-  'index.html': `<!doctype html>
+  'index.html': `<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Windoc Demo</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windoc Playground</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
 </html>
 `,
   'tsconfig.json': JSON.stringify(
     {
       compilerOptions: {
         target: 'ES2020',
-        lib: ['ES2020', 'DOM', 'DOM.Iterable'],
         module: 'ESNext',
         moduleResolution: 'bundler',
         jsx: 'react-jsx',
         strict: true,
+        esModuleInterop: true,
         skipLibCheck: true,
       },
       include: ['src'],
@@ -61,28 +62,10 @@ export default defineConfig({ plugins: [react()] })
     null,
     2
   ),
-  'src/main.tsx': `import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+  'src/main.tsx': `import { createRoot } from 'react-dom/client'
 import App from './App'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-)
-`,
-  'src/index.css': `* { box-sizing: border-box; margin: 0; padding: 0; }
-body { overflow: hidden; }
-
-/* Fix toolbar positioning */
-div.menu {
-  position: relative !important;
-  top: auto !important;
-  flex-shrink: 0;
-  flex-wrap: wrap !important;
-  padding: 4px 8px !important;
-}
+createRoot(document.getElementById('root')!).render(<App />)
 `,
 };
 
@@ -90,18 +73,19 @@ const DEFAULT_APP = `import { Editor } from '@windoc/react'
 import '@windoc/core/style.css'
 import '@windoc/react/style.css'
 
-export default function App() {
+function App() {
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh' }}>
       <Editor
         options={{
           placeholder: { data: 'Start typing...' },
         }}
-        style={{ flex: 1, minHeight: 0, overflow: 'auto' }}
       />
     </div>
   )
 }
+
+export default App
 `;
 
 interface StackBlitzEmbedProps {

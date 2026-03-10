@@ -10,7 +10,6 @@ function App() {
         options={{
           placeholder: { data: 'Start typing...' },
         }}
-        onReady={(editor) => console.log('Ready!', editor)}
       />
     </div>
   )
