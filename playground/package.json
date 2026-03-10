@@ -1,0 +1,25 @@
+{
+  "name": "windoc-playground",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
+  "resolutions": {
+    "@windoc/core": "file:../core"
+  },
+  "dependencies": {
+    "@windoc/core": "file:../core",
+    "@windoc/react": "file:../react",
+    "lucide-react": "^0.563.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.5.2",
+    "typescript": "^5",
+    "vite": "^6"
+  }
+}

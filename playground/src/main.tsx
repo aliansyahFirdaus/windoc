@@ -1,0 +1,19 @@
+import { createRoot } from 'react-dom/client'
+import { Editor } from '@windoc/react'
+import '@windoc/core/style.css'
+import '@windoc/react/style.css'
+
+function App() {
+  return (
+    <div style={{ height: '100vh' }}>
+      <Editor
+        options={{
+          placeholder: { data: 'Start typing...' },
+        }}
+        onReady={(editor) => console.log('Ready!', editor)}
+      />
+    </div>
+  )
+}
+
+createRoot(document.getElementById('root')!).render(<App />)

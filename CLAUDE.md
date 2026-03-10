@@ -1,114 +1,140 @@
-# Windoc — Instructions for Claude Code
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## General Rules
-- Selalu pakai `yarn`, bukan `npm` (kecuali di folder `docs/` yang pakai npm)
-- Jangan jalankan dev environment setelah selesai tugas
-- Jangan commit `core/dist/` atau `react/dist/` — sudah ada di `.gitignore`
+- Always use `yarn`, not `npm` (except in `docs/` which uses npm)
+- Do not run dev environment after completing a task
+- Never commit `core/dist/` or `react/dist/` — already in `.gitignore`
+- Never use `any` type in TypeScript — use proper types or generics
 
 ## Project Structure
-- `core/` — `@windoc/core`, canvas editor engine (framework-agnostic)
-- `react/` — `@windoc/react`, React bindings
-- `docs/` — Docusaurus site, deploy ke GitHub Pages via `main` branch push
-- `scripts/` — utility scripts
+- `core/` — `@windoc/core`, canvas-based document editor engine (framework-agnostic), built with tsup
+- `react/` — `@windoc/react`, React bindings for the core engine, built with tsup
+- `docs/` — Docusaurus site, deployed to GitHub Pages on push to `main`
+- `scripts/` — utility scripts (e.g., `sync-version.js`)
 
 ## Common Commands
 ```bash
 yarn install          # install all workspace dependencies
-yarn build            # build both core dan react
-yarn sync-version     # sync version numbers ke docs dan README (WAJIB sebelum release)
+yarn build            # build both core and react (runs tsup in each package)
+yarn sync-version     # sync version numbers to docs and README (required before release)
+yarn changelog        # generate CHANGELOG.md from commit history via git-cliff
 ```
+
+## Architecture
+
+### @windoc/core
+The core is a canvas-based document editor. Entry point: `core/src/index.ts`, which exports the `Editor` class and all enums/interfaces.
+
+Key subsystems inside `core/src/core/`:
+- **`draw/Draw.ts`** — Central renderer. Manages the canvas draw loop, page layout, element measurement, and coordinates all particle renderers. This is the largest and most critical class.
+- **`command/Command.ts` + `CommandAdapt.ts`** — Public API surface for triggering editor actions (e.g., `executeBold`, `executeInsertElementList`). All mutations go through `Command`.
+- **`listener/Listener.ts`** — Callback hooks for consumers (e.g., `rangeStyleChange`, `contentChange`, `pageSizeChange`). Assigned directly on the listener object.
+- **`register/Register.ts`** — Lets consumers register custom shortcuts (`register.shortcutList`) and context menus (`register.contextMenuList`).
+- **`event/CanvasEvent.ts` + `GlobalEvent.ts`** — Wires DOM events (mouse, keyboard, drag, paste, copy, cut) to editor behavior.
+- **`history/HistoryManager.ts`** — Undo/redo stack.
+- **`range/RangeManager.ts`** — Manages selection/cursor range state.
+- **`position/Position.ts`** — Maps canvas coordinates to element positions.
+- **`draw/particle/`** — Individual element renderers: `TextParticle`, `TableParticle`, `ImageParticle`, `LaTexParticle`, `CheckboxParticle`, `ListParticle`, etc.
+- **`draw/frame/`** — Page frame renderers: `Header`, `Footer`, `PageNumber`, `Watermark`, `Background`, `Margin`.
+- **`worker/WorkerManager.ts`** — Off-thread tasks: word count, catalog, value serialization.
+- **`event/eventbus/EventBus.ts`** — Internal typed event bus (typed via `EventBusMap` interface).
+- **`override/Override.ts`** — Lets consumers override internal behaviors.
+- **`plugin/Plugin.ts`** — Plugin system (`editor.use(plugin)`).
+
+Document data model (`IEditorData`): `{ header?: IElement[], main: IElement[], footer?: IElement[], graffiti?: IGraffitiData[] }`. Each `IElement` has a `type` field (`ElementType` enum) and type-specific properties.
+
+### @windoc/react
+React wrapper around `@windoc/core`. The core is loaded asynchronously (dynamic import) to avoid SSR issues.
+
+Key files:
+- **`Editor.tsx`** — Main component. Mounts `@windoc/core` into a `div`, sets up listeners, registers shortcuts and context menus. Accepts `defaultValue`, `options`, `onChange`, `onReady`, `toolbar`, `footer`, `renderToolbar`, `renderFooter`, `children`.
+- **`EditorContext.tsx`** — `EditorProvider` context providing `editorRef`, `rangeStyle`, and `isApple`. Access via `useEditor()` hook.
+- **`FooterContext.tsx`** — `FooterProvider` context for footer status (page number, word count, scale). Access via `useFooter()` hook.
+- **`EditorToolbar.tsx`** — Pre-built toolbar. Individual tools in `toolbar/`.
+- **`EditorFooter.tsx`** — Pre-built footer/status bar. Individual tools in `footer/`.
+- **`toolbar/*.tsx`** — Each toolbar button is a standalone exported component (e.g., `BoldTool`, `TableTool`). Each tool calls `useEditor()` to get `editorRef` and invokes `editorRef.current?.command.executeXxx()`.
+- **`footer/*.tsx`** — Each footer widget is a standalone exported component that calls `useFooter()` for state.
+- **`utils/DropdownPortal.tsx`** — Utility for rendering dropdown menus via React portals.
+
+Both `EditorToolbar` and `EditorFooter`, plus all individual tools, are exported from `react/src/index.ts` to allow consumers to compose custom UIs.
+
+## Commit Convention
+
+Format: `<type>(<scope>): <short description>`
+
+Types: `feat`, `fix`, `docs`, `refactor`, `chore`, `perf`, `test`, `style`, `ci`, `revert`
+
+Scopes (optional): `core`, `react`, `docs`
+
+Rules: present tense, subject max 72 chars. Non-conventional commits are rejected by husky + commitlint.
 
 ---
 
-## Release SOP — Wajib Diikuti Saat Publish ke npm
+## Release SOP
 
-### 1. Pastikan semua changes sudah di-merge ke `main`
+### 1. Ensure all changes are merged to `main`
 ```bash
-git checkout main
-git pull origin main
-git status  # harus clean
+git checkout main && git pull origin main && git status
 ```
 
-### 2. Bump versi di kedua package
-Edit kedua file ini, ganti versi ke versi baru (misal `0.2.0` → `0.3.0`):
-- `core/package.json` → field `"version"`
-- `react/package.json` → field `"version"` DAN `"dependencies"."@windoc/core"`
+### 2. Bump versions
+Edit both files, change version (e.g., `0.2.0` → `0.3.0`):
+- `core/package.json` → `"version"`
+- `react/package.json` → `"version"` AND `"dependencies"."@windoc/core"`
 
-### 3. Sync versi ke docs dan README
+### 3. Sync versions to docs and README
 ```bash
 yarn sync-version
 ```
-Ini update otomatis:
-- Badge versi di `docs/src/pages/index.tsx`
-- Tabel versi di `README.md`
+Updates: version badge in `docs/src/pages/index.tsx` and version table in `README.md`.
 
 ### 4. Generate CHANGELOG
 ```bash
 yarn changelog
 ```
-Ini auto-generate dari commit history menggunakan `git-cliff` + `cliff.toml`.
-Review hasilnya di `CHANGELOG.md` — edit kalau ada yang perlu dipoles atau dihapus.
-Commit messages yang skip otomatis: `chore`, `ci`, `test`, `style`.
-Yang masuk: `feat` → Added, `fix` → Fixed, `refactor` → Changed, `perf` → Performance, `docs` → Documentation.
+Uses `git-cliff` + `cliff.toml`. Skips: `chore`, `ci`, `test`, `style`. Includes: `feat` → Added, `fix` → Fixed, `refactor` → Changed, `perf` → Performance, `docs` → Documentation.
 
-### 5. Build untuk verifikasi
+### 5. Build to verify
 ```bash
 yarn build
 ```
-Pastikan tidak ada TypeScript error.
 
-### 6. Commit semua changes
+### 6. Commit all changes
 ```bash
 git add core/package.json react/package.json docs/src/pages/index.tsx README.md CHANGELOG.md
 git commit -m "chore: release v0.x.0"
 git push origin main
 ```
 
-### 7. Buat git tag — INI YANG TRIGGER PUBLISH KE NPM
+### 7. Create git tag — this triggers npm publish
 ```bash
 git tag v0.x.0
 git push origin v0.x.0
 ```
+Tag push triggers `.github/workflows/publish.yml` → builds and publishes both packages using `NPM_TOKEN` secret.
 
-Tag push akan trigger `.github/workflows/publish.yml` secara otomatis.
-Workflow akan build kedua packages dan publish ke npm menggunakan `NPM_TOKEN` secret.
+### 8. Verify publish
+- GitHub Actions tab → "Publish to npm" must be green
+- Check npmjs.com for `@windoc/core` and `@windoc/react`
 
-### 8. Verifikasi publish berhasil
-- Cek GitHub Actions tab — workflow "Publish to npm" harus hijau
-- Cek `https://www.npmjs.com/package/@windoc/core`
-- Cek `https://www.npmjs.com/package/@windoc/react`
-
-### 9. Buat GitHub Release (opsional tapi bagus)
+### 9. Create GitHub Release (optional)
 ```bash
-gh release create v0.x.0 --title "v0.x.0" --notes "$(cat <<'EOF'
-## What's new
-
-Copy relevant section dari CHANGELOG.md ke sini.
-EOF
-)"
+gh release create v0.x.0 --title "v0.x.0" --notes "..."
 ```
 
 ---
 
-## Checklist Release (copy-paste ini saat mau release)
+## Release Checklist
 
-- [ ] Semua PRs sudah merged ke `main`
-- [ ] `core/package.json` versi di-bump
-- [ ] `react/package.json` versi di-bump (termasuk dependency `@windoc/core`)
-- [ ] `yarn sync-version` sudah dijalankan
-- [ ] `CHANGELOG.md` sudah diupdate
-- [ ] `yarn build` berhasil tanpa error
-- [ ] Commit dengan message `chore: release vX.X.X`
-- [ ] Tag `vX.X.X` dibuat dan di-push
-- [ ] GitHub Actions "Publish to npm" berhasil (hijau)
-- [ ] npm package terverifikasi online
-
----
-
-## Setup NPM_TOKEN (hanya perlu dilakukan sekali)
-
-Sebelum workflow publish bisa berjalan, perlu setup secret di GitHub:
-1. Login ke `npmjs.com` → Account → Access Tokens → Generate New Token → "Automation"
-2. Copy token
-3. Buka GitHub repo → Settings → Secrets and variables → Actions → New repository secret
-4. Name: `NPM_TOKEN`, Value: token yang di-copy
+- [ ] All PRs merged to `main`
+- [ ] `core/package.json` version bumped
+- [ ] `react/package.json` version bumped (including `@windoc/core` dependency)
+- [ ] `yarn sync-version` done
+- [ ] `CHANGELOG.md` updated
+- [ ] `yarn build` succeeds with no TypeScript errors
+- [ ] Commit `chore: release vX.X.X`
+- [ ] Tag `vX.X.X` created and pushed
+- [ ] GitHub Actions "Publish to npm" green
+- [ ] npm packages verified online
