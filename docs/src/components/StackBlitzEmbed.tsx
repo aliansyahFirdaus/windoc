@@ -96,24 +96,26 @@ const DEFAULT_APP = `import {
 import '@windoc/core/style.css'
 import '@windoc/react/style.css'
 
+const D = () => <div className="menu-divider" style={{ margin: '0 3px' }} />
+
 const toolbar = (
   <div className="menu" editor-component="menu">
     <div className="menu-item"><UndoTool /><RedoTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><ColumnTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><PageBreakTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><TableTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><TitleTool /><FontTool /><FontSizeTool /><LineHeightTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><ColorTool /><HighlightTool /><BoldTool /><ItalicTool /><UnderlineTool /><StrikeoutTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><LeftAlignTool /><CenterAlignTool /><RightAlignTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><ListTool /></div>
-    <div className="menu-divider" />
+    <D />
     <div className="menu-item"><ImageTool /></div>
     <div className="menu-item"><WatermarkTool /></div>
   </div>
