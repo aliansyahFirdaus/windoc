@@ -3,6 +3,16 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+- Add onRangeStyleChange prop to avoid listener overwrite
+
+
+### Fixed
+- Use pt as font size unit instead of px
+
+
 ## [0.2.8] — 2026-03-10
 
 ### Fixed
