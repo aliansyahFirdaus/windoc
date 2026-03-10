@@ -1844,9 +1844,9 @@ export class Draw {
           ctx,
           element.font!
         )
-        metrics.boundingBoxAscent = basisMetrics.actualBoundingBoxAscent * scale
+        metrics.boundingBoxAscent = basisMetrics.fontBoundingBoxAscent * scale
         metrics.boundingBoxDescent =
-          basisMetrics.actualBoundingBoxDescent * scale
+          basisMetrics.fontBoundingBoxDescent * scale
         if (element.type === ElementType.SUPERSCRIPT) {
           metrics.boundingBoxAscent += metrics.height / 2
         } else if (element.type === ElementType.SUBSCRIPT) {

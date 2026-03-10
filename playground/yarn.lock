@@ -740,22 +740,29 @@ __metadata:
   linkType: hard
 
 "@windoc/core@file:../core::locator=windoc-playground%40workspace%3A.":
-  version: 0.2.7
-  resolution: "@windoc/core@file:../core#../core::hash=ac13df&locator=windoc-playground%40workspace%3A."
-  checksum: 10c0/8f63048cf619696e7faf27449b61f110fea749718cc7f147a51061378a9668d05ee28d913f978e280e713c6d2e6f86a9068065f773d10f57f50267b274badfe1
+  version: 0.2.10
+  resolution: "@windoc/core@file:../core#../core::hash=fef5a2&locator=windoc-playground%40workspace%3A."
+  checksum: 10c0/948c722ffff5818ab45ed1a7cfd6ccdc3a4b2412e138644c867eedfdc5a92f565fa14c3bde16e075cfe7151eece1172fb8dd22070520b2677d1f77fb2003359d
+  languageName: node
+  linkType: hard
+
+"@windoc/core@npm:^0.2.10":
+  version: 0.2.10
+  resolution: "@windoc/core@npm:0.2.10"
+  checksum: 10c0/4c57d9a14231e479d13f1a23664c226c9e4f50033574cdf3c5dbfc86016f8361cbd5d42cb0461e9ca98691ad6938a27759ed36f7e8fc0e2adafedb48528aca24
   languageName: node
   linkType: hard
 
 "@windoc/react@file:../react::locator=windoc-playground%40workspace%3A.":
-  version: 0.2.7
-  resolution: "@windoc/react@file:../react#../react::hash=a51ba2&locator=windoc-playground%40workspace%3A."
+  version: 0.2.10
+  resolution: "@windoc/react@file:../react#../react::hash=73d883&locator=windoc-playground%40workspace%3A."
   dependencies:
-    "@windoc/core": "npm:^0.2.7"
+    "@windoc/core": "npm:^0.2.10"
   peerDependencies:
     lucide-react: ">=0.300.0"
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/973dd14975e4de7d26b6771ea92b872d7e3a9a0f7b0268f8dc688442ad88ce1b6bf417daf7fa18d656a9123d6b1532274d9d7ab07099865bd1706f05c187b551
+  checksum: 10c0/1efe60abc706e6fedfefa5d272557ce738a9226bc5dedad9c90d8cd1d55930f5d43b1ae5d2d8124b5fee2c03a2d15d623b46fd0294e3fd9679f62a40b587b718
   languageName: node
   linkType: hard
 

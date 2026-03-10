@@ -5,9 +5,6 @@
   "scripts": {
     "dev": "vite"
   },
-  "resolutions": {
-    "@windoc/core": "file:../core"
-  },
   "dependencies": {
     "@windoc/core": "file:../core",
     "@windoc/react": "file:../react",
