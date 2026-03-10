@@ -118,7 +118,6 @@ function App() {
   return (
     <div style={{ height: '100vh' }}>
       <Editor
-        options={{ placeholder: { data: 'Start typing...' } }}
         renderToolbar={toolbar}
       />
     </div>
