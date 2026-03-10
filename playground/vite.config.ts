@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@windoc/core/style.css': path.resolve(__dirname, '../core/dist/index.css'),
-      '@windoc/react/style.css': path.resolve(__dirname, '../react/dist/index.css'),
+      '@windoc/react/style.css': path.resolve(__dirname, '../react/src/styles/editor.css'),
       '@windoc/core': path.resolve(__dirname, '../core/src/index.ts'),
       '@windoc/react': path.resolve(__dirname, '../react/src/index.ts'),
     },
