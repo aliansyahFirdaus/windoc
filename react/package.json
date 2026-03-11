@@ -1,6 +1,6 @@
 {
   "name": "@windoc/react",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "React bindings for windoc editor",
   "homepage": "https://aliansyahfirdaus.github.io/windoc/",
   "repository": {
@@ -50,7 +50,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@windoc/core": "^0.3.7"
+    "@windoc/core": "^0.3.8"
   },
   "devDependencies": {
     "@types/react": "^19",

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.7] — 2026-03-11
+
+### Fixed
+- Fix StrictMode double-init and closeDropdowns memory leak
+
+
 ## [0.3.6] — 2026-03-11
 
 ### Fixed
