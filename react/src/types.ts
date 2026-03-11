@@ -145,7 +145,12 @@ export type EditorInstance = {
     on: (event: string, callback: (...args: unknown[]) => void) => void;
     [key: string]: unknown;
   };
-  override: object;
+  override: {
+    drop?: ((evt: DragEvent) => unknown) | undefined;
+    paste?: ((evt?: ClipboardEvent) => unknown) | undefined;
+    copy?: (() => unknown) | undefined;
+    [key: string]: unknown;
+  };
   version: string;
   destroy: () => void;
   use: (plugin: object) => void;

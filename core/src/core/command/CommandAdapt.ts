@@ -566,10 +566,11 @@ export class CommandAdapt {
       const { endIndex } = this.range.getRange();
       const elementList = this.draw.getElementList();
       const enterElement = elementList[endIndex];
+      if (!enterElement) return;
       this.range.setDefaultStyle({
         bold: enterElement.bold ? false : !this.range.getDefaultStyle()?.bold
       });
-      if (enterElement?.value === ZERO) {
+      if (enterElement.value === ZERO) {
         enterElement.bold = !enterElement.bold;
       } else {
         isSubmitHistory = false;
@@ -600,12 +601,13 @@ export class CommandAdapt {
       const { endIndex } = this.range.getRange();
       const elementList = this.draw.getElementList();
       const enterElement = elementList[endIndex];
+      if (!enterElement) return;
       this.range.setDefaultStyle({
         italic: enterElement.italic
           ? false
           : !this.range.getDefaultStyle()?.italic
       });
-      if (enterElement?.value === ZERO) {
+      if (enterElement.value === ZERO) {
         enterElement.italic = !enterElement.italic;
       } else {
         isSubmitHistory = false;
@@ -656,12 +658,13 @@ export class CommandAdapt {
       const { endIndex } = this.range.getRange();
       const elementList = this.draw.getElementList();
       const enterElement = elementList[endIndex];
+      if (!enterElement) return;
       this.range.setDefaultStyle({
-        underline: enterElement?.underline
+        underline: enterElement.underline
           ? false
           : !this.range.getDefaultStyle()?.underline
       });
-      if (enterElement?.value === ZERO) {
+      if (enterElement.value === ZERO) {
         enterElement.underline = !enterElement.underline;
       } else {
         isSubmitHistory = false;
@@ -695,12 +698,13 @@ export class CommandAdapt {
       const { endIndex } = this.range.getRange();
       const elementList = this.draw.getElementList();
       const enterElement = elementList[endIndex];
+      if (!enterElement) return;
       this.range.setDefaultStyle({
         strikeout: enterElement.strikeout
           ? false
           : !this.range.getDefaultStyle()?.strikeout
       });
-      if (enterElement?.value === ZERO) {
+      if (enterElement.value === ZERO) {
         enterElement.strikeout = !enterElement.strikeout;
       } else {
         isSubmitHistory = false;
