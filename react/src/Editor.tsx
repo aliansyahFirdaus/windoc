@@ -266,16 +266,6 @@ function EditorInner({
         }
       ]);
 
-      // Set drop override when onDrop is provided, so the core's native
-      // drop handler doesn't consume the event before React can process it
-      if (userOnDrop) {
-        instance.override.drop = (evt: DragEvent) => {
-          evt.preventDefault();
-          // Bypass core's default drop handling; the React onDrop
-          // handler on the container div will handle the event instead
-        };
-      }
-
       // Global click handler to close dropdowns
       const closeDropdowns = (evt: MouseEvent) => {
         const visibleDom = document.querySelector('.visible');
