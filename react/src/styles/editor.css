@@ -52,7 +52,7 @@ ul {
     height: 60px;
     top: 0;
     z-index: 9;
-    position: fixed;
+    position: sticky;
     display: flex;
     align-items: center;
     justify-content: center;
