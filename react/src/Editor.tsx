@@ -132,6 +132,8 @@ function EditorInner({
 
   useEffect(() => {
     let instance: EditorInstance | null = null;
+    let cancelled = false;
+    let closeDropdowns: ((evt: MouseEvent) => void) | null = null;
 
     const initEditor = async () => {
       if (!containerRef.current) return;
@@ -145,6 +147,9 @@ function EditorInner({
         Dialog,
         Signature
       } = await import('@windoc/core');
+
+      // Guard: if cleanup already ran before async resolved, bail out
+      if (cancelled) return;
 
       const data = (defaultValue ?? { main: [] }) as any;
 
@@ -266,8 +271,8 @@ function EditorInner({
         }
       ]);
 
-      // Global click handler to close dropdowns
-      const closeDropdowns = (evt: MouseEvent) => {
+      // Global click handler to close dropdowns — store ref for cleanup
+      closeDropdowns = (evt: MouseEvent) => {
         const visibleDom = document.querySelector('.visible');
         if (!visibleDom) return;
         const parent = visibleDom.parentElement;
@@ -287,7 +292,13 @@ function EditorInner({
     initEditor();
 
     return () => {
+      cancelled = true;
       instance?.destroy();
+      editorRef.current = null;
+      if (closeDropdowns) {
+        window.removeEventListener('click', closeDropdowns, { capture: true });
+        closeDropdowns = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
