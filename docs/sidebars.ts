@@ -24,6 +24,15 @@ const sidebars: SidebarsConfig = {
         'api/commands',
       ],
     },
+    {
+      type: 'category',
+      label: 'Architecture',
+      items: [
+        'architecture/initialization',
+        'architecture/data-model',
+        'architecture/internals',
+      ],
+    },
   ],
 };
 
