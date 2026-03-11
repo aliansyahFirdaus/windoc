@@ -1,7 +1,7 @@
-import { Command, RowFlex } from '../../..'
-import { KeyMap } from '../../../dataset/enum/KeyMap'
-import { IRegisterShortcut } from '../../../interface/shortcut/Shortcut'
-import { isApple } from '../../../utils/ua'
+import { Command, RowFlex } from '../../..';
+import { KeyMap } from '../../../dataset/enum/KeyMap';
+import { IRegisterShortcut } from '../../../interface/shortcut/Shortcut';
+import { isApple } from '../../../utils/ua';
 
 export const richtextKeys: IRegisterShortcut[] = [
   {
@@ -9,42 +9,42 @@ export const richtextKeys: IRegisterShortcut[] = [
     ctrl: true,
     shift: true,
     callback: (command: Command) => {
-      command.executeStrikeout()
+      command.executeStrikeout();
     }
   },
   {
     key: KeyMap.LEFT_BRACKET,
     mod: true,
     callback: (command: Command) => {
-      command.executeSizeAdd()
+      command.executeSizeAdd();
     }
   },
   {
     key: KeyMap.RIGHT_BRACKET,
     mod: true,
     callback: (command: Command) => {
-      command.executeSizeMinus()
+      command.executeSizeMinus();
     }
   },
   {
     key: KeyMap.B,
     mod: true,
     callback: (command: Command) => {
-      command.executeBold()
+      command.executeBold();
     }
   },
   {
     key: KeyMap.I,
     mod: true,
     callback: (command: Command) => {
-      command.executeItalic()
+      command.executeItalic();
     }
   },
   {
     key: KeyMap.U,
     mod: true,
     callback: (command: Command) => {
-      command.executeUnderline()
+      command.executeUnderline();
     }
   },
   {
@@ -52,7 +52,7 @@ export const richtextKeys: IRegisterShortcut[] = [
     mod: true,
     shift: true,
     callback: (command: Command) => {
-      command.executeSuperscript()
+      command.executeSuperscript();
     }
   },
   {
@@ -60,35 +60,35 @@ export const richtextKeys: IRegisterShortcut[] = [
     mod: true,
     shift: true,
     callback: (command: Command) => {
-      command.executeSubscript()
+      command.executeSubscript();
     }
   },
   {
     key: KeyMap.L,
     mod: true,
     callback: (command: Command) => {
-      command.executeRowFlex(RowFlex.LEFT)
+      command.executeRowFlex(RowFlex.LEFT);
     }
   },
   {
     key: KeyMap.E,
     mod: true,
     callback: (command: Command) => {
-      command.executeRowFlex(RowFlex.CENTER)
+      command.executeRowFlex(RowFlex.CENTER);
     }
   },
   {
     key: KeyMap.R,
     mod: true,
     callback: (command: Command) => {
-      command.executeRowFlex(RowFlex.RIGHT)
+      command.executeRowFlex(RowFlex.RIGHT);
     }
   },
   {
     key: KeyMap.J,
     mod: true,
     callback: (command: Command) => {
-      command.executeRowFlex(RowFlex.ALIGNMENT)
+      command.executeRowFlex(RowFlex.ALIGNMENT);
     }
   },
   {
@@ -96,7 +96,7 @@ export const richtextKeys: IRegisterShortcut[] = [
     mod: true,
     shift: true,
     callback: (command: Command) => {
-      command.executeRowFlex(RowFlex.JUSTIFY)
+      command.executeRowFlex(RowFlex.JUSTIFY);
     }
   }
-]
+];

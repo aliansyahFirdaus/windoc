@@ -1,5 +1,5 @@
-import { isApple } from './ua'
+import { isApple } from './ua';
 
 export function isMod(evt: KeyboardEvent | MouseEvent) {
-  return isApple ? evt.metaKey : evt.ctrlKey
+  return isApple ? evt.metaKey : evt.ctrlKey;
 }

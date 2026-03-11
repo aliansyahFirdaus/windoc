@@ -1,74 +1,74 @@
-import { ControlComponent } from '../../../../dataset/enum/Control'
-import { KeyMap } from '../../../../dataset/enum/KeyMap'
+import { ControlComponent } from '../../../../dataset/enum/Control';
+import { KeyMap } from '../../../../dataset/enum/KeyMap';
 import {
   IControlContext,
   IControlInstance,
   IControlRuleOption
-} from '../../../../interface/Control'
-import { IElement } from '../../../../interface/Element'
-import { Control } from '../Control'
+} from '../../../../interface/Control';
+import { IElement } from '../../../../interface/Element';
+import { Control } from '../Control';
 
 export class CheckboxControl implements IControlInstance {
-  protected element: IElement
-  protected control: Control
+  protected element: IElement;
+  protected control: Control;
 
   constructor(element: IElement, control: Control) {
-    this.element = element
-    this.control = control
+    this.element = element;
+    this.control = control;
   }
 
   public setElement(element: IElement) {
-    this.element = element
+    this.element = element;
   }
 
   public getElement(): IElement {
-    return this.element
+    return this.element;
   }
 
   public getCode(): string | null {
-    return this.element.control?.code || null
+    return this.element.control?.code || null;
   }
 
   public getValue(): IElement[] {
-    const elementList = this.control.getElementList()
-    const { startIndex } = this.control.getRange()
-    const startElement = elementList[startIndex]
-    const data: IElement[] = []
-    let preIndex = startIndex
+    const elementList = this.control.getElementList();
+    const { startIndex } = this.control.getRange();
+    const startElement = elementList[startIndex];
+    const data: IElement[] = [];
+    let preIndex = startIndex;
     while (preIndex > 0) {
-      const preElement = elementList[preIndex]
+      const preElement = elementList[preIndex];
       if (
         preElement.controlId !== startElement.controlId ||
         preElement.controlComponent === ControlComponent.PREFIX ||
         preElement.controlComponent === ControlComponent.PRE_TEXT
       ) {
-        break
+        break;
       }
       if (preElement.controlComponent === ControlComponent.VALUE) {
-        data.unshift(preElement)
+        data.unshift(preElement);
       }
-      preIndex--
+      preIndex--;
     }
-    let nextIndex = startIndex + 1
+    let nextIndex = startIndex + 1;
     while (nextIndex < elementList.length) {
-      const nextElement = elementList[nextIndex]
+      const nextElement = elementList[nextIndex];
       if (
         nextElement.controlId !== startElement.controlId ||
         nextElement.controlComponent === ControlComponent.POSTFIX ||
         nextElement.controlComponent === ControlComponent.POST_TEXT
       ) {
-        break
+        break;
       }
       if (nextElement.controlComponent === ControlComponent.VALUE) {
-        data.push(nextElement)
+        data.push(nextElement);
       }
-      nextIndex++
+      nextIndex++;
     }
-    return data
+    return data;
   }
 
   public setValue(): number {
-    return -1
+    return -1;
   }
 
   public setSelect(
@@ -80,68 +80,68 @@ export class CheckboxControl implements IControlInstance {
       !options.isIgnoreDisabledRule &&
       this.control.getIsDisabledControl(context)
     ) {
-      return
+      return;
     }
-    const { control } = this.element
-    const elementList = context.elementList || this.control.getElementList()
-    const { startIndex } = context.range || this.control.getRange()
-    const startElement = elementList[startIndex]
-    let preIndex = startIndex
+    const { control } = this.element;
+    const elementList = context.elementList || this.control.getElementList();
+    const { startIndex } = context.range || this.control.getRange();
+    const startElement = elementList[startIndex];
+    let preIndex = startIndex;
     while (preIndex > 0) {
-      const preElement = elementList[preIndex]
+      const preElement = elementList[preIndex];
       if (
         preElement.controlId !== startElement.controlId ||
         preElement.controlComponent === ControlComponent.PREFIX ||
         preElement.controlComponent === ControlComponent.PRE_TEXT
       ) {
-        break
+        break;
       }
       if (preElement.controlComponent === ControlComponent.CHECKBOX) {
-        const checkbox = preElement.checkbox!
-        checkbox.value = codes.includes(checkbox.code!)
+        const checkbox = preElement.checkbox!;
+        checkbox.value = codes.includes(checkbox.code!);
       }
-      preIndex--
+      preIndex--;
     }
-    let nextIndex = startIndex + 1
+    let nextIndex = startIndex + 1;
     while (nextIndex < elementList.length) {
-      const nextElement = elementList[nextIndex]
+      const nextElement = elementList[nextIndex];
       if (
         nextElement.controlId !== startElement.controlId ||
         nextElement.controlComponent === ControlComponent.POSTFIX ||
         nextElement.controlComponent === ControlComponent.POST_TEXT
       ) {
-        break
+        break;
       }
       if (nextElement.controlComponent === ControlComponent.CHECKBOX) {
-        const checkbox = nextElement.checkbox!
-        checkbox.value = codes.includes(checkbox.code!)
+        const checkbox = nextElement.checkbox!;
+        checkbox.value = codes.includes(checkbox.code!);
       }
-      nextIndex++
+      nextIndex++;
     }
-    control!.code = codes.join(',')
+    control!.code = codes.join(',');
     this.control.repaintControl({
       curIndex: startIndex,
       isSetCursor: false
-    })
+    });
     this.control.emitControlContentChange({
       context
-    })
+    });
   }
 
   public keydown(evt: KeyboardEvent): number | null {
     if (this.control.getIsDisabledControl()) {
-      return null
+      return null;
     }
-    const range = this.control.getRange()
-    this.control.shrinkBoundary()
-    const { startIndex, endIndex } = range
+    const range = this.control.getRange();
+    this.control.shrinkBoundary();
+    const { startIndex, endIndex } = range;
     if (evt.key === KeyMap.Backspace || evt.key === KeyMap.Delete) {
-      return this.control.removeControl(startIndex)
+      return this.control.removeControl(startIndex);
     }
-    return endIndex
+    return endIndex;
   }
 
   public cut(): number {
-    return -1
+    return -1;
   }
 }

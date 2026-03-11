@@ -1,4 +1,4 @@
-import { ITableOption } from '../../interface/table/Table'
+import { ITableOption } from '../../interface/table/Table';
 
 export const defaultTableOption: Readonly<Required<ITableOption>> = {
   tdPadding: [0, 5, 5, 5],
@@ -6,4 +6,4 @@ export const defaultTableOption: Readonly<Required<ITableOption>> = {
   defaultColMinWidth: 40,
   defaultBorderColor: '#000000',
   overflow: true
-}
+};

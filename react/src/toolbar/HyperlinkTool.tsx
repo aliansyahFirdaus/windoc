@@ -3,5 +3,5 @@ export default function HyperlinkTool() {
     <div className="menu-item__hyperlink">
       <i title="Hyperlink"></i>
     </div>
-  )
+  );
 }

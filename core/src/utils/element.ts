@@ -7,11 +7,11 @@ import {
   isArrayEqual,
   omitObject,
   pickObject,
-  splitText,
-} from ".";
-import { IFrameBlock } from "../core/draw/particle/block/modules/IFrameBlock";
-import { LaTexParticle } from "../core/draw/particle/latex/LaTexParticle";
-import { NON_BREAKING_SPACE, ZERO } from "../dataset/constant/Common";
+  splitText
+} from '.';
+import { IFrameBlock } from '../core/draw/particle/block/modules/IFrameBlock';
+import { LaTexParticle } from '../core/draw/particle/latex/LaTexParticle';
+import { NON_BREAKING_SPACE, ZERO } from '../dataset/constant/Common';
 import {
   AREA_CONTEXT_ATTR,
   BLOCK_ELEMENT_TYPE,
@@ -23,36 +23,36 @@ import {
   TABLE_CONTEXT_ATTR,
   TABLE_TD_ZIP_ATTR,
   TEXTLIKE_ELEMENT_TYPE,
-  TITLE_CONTEXT_ATTR,
-} from "../dataset/constant/Element";
+  TITLE_CONTEXT_ATTR
+} from '../dataset/constant/Element';
 import {
   listStyleCSSMapping,
   listTypeElementMapping,
-  ulStyleMapping,
-} from "../dataset/constant/List";
-import { START_LINE_BREAK_REG } from "../dataset/constant/Regular";
+  ulStyleMapping
+} from '../dataset/constant/List';
+import { START_LINE_BREAK_REG } from '../dataset/constant/Regular';
 import {
   titleNodeNameMapping,
   titleOrderNumberMapping,
-  titleSizeMapping,
-} from "../dataset/constant/Title";
-import { BlockType } from "../dataset/enum/Block";
-import { ImageDisplay, LocationPosition } from "../dataset/enum/Common";
-import { ControlComponent, ControlType } from "../dataset/enum/Control";
-import { EditorMode } from "../dataset/enum/Editor";
-import { ElementType } from "../dataset/enum/Element";
-import { ListStyle, ListType, UlStyle } from "../dataset/enum/List";
-import { RowFlex } from "../dataset/enum/Row";
-import { TableBorder, TdBorder } from "../dataset/enum/table/Table";
-import { VerticalAlign } from "../dataset/enum/VerticalAlign";
-import { DeepRequired } from "../interface/Common";
-import { IControlSelect } from "../interface/Control";
-import { IEditorOption } from "../interface/Editor";
-import { IElement } from "../interface/Element";
-import { IRowElement } from "../interface/Row";
-import { ITd } from "../interface/table/Td";
-import { ITr } from "../interface/table/Tr";
-import { mergeOption } from "./option";
+  titleSizeMapping
+} from '../dataset/constant/Title';
+import { BlockType } from '../dataset/enum/Block';
+import { ImageDisplay, LocationPosition } from '../dataset/enum/Common';
+import { ControlComponent, ControlType } from '../dataset/enum/Control';
+import { EditorMode } from '../dataset/enum/Editor';
+import { ElementType } from '../dataset/enum/Element';
+import { ListStyle, ListType, UlStyle } from '../dataset/enum/List';
+import { RowFlex } from '../dataset/enum/Row';
+import { TableBorder, TdBorder } from '../dataset/enum/table/Table';
+import { VerticalAlign } from '../dataset/enum/VerticalAlign';
+import { DeepRequired } from '../interface/Common';
+import { IControlSelect } from '../interface/Control';
+import { IEditorOption } from '../interface/Editor';
+import { IElement } from '../interface/Element';
+import { IRowElement } from '../interface/Row';
+import { ITd } from '../interface/table/Td';
+import { ITr } from '../interface/table/Tr';
+import { mergeOption } from './option';
 
 export function unzipElementList(elementList: IElement[]): IElement[] {
   const result: IElement[] = [];
@@ -74,14 +74,15 @@ interface IFormatElementListOption {
 
 export function formatElementList(
   elementList: IElement[],
-  options: IFormatElementListOption,
+  options: IFormatElementListOption
 ) {
   const {
     isHandleFirstElement = true,
     isForceCompensation = false,
-    editorOptions,
+    editorOptions
   } = options;
   const startElement = elementList[0];
+
   if (
     isForceCompensation ||
     (isHandleFirstElement &&
@@ -90,20 +91,25 @@ export function formatElementList(
         !START_LINE_BREAK_REG.test(startElement?.value)))
   ) {
     elementList.unshift({
-      value: ZERO,
+      type: ElementType.TEXT,
+      value: ZERO
     });
   }
+
   let i = 0;
+
   while (i < elementList.length) {
     let el = elementList[i];
+
     if (el.type === ElementType.TITLE) {
       elementList.splice(i, 1);
       const valueList = el.valueList || [];
       formatElementList(valueList, {
         ...options,
         isHandleFirstElement: true,
-        isForceCompensation: false,
+        isForceCompensation: false
       });
+
       if (valueList.length) {
         const titleId = el.titleId || getUUID();
         const titleOptions = editorOptions.title;
@@ -133,7 +139,7 @@ export function formatElementList(
       formatElementList(valueList, {
         ...options,
         isHandleFirstElement: true,
-        isForceCompensation: false,
+        isForceCompensation: false
       });
       if (valueList.length) {
         const listId = getUUID();
@@ -155,7 +161,7 @@ export function formatElementList(
       formatElementList(valueList, {
         ...options,
         isHandleFirstElement: true,
-        isForceCompensation: true,
+        isForceCompensation: true
       });
       if (valueList.length) {
         const areaId = getUUID();
@@ -206,7 +212,7 @@ export function formatElementList(
             formatElementList(td.value, {
               ...options,
               isHandleFirstElement: true,
-              isForceCompensation: true,
+              isForceCompensation: true
             });
             if (
               !td.value[0].size &&
@@ -268,28 +274,28 @@ export function formatElementList(
         placeholder,
         code,
         type,
-        valueSets,
+        valueSets
       } = el.control;
       const {
         editorOptions: {
           control: controlOption,
           checkbox: checkboxOption,
-          radio: radioOption,
-        },
+          radio: radioOption
+        }
       } = options;
       const controlId = el.controlId || getUUID();
       elementList.splice(i, 1);
       const controlContext = pickObject(el, [
         ...EDITOR_ELEMENT_CONTEXT_ATTR,
-        ...EDITOR_ROW_ATTR,
+        ...EDITOR_ROW_ATTR
       ]);
       const controlDefaultStyle = pickObject(
         <IElement>(<unknown>el.control),
-        CONTROL_STYLE_ATTR,
+        CONTROL_STYLE_ATTR
       );
-      const thePrePostfixArg: Omit<IElement, "value"> = {
+      const thePrePostfixArg: Omit<IElement, 'value'> = {
         ...controlDefaultStyle,
-        color: editorOptions.control.bracketColor,
+        color: editorOptions.control.bracketColor
       };
       const prefixStrList = splitText(prefix || controlOption.prefix);
       for (let p = 0; p < prefixStrList.length; p++) {
@@ -301,7 +307,7 @@ export function formatElementList(
           value,
           type: el.type,
           control: el.control,
-          controlComponent: ControlComponent.PREFIX,
+          controlComponent: ControlComponent.PREFIX
         });
         i++;
       }
@@ -316,7 +322,7 @@ export function formatElementList(
             value,
             type: el.type,
             control: el.control,
-            controlComponent: ControlComponent.PRE_TEXT,
+            controlComponent: ControlComponent.PRE_TEXT
           });
           i++;
         }
@@ -329,14 +335,14 @@ export function formatElementList(
       ) {
         let valueList: IElement[] = value ? deepClone(value) : [];
         if (type === ControlType.CHECKBOX) {
-          const codeList = code ? code.split(",") : [];
+          const codeList = code ? code.split(',') : [];
           if (Array.isArray(valueSets) && valueSets.length) {
             const valueStyleList = valueList.reduce(
               (pre, cur) =>
                 pre.concat(
-                  cur.value.split("").map((v) => ({ ...cur, value: v })),
+                  cur.value.split('').map(v => ({ ...cur, value: v }))
                 ),
-              [] as IElement[],
+              [] as IElement[]
             );
             let valueStyleIndex = 0;
             for (let v = 0; v < valueSets.length; v++) {
@@ -345,14 +351,14 @@ export function formatElementList(
                 ...controlContext,
                 ...controlDefaultStyle,
                 controlId,
-                value: "",
+                value: '',
                 type: el.type,
                 control: el.control,
                 controlComponent: ControlComponent.CHECKBOX,
                 checkbox: {
                   code: valueSet.code,
-                  value: codeList.includes(valueSet.code),
-                },
+                  value: codeList.includes(valueSet.code)
+                }
               });
               i++;
               const valueStrList = splitText(valueSet.value);
@@ -364,10 +370,10 @@ export function formatElementList(
                   ...controlDefaultStyle,
                   ...valueStyleList[valueStyleIndex],
                   controlId,
-                  value: value === "\n" ? ZERO : value,
+                  value: value === '\n' ? ZERO : value,
                   letterSpacing: isLastLetter ? checkboxOption.gap : 0,
                   control: el.control,
-                  controlComponent: ControlComponent.VALUE,
+                  controlComponent: ControlComponent.VALUE
                 });
                 valueStyleIndex++;
                 i++;
@@ -379,9 +385,9 @@ export function formatElementList(
             const valueStyleList = valueList.reduce(
               (pre, cur) =>
                 pre.concat(
-                  cur.value.split("").map((v) => ({ ...cur, value: v })),
+                  cur.value.split('').map(v => ({ ...cur, value: v }))
                 ),
-              [] as IElement[],
+              [] as IElement[]
             );
             let valueStyleIndex = 0;
             for (let v = 0; v < valueSets.length; v++) {
@@ -390,14 +396,14 @@ export function formatElementList(
                 ...controlContext,
                 ...controlDefaultStyle,
                 controlId,
-                value: "",
+                value: '',
                 type: el.type,
                 control: el.control,
                 controlComponent: ControlComponent.RADIO,
                 radio: {
                   code: valueSet.code,
-                  value: code === valueSet.code,
-                },
+                  value: code === valueSet.code
+                }
               });
               i++;
               const valueStrList = splitText(valueSet.value);
@@ -409,10 +415,10 @@ export function formatElementList(
                   ...controlDefaultStyle,
                   ...valueStyleList[valueStyleIndex],
                   controlId,
-                  value: value === "\n" ? ZERO : value,
+                  value: value === '\n' ? ZERO : value,
                   letterSpacing: isLastLetter ? radioOption.gap : 0,
                   control: el.control,
-                  controlComponent: ControlComponent.VALUE,
+                  controlComponent: ControlComponent.VALUE
                 });
                 valueStyleIndex++;
                 i++;
@@ -422,12 +428,12 @@ export function formatElementList(
         } else {
           if (!value || !value.length) {
             if (Array.isArray(valueSets) && valueSets.length) {
-              const valueSet = valueSets.find((v) => v.code === code);
+              const valueSet = valueSets.find(v => v.code === code);
               if (valueSet) {
                 valueList = [
                   {
-                    value: valueSet.value,
-                  },
+                    value: valueSet.value
+                  }
                 ];
               }
             }
@@ -435,7 +441,7 @@ export function formatElementList(
           formatElementList(valueList, {
             ...options,
             isHandleFirstElement: false,
-            isForceCompensation: false,
+            isForceCompensation: false
           });
           for (let v = 0; v < valueList.length; v++) {
             const element = valueList[v];
@@ -445,19 +451,19 @@ export function formatElementList(
               ...controlDefaultStyle,
               ...element,
               controlId,
-              value: value === "\n" ? ZERO : value,
+              value: value === '\n' ? ZERO : value,
               type: element.type || ElementType.TEXT,
               control: el.control,
-              controlComponent: ControlComponent.VALUE,
+              controlComponent: ControlComponent.VALUE
             });
             i++;
           }
         }
       } else if (placeholder) {
         // placeholder
-        const thePlaceholderArgs: Omit<IElement, "value"> = {
+        const thePlaceholderArgs: Omit<IElement, 'value'> = {
           ...controlDefaultStyle,
-          color: editorOptions.control.placeholderColor,
+          color: editorOptions.control.placeholderColor
         };
         const placeholderStrList = splitText(placeholder);
         for (let p = 0; p < placeholderStrList.length; p++) {
@@ -466,10 +472,10 @@ export function formatElementList(
             ...controlContext,
             ...thePlaceholderArgs,
             controlId,
-            value: value === "\n" ? ZERO : value,
+            value: value === '\n' ? ZERO : value,
             type: el.type,
             control: el.control,
-            controlComponent: ControlComponent.PLACEHOLDER,
+            controlComponent: ControlComponent.PLACEHOLDER
           });
           i++;
         }
@@ -485,7 +491,7 @@ export function formatElementList(
             value,
             type: el.type,
             control: el.control,
-            controlComponent: ControlComponent.POST_TEXT,
+            controlComponent: ControlComponent.POST_TEXT
           });
           i++;
         }
@@ -500,7 +506,7 @@ export function formatElementList(
           value,
           type: el.type,
           control: el.control,
-          controlComponent: ControlComponent.POSTFIX,
+          controlComponent: ControlComponent.POSTFIX
         });
         i++;
       }
@@ -516,7 +522,7 @@ export function formatElementList(
       }
       el = elementList[i];
     }
-    if (el.value === "\n" || el.value == "\r\n") {
+    if (el.value === '\n' || el.value == '\r\n') {
       el.value = ZERO;
     }
     if (el.type === ElementType.IMAGE || el.type === ElementType.BLOCK) {
@@ -535,16 +541,16 @@ export function formatElementList(
 
 export function isSameElementExceptValue(
   source: IElement,
-  target: IElement,
+  target: IElement
 ): boolean {
   const sourceKeys = Object.keys(source);
   const targetKeys = Object.keys(target);
   if (sourceKeys.length !== targetKeys.length) return false;
   for (let s = 0; s < sourceKeys.length; s++) {
     const key = sourceKeys[s] as never;
-    if (key === "value") continue;
+    if (key === 'value') continue;
     if (
-      key === "groupIds" &&
+      key === 'groupIds' &&
       Array.isArray(source[key]) &&
       Array.isArray(target[key]) &&
       isArrayEqual(source[key], target[key])
@@ -562,7 +568,7 @@ interface IPickElementOption {
 }
 export function pickElementAttr(
   payload: IElement,
-  option: IPickElementOption = {},
+  option: IPickElementOption = {}
 ): IElement {
   const { extraPickAttrs } = option;
   const zipAttrs = [...EDITOR_ELEMENT_ZIP_ATTR];
@@ -570,9 +576,9 @@ export function pickElementAttr(
     zipAttrs.push(...extraPickAttrs);
   }
   const element: IElement = {
-    value: payload.value === ZERO ? `\n` : payload.value,
+    value: payload.value === ZERO ? `\n` : payload.value
   };
-  zipAttrs.forEach((attr) => {
+  zipAttrs.forEach(attr => {
     const value = payload[attr] as never;
     if (value !== undefined) {
       element[attr] = value;
@@ -588,7 +594,7 @@ interface IZipElementListOption {
 }
 export function zipElementList(
   payload: IElement[],
-  options: IZipElementListOption = {},
+  options: IZipElementListOption = {}
 ): IElement[] {
   const { extraPickAttrs, isClassifyArea = false, isClone = true } = options;
   const elementList = isClone ? deepClone(payload) : payload;
@@ -624,9 +630,9 @@ export function zipElementList(
       if (isClassifyArea) {
         const areaElement: IElement = {
           type: ElementType.AREA,
-          value: "",
+          value: '',
           areaId,
-          area,
+          area
         };
         areaElement.valueList = areaElementList;
         element = areaElement;
@@ -642,8 +648,8 @@ export function zipElementList(
           type: ElementType.TITLE,
           title: element.title,
           titleId,
-          value: "",
-          level,
+          value: '',
+          level
         };
         const valueList: IElement[] = [];
         while (e < elementList.length) {
@@ -667,10 +673,10 @@ export function zipElementList(
         const listStyle = element.listStyle;
         const listElement: IElement = {
           type: ElementType.LIST,
-          value: "",
+          value: '',
           listId,
           listType,
-          listStyle,
+          listStyle
         };
         const valueList: IElement[] = [];
         while (e < elementList.length) {
@@ -714,10 +720,10 @@ export function zipElementList(
               rowspan: td.rowspan,
               value: zipElementList(td.value, {
                 ...options,
-                isClassifyArea: false,
-              }),
+                isClassifyArea: false
+              })
             };
-            TABLE_TD_ZIP_ATTR.forEach((attr) => {
+            TABLE_TD_ZIP_ATTR.forEach(attr => {
               const value = td[attr] as never;
               if (value !== undefined) {
                 zipTd[attr] = value;
@@ -732,8 +738,8 @@ export function zipElementList(
       if (hyperlinkId) {
         const hyperlinkElement: IElement = {
           type: ElementType.HYPERLINK,
-          value: "",
-          url: element.url,
+          value: '',
+          url: element.url
         };
         const valueList: IElement[] = [];
         while (e < elementList.length) {
@@ -755,8 +761,8 @@ export function zipElementList(
       if (dateId) {
         const dateElement: IElement = {
           type: ElementType.DATE,
-          value: "",
-          dateFormat: element.dateFormat,
+          value: '',
+          dateFormat: element.dateFormat
         };
         const valueList: IElement[] = [];
         while (e < elementList.length) {
@@ -798,14 +804,14 @@ export function zipElementList(
           );
           const control = {
             ...element.control!,
-            ...controlDefaultStyle,
+            ...controlDefaultStyle
           };
           const controlElement: IElement = {
             ...pickObject(element, EDITOR_ROW_ATTR),
             type: ElementType.CONTROL,
-            value: "",
+            value: '',
             control,
-            controlId,
+            controlId
           };
           controlElement.control!.value = zipElementList(valueList, options);
           element = pickElementAttr(controlElement, { extraPickAttrs });
@@ -839,11 +845,11 @@ export function zipElementList(
           nextElement &&
           isSameElementExceptValue(
             pickElement,
-            pickElementAttr(nextElement, { extraPickAttrs }),
+            pickElementAttr(nextElement, { extraPickAttrs })
           )
         ) {
           const nextValue =
-            nextElement.value === ZERO ? "\n" : nextElement.value;
+            nextElement.value === ZERO ? '\n' : nextElement.value;
           pickElement.value += nextValue;
         } else {
           break;
@@ -860,17 +866,17 @@ export function zipElementList(
 export function convertTextAlignToRowFlex(node: HTMLElement) {
   const textAlign = window.getComputedStyle(node).textAlign;
   switch (textAlign) {
-    case "left":
-    case "start":
+    case 'left':
+    case 'start':
       return RowFlex.LEFT;
-    case "center":
+    case 'center':
       return RowFlex.CENTER;
-    case "right":
-    case "end":
+    case 'right':
+    case 'end':
       return RowFlex.RIGHT;
-    case "justify":
+    case 'justify':
       return RowFlex.ALIGNMENT;
-    case "justify-all":
+    case 'justify-all':
       return RowFlex.JUSTIFY;
     default:
       return RowFlex.LEFT;
@@ -878,22 +884,22 @@ export function convertTextAlignToRowFlex(node: HTMLElement) {
 }
 
 export function convertRowFlexToTextAlign(rowFlex: RowFlex) {
-  return rowFlex === RowFlex.ALIGNMENT ? "justify" : rowFlex;
+  return rowFlex === RowFlex.ALIGNMENT ? 'justify' : rowFlex;
 }
 
 export function convertRowFlexToJustifyContent(rowFlex: RowFlex) {
   switch (rowFlex) {
     case RowFlex.LEFT:
-      return "flex-start";
+      return 'flex-start';
     case RowFlex.CENTER:
-      return "center";
+      return 'center';
     case RowFlex.RIGHT:
-      return "flex-end";
+      return 'flex-end';
     case RowFlex.ALIGNMENT:
     case RowFlex.JUSTIFY:
-      return "space-between";
+      return 'space-between';
     default:
-      return "flex-start";
+      return 'flex-start';
   }
 }
 
@@ -907,15 +913,15 @@ export function isTextElement(element: IElement): boolean {
 
 export function getElementListText(elementList: IElement[]): string {
   return elementList
-    .filter((el) => isTextLikeElement(el))
-    .map((el) => el.value)
-    .join("")
-    .replace(new RegExp(ZERO, "g"), "");
+    .filter(el => isTextLikeElement(el))
+    .map(el => el.value)
+    .join('')
+    .replace(new RegExp(ZERO, 'g'), '');
 }
 
 export function getAnchorElement(
   elementList: IElement[],
-  anchorIndex: number,
+  anchorIndex: number
 ): IElement | null {
   const anchorElement = elementList[anchorIndex];
   if (!anchorElement) return null;
@@ -939,14 +945,14 @@ export function formatElementContext(
   sourceElementList: IElement[],
   formatElementList: IElement[],
   anchorIndex: number,
-  options?: IFormatElementContextOption,
+  options?: IFormatElementContextOption
 ) {
   let copyElement = getAnchorElement(sourceElementList, anchorIndex);
   if (!copyElement) return;
   const {
     isBreakWhenWrap = false,
     editorOptions,
-    ignoreContextKeys = [],
+    ignoreContextKeys = []
   } = options || {};
   const { mode } = editorOptions || {};
   if (mode !== EditorMode.DESIGN && copyElement.title?.disabled) {
@@ -969,11 +975,11 @@ export function formatElementContext(
       const cloneAttr = [
         ...TABLE_CONTEXT_ATTR,
         ...EDITOR_ROW_ATTR,
-        ...AREA_CONTEXT_ATTR,
+        ...AREA_CONTEXT_ATTR
       ];
       deleteProperty(cloneAttr, ignoreContextKeys);
       cloneProperty<IElement>(cloneAttr, copyElement!, targetElement);
-      targetElement.valueList?.forEach((valueItem) => {
+      targetElement.valueList?.forEach(valueItem => {
         cloneProperty<IElement>(cloneAttr, copyElement!, valueItem);
       });
       continue;
@@ -983,7 +989,7 @@ export function formatElementContext(
         sourceElementList,
         targetElement.valueList,
         anchorIndex,
-        options,
+        options
       );
     }
     const cloneAttr = [...EDITOR_ELEMENT_CONTEXT_ATTR];
@@ -997,13 +1003,13 @@ export function formatElementContext(
 
 export function convertElementToDom(
   element: IElement,
-  options: DeepRequired<IEditorOption>,
+  options: DeepRequired<IEditorOption>
 ): HTMLElement {
-  let tagName: keyof HTMLElementTagNameMap = "span";
+  let tagName: keyof HTMLElementTagNameMap = 'span';
   if (element.type === ElementType.SUPERSCRIPT) {
-    tagName = "sup";
+    tagName = 'sup';
   } else if (element.type === ElementType.SUBSCRIPT) {
-    tagName = "sub";
+    tagName = 'sub';
   }
   const dom = document.createElement(tagName);
   dom.style.fontFamily = element.font || options.defaultFont;
@@ -1014,36 +1020,36 @@ export function convertElementToDom(
     dom.style.color = element.color;
   }
   if (element.bold) {
-    dom.style.fontWeight = "600";
+    dom.style.fontWeight = '600';
   }
   if (element.italic) {
-    dom.style.fontStyle = "italic";
+    dom.style.fontStyle = 'italic';
   }
   dom.style.fontSize = `${element.size || options.defaultSize}pt`;
   if (element.highlight) {
     dom.style.backgroundColor = element.highlight;
   }
   if (element.underline) {
-    dom.style.textDecoration = "underline";
-    dom.style.textDecorationStyle = element.textDecoration?.style || "solid";
+    dom.style.textDecoration = 'underline';
+    dom.style.textDecorationStyle = element.textDecoration?.style || 'solid';
   }
   if (element.strikeout) {
-    dom.style.textDecoration += " line-through";
+    dom.style.textDecoration += ' line-through';
   }
   if (element.type) {
-    dom.setAttribute("data-type", element.type);
+    dom.setAttribute('data-type', element.type);
   }
   if (element.rowMargin) {
     dom.style.lineHeight = (
       element.rowMargin ?? options.defaultRowMargin
     ).toString();
   }
-  dom.innerText = element.value.replace(new RegExp(`${ZERO}`, "g"), "\n");
+  dom.innerText = element.value.replace(new RegExp(`${ZERO}`, 'g'), '\n');
   return dom;
 }
 
 export function splitListElement(
-  elementList: IElement[],
+  elementList: IElement[]
 ): Map<number, IElement[]> {
   let curListIndex = 0;
   const listElementListMap: Map<number, IElement[]> = new Map();
@@ -1051,14 +1057,14 @@ export function splitListElement(
     const element = elementList[e];
     if (e === 0) {
       if (element.checkbox) continue;
-      element.value = element.value.replace(START_LINE_BREAK_REG, "");
+      element.value = element.value.replace(START_LINE_BREAK_REG, '');
     }
     if (element.listWrap) {
       const listElementList = listElementListMap.get(curListIndex) || [];
       listElementList.push(element);
       listElementListMap.set(curListIndex, listElementList);
     } else {
-      const valueList = element.value.split("\n");
+      const valueList = element.value.split('\n');
       for (let c = 0; c < valueList.length; c++) {
         if (c > 0) {
           curListIndex += 1;
@@ -1067,7 +1073,7 @@ export function splitListElement(
         const listElementList = listElementListMap.get(curListIndex) || [];
         listElementList.push({
           ...element,
-          value,
+          value
         });
         listElementListMap.set(curListIndex, listElementList);
       }
@@ -1082,14 +1088,14 @@ export interface IElementListGroupRowFlex {
 }
 
 export function groupElementListByRowFlex(
-  elementList: IElement[],
+  elementList: IElement[]
 ): IElementListGroupRowFlex[] {
   const elementListGroupList: IElementListGroupRowFlex[] = [];
   if (!elementList.length) return elementListGroupList;
   let currentRowFlex: RowFlex | null = elementList[0]?.rowFlex || null;
   elementListGroupList.push({
     rowFlex: currentRowFlex,
-    data: [elementList[0]],
+    data: [elementList[0]]
   });
   for (let e = 1; e < elementList.length; e++) {
     const element = elementList[e];
@@ -1105,7 +1111,7 @@ export function groupElementListByRowFlex(
     } else {
       elementListGroupList.push({
         rowFlex,
-        data: [element],
+        data: [element]
       });
       currentRowFlex = rowFlex;
     }
@@ -1119,19 +1125,19 @@ export function groupElementListByRowFlex(
 
 export function createDomFromElementList(
   elementList: IElement[],
-  options?: IEditorOption,
+  options?: IEditorOption
 ) {
   const editorOptions = mergeOption(options);
   function buildDom(payload: IElement[]): HTMLDivElement {
-    const clipboardDom = document.createElement("div");
+    const clipboardDom = document.createElement('div');
     for (let e = 0; e < payload.length; e++) {
       const element = payload[e];
       if (element.type === ElementType.TABLE) {
-        const tableDom: HTMLTableElement = document.createElement("table");
-        tableDom.setAttribute("cellSpacing", "0");
-        tableDom.setAttribute("cellpadding", "0");
-        tableDom.setAttribute("border", "0");
-        const borderStyle = "1px solid #000000";
+        const tableDom: HTMLTableElement = document.createElement('table');
+        tableDom.setAttribute('cellSpacing', '0');
+        tableDom.setAttribute('cellpadding', '0');
+        tableDom.setAttribute('border', '0');
+        const borderStyle = '1px solid #000000';
         if (!element.borderType || element.borderType === TableBorder.ALL) {
           tableDom.style.borderTop = borderStyle;
           tableDom.style.borderLeft = borderStyle;
@@ -1140,29 +1146,29 @@ export function createDomFromElementList(
         }
         tableDom.style.width = `${element.width}px`;
         // colgroup
-        const colgroupDom = document.createElement("colgroup");
+        const colgroupDom = document.createElement('colgroup');
         for (let c = 0; c < element.colgroup!.length; c++) {
           const colgroup = element.colgroup![c];
-          const colDom = document.createElement("col");
-          colDom.setAttribute("width", `${colgroup.width}`);
+          const colDom = document.createElement('col');
+          colDom.setAttribute('width', `${colgroup.width}`);
           colgroupDom.append(colDom);
         }
         tableDom.append(colgroupDom);
         // tr
         const trList = element.trList!;
         for (let t = 0; t < trList.length; t++) {
-          const trDom = document.createElement("tr");
+          const trDom = document.createElement('tr');
           const tr = trList[t];
           trDom.style.height = `${tr.height}px`;
           for (let d = 0; d < tr.tdList.length; d++) {
-            const tdDom = document.createElement("td");
+            const tdDom = document.createElement('td');
             if (!element.borderType || element.borderType === TableBorder.ALL) {
-              tdDom.style.borderBottom = tdDom.style.borderRight = "1px solid";
+              tdDom.style.borderBottom = tdDom.style.borderRight = '1px solid';
             }
             const td = tr.tdList[d];
             tdDom.colSpan = td.colspan;
             tdDom.rowSpan = td.rowspan;
-            tdDom.style.verticalAlign = td.verticalAlign || "top";
+            tdDom.style.verticalAlign = td.verticalAlign || 'top';
             if (td.borderTypes?.includes(TdBorder.TOP)) {
               tdDom.style.borderTop = borderStyle;
             }
@@ -1186,37 +1192,37 @@ export function createDomFromElementList(
         }
         clipboardDom.append(tableDom);
       } else if (element.type === ElementType.HYPERLINK) {
-        const a = document.createElement("a");
-        a.innerText = element.valueList!.map((v) => v.value).join("");
+        const a = document.createElement('a');
+        a.innerText = element.valueList!.map(v => v.value).join('');
         if (element.url) {
           a.href = element.url;
         }
         clipboardDom.append(a);
       } else if (element.type === ElementType.TITLE) {
         const h = document.createElement(
-          `h${titleOrderNumberMapping[element.level!]}`,
+          `h${titleOrderNumberMapping[element.level!]}`
         );
         const childDom = buildDom(element.valueList!);
         h.innerHTML = childDom.innerHTML;
         clipboardDom.append(h);
       } else if (element.type === ElementType.LIST) {
         const list = document.createElement(
-          listTypeElementMapping[element.listType!],
+          listTypeElementMapping[element.listType!]
         );
         if (element.listStyle) {
           list.style.listStyleType = listStyleCSSMapping[element.listStyle];
         }
         const zipList = zipElementList(element.valueList!);
         const listElementListMap = splitListElement(zipList);
-        listElementListMap.forEach((listElementList) => {
-          const li = document.createElement("li");
+        listElementListMap.forEach(listElementList => {
+          const li = document.createElement('li');
           const childDom = buildDom(listElementList);
           li.innerHTML = childDom.innerHTML;
           list.append(li);
         });
         clipboardDom.append(list);
       } else if (element.type === ElementType.IMAGE) {
-        const img = document.createElement("img");
+        const img = document.createElement('img');
         if (element.value) {
           img.src = element.value;
           img.width = element.width!;
@@ -1227,8 +1233,8 @@ export function createDomFromElementList(
         if (element.block?.type === BlockType.VIDEO) {
           const src = element.block.videoBlock?.src;
           if (src) {
-            const video = document.createElement("video");
-            video.style.display = "block";
+            const video = document.createElement('video');
+            video.style.display = 'block';
             video.controls = true;
             video.src = src;
             video.width = element.width! || options?.width || window.innerWidth;
@@ -1239,14 +1245,14 @@ export function createDomFromElementList(
           const { src, srcdoc, sandbox, allow } =
             element.block.iframeBlock || {};
           if (src || srcdoc) {
-            const iframe = document.createElement("iframe");
+            const iframe = document.createElement('iframe');
             iframe.sandbox.add(...(sandbox || IFrameBlock.sandbox));
             iframe.setAttribute(
-              "allow",
-              [allow || IFrameBlock.allow].join(" "),
+              'allow',
+              [allow || IFrameBlock.allow].join(' ')
             );
-            iframe.style.display = "block";
-            iframe.style.border = "none";
+            iframe.style.display = 'block';
+            iframe.style.border = 'none';
             if (src) {
               iframe.src = src;
             } else if (srcdoc) {
@@ -1260,99 +1266,99 @@ export function createDomFromElementList(
           }
         }
       } else if (element.type === ElementType.SEPARATOR) {
-        const hr = document.createElement("hr");
+        const hr = document.createElement('hr');
         if (element.dashArray?.length) {
-          hr.setAttribute("data-dash-array", element.dashArray.join(","));
+          hr.setAttribute('data-dash-array', element.dashArray.join(','));
         }
         clipboardDom.append(hr);
       } else if (element.type === ElementType.CHECKBOX) {
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
         if (element.checkbox?.value) {
-          checkbox.setAttribute("checked", "true");
+          checkbox.setAttribute('checked', 'true');
         }
         clipboardDom.append(checkbox);
       } else if (element.type === ElementType.RADIO) {
-        const radio = document.createElement("input");
-        radio.type = "radio";
+        const radio = document.createElement('input');
+        radio.type = 'radio';
         if (element.radio?.value) {
-          radio.setAttribute("checked", "true");
+          radio.setAttribute('checked', 'true');
         }
         clipboardDom.append(radio);
       } else if (element.type === ElementType.LABEL) {
-        const span = document.createElement("span");
-        span.setAttribute("data-component-badge", "");
+        const span = document.createElement('span');
+        span.setAttribute('data-component-badge', '');
         const componentId = element.id || element.labelId;
         if (componentId) {
-          span.setAttribute("data-component-id", componentId);
+          span.setAttribute('data-component-id', componentId);
         }
         const ext = element.extension as
           | { source?: string; name?: string }
           | undefined;
         if (ext?.name) {
-          span.setAttribute("data-component-name", ext.name);
+          span.setAttribute('data-component-name', ext.name);
         }
         if (ext?.source) {
-          span.setAttribute("data-component-source", ext.source);
+          span.setAttribute('data-component-source', ext.source);
         }
-        span.innerText = ext?.name || element.value || "";
+        span.innerText = ext?.name || element.value || '';
         clipboardDom.append(span);
       } else if (element.type === ElementType.TAB) {
-        const tab = document.createElement("span");
+        const tab = document.createElement('span');
         tab.innerHTML = `${NON_BREAKING_SPACE}${NON_BREAKING_SPACE}`;
         clipboardDom.append(tab);
       } else if (element.type === ElementType.CONTROL) {
-        const controlElement = document.createElement("span");
+        const controlElement = document.createElement('span');
         const childDom = buildDom(element.control?.value || []);
         controlElement.innerHTML = childDom.innerHTML;
         clipboardDom.append(controlElement);
       } else if (element.type === ElementType.PAGE_BREAK) {
-        const pageBreakElement = document.createElement("div");
-        pageBreakElement.style.breakAfter = "page";
+        const pageBreakElement = document.createElement('div');
+        pageBreakElement.style.breakAfter = 'page';
         clipboardDom.append(pageBreakElement);
       } else if (
         !element.type ||
         element.type === ElementType.LATEX ||
         TEXTLIKE_ELEMENT_TYPE.includes(element.type)
       ) {
-        let text = "";
+        let text = '';
         if (element.type === ElementType.DATE) {
-          text = element.valueList?.map((v) => v.value).join("") || "";
+          text = element.valueList?.map(v => v.value).join('') || '';
         } else {
           text = element.value;
         }
         if (!text) continue;
         const dom = convertElementToDom(element, editorOptions);
         if (payload[e - 1]?.type === ElementType.TITLE) {
-          text = text.replace(/^\n/, "");
+          text = text.replace(/^\n/, '');
         }
-        dom.innerText = text.replace(new RegExp(`${ZERO}`, "g"), "\n");
+        dom.innerText = text.replace(new RegExp(`${ZERO}`, 'g'), '\n');
         clipboardDom.append(dom);
       }
     }
     return clipboardDom;
   }
-  const clipboardDom = document.createElement("div");
+  const clipboardDom = document.createElement('div');
   const groupElementList = groupElementListByRowFlex(elementList);
   for (let g = 0; g < groupElementList.length; g++) {
     const elementGroupRowFlex = groupElementList[g];
     const isDefaultRowFlex =
       !elementGroupRowFlex.rowFlex ||
       elementGroupRowFlex.rowFlex === RowFlex.LEFT;
-    const rowFlexDom = document.createElement("div");
+    const rowFlexDom = document.createElement('div');
     if (!isDefaultRowFlex) {
       const firstElement = elementGroupRowFlex.data[0];
       if (getIsBlockElement(firstElement)) {
-        rowFlexDom.style.display = "flex";
+        rowFlexDom.style.display = 'flex';
         rowFlexDom.style.justifyContent = convertRowFlexToJustifyContent(
-          firstElement.rowFlex!,
+          firstElement.rowFlex!
         );
       } else {
         rowFlexDom.style.textAlign = convertRowFlexToTextAlign(
-          elementGroupRowFlex.rowFlex!,
+          elementGroupRowFlex.rowFlex!
         );
-        if (elementGroupRowFlex.rowFlex === "justify") {
-          rowFlexDom.style.textAlignLast = "justify";
+        if (elementGroupRowFlex.rowFlex === 'justify') {
+          rowFlexDom.style.textAlignLast = 'justify';
         }
       }
     }
@@ -1360,7 +1366,7 @@ export function createDomFromElementList(
     if (!isDefaultRowFlex) {
       clipboardDom.append(rowFlexDom);
     } else {
-      rowFlexDom.childNodes.forEach((child) => {
+      rowFlexDom.childNodes.forEach(child => {
         clipboardDom.append(child.cloneNode(true));
       });
     }
@@ -1369,40 +1375,40 @@ export function createDomFromElementList(
 }
 
 export function convertTextNodeToElement(
-  textNode: Element | Node,
+  textNode: Element | Node
 ): IElement | null {
   if (!textNode || textNode.nodeType !== 3) return null;
   const parentNode = <HTMLElement>textNode.parentNode;
   const anchorNode =
-    parentNode.nodeName === "FONT"
+    parentNode.nodeName === 'FONT'
       ? <HTMLElement>parentNode.parentNode
       : parentNode;
   const rowFlex = convertTextAlignToRowFlex(anchorNode);
   const value = textNode.textContent;
   const style = window.getComputedStyle(anchorNode);
-  if (!value || anchorNode.nodeName === "STYLE") return null;
+  if (!value || anchorNode.nodeName === 'STYLE') return null;
   const element: IElement = {
     value,
     color: style.color,
     bold: Number(style.fontWeight) > 500,
-    italic: style.fontStyle.includes("italic"),
-    size: Math.round(parseFloat(style.fontSize) * 0.75),
+    italic: style.fontStyle.includes('italic'),
+    size: Math.round(parseFloat(style.fontSize) * 0.75)
   };
-  if (anchorNode.nodeName === "SUB" || style.verticalAlign === "sub") {
+  if (anchorNode.nodeName === 'SUB' || style.verticalAlign === 'sub') {
     element.type = ElementType.SUBSCRIPT;
-  } else if (anchorNode.nodeName === "SUP" || style.verticalAlign === "super") {
+  } else if (anchorNode.nodeName === 'SUP' || style.verticalAlign === 'super') {
     element.type = ElementType.SUPERSCRIPT;
   }
   if (rowFlex !== RowFlex.LEFT) {
     element.rowFlex = rowFlex;
   }
-  if (style.backgroundColor !== "rgba(0, 0, 0, 0)") {
+  if (style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
     element.highlight = style.backgroundColor;
   }
-  if (style.textDecorationLine.includes("underline")) {
+  if (style.textDecorationLine.includes('underline')) {
     element.underline = true;
   }
-  if (style.textDecorationLine.includes("line-through")) {
+  if (style.textDecorationLine.includes('line-through')) {
     element.strikeout = true;
   }
   return element;
@@ -1414,7 +1420,7 @@ export interface IGetElementListByHTMLOption {
 
 export function getElementListByHTML(
   htmlText: string,
-  options: IGetElementListByHTMLOption,
+  options: IGetElementListByHTMLOption
 ): IElement[] {
   const elementList: IElement[] = [];
   function findTextNode(dom: Element | Node) {
@@ -1427,53 +1433,53 @@ export function getElementListByHTML(
       const childNodes = dom.childNodes;
       for (let n = 0; n < childNodes.length; n++) {
         const node = childNodes[n];
-        if (node.nodeName === "BR") {
+        if (node.nodeName === 'BR') {
           elementList.push({
-            value: "\n",
+            value: '\n'
           });
-        } else if (node.nodeName === "A") {
+        } else if (node.nodeName === 'A') {
           const aElement = node as HTMLLinkElement;
           const value = aElement.innerText;
           if (value) {
             elementList.push({
               type: ElementType.HYPERLINK,
-              value: "",
+              value: '',
               valueList: [
                 {
-                  value,
-                },
+                  value
+                }
               ],
-              url: aElement.href,
+              url: aElement.href
             });
           }
         } else if (/H[1-6]/.test(node.nodeName)) {
           const hElement = node as HTMLTitleElement;
           const valueList = getElementListByHTML(
-            replaceHTMLElementTag(hElement, "div").outerHTML,
-            options,
+            replaceHTMLElementTag(hElement, 'div').outerHTML,
+            options
           );
           elementList.push({
-            value: "",
+            value: '',
             type: ElementType.TITLE,
             level: titleNodeNameMapping[node.nodeName],
-            valueList,
+            valueList
           });
           if (
             node.nextSibling &&
             !INLINE_NODE_NAME.includes(node.nextSibling.nodeName)
           ) {
             elementList.push({
-              value: "\n",
+              value: '\n'
             });
           }
-        } else if (node.nodeName === "UL" || node.nodeName === "OL") {
+        } else if (node.nodeName === 'UL' || node.nodeName === 'OL') {
           const listNode = node as HTMLOListElement | HTMLUListElement;
           const listElement: IElement = {
-            value: "",
+            value: '',
             type: ElementType.LIST,
-            valueList: [],
+            valueList: []
           };
-          if (node.nodeName === "OL") {
+          if (node.nodeName === 'OL') {
             listElement.listType = ListType.OL;
           } else {
             listElement.listType = ListType.UL;
@@ -1481,91 +1487,91 @@ export function getElementListByHTML(
               (<unknown>listNode.style.listStyleType)
             );
           }
-          listNode.querySelectorAll("li").forEach((li) => {
+          listNode.querySelectorAll('li').forEach(li => {
             const liValueList = getElementListByHTML(li.innerHTML, options);
-            liValueList.forEach((list) => {
-              if (list.value === "\n") {
+            liValueList.forEach(list => {
+              if (list.value === '\n') {
                 list.listWrap = true;
               }
             });
             liValueList.unshift({
-              value: "\n",
+              value: '\n'
             });
             listElement.valueList!.push(...liValueList);
           });
           elementList.push(listElement);
-        } else if (node.nodeName === "HR") {
+        } else if (node.nodeName === 'HR') {
           elementList.push({
-            value: "\n",
-            type: ElementType.SEPARATOR,
+            value: '\n',
+            type: ElementType.SEPARATOR
           });
-        } else if (node.nodeName === "IMG") {
+        } else if (node.nodeName === 'IMG') {
           const { src, width, height } = node as HTMLImageElement;
           if (src && width && height) {
             elementList.push({
               width,
               height,
               value: src,
-              type: ElementType.IMAGE,
+              type: ElementType.IMAGE
             });
           }
-        } else if (node.nodeName === "VIDEO") {
+        } else if (node.nodeName === 'VIDEO') {
           const { src, width, height } = node as HTMLVideoElement;
           if (src && width && height) {
             elementList.push({
-              value: "",
+              value: '',
               type: ElementType.BLOCK,
               block: {
                 type: BlockType.VIDEO,
                 videoBlock: {
-                  src,
-                },
+                  src
+                }
               },
               width,
-              height,
+              height
             });
           }
-        } else if (node.nodeName === "IFRAME") {
+        } else if (node.nodeName === 'IFRAME') {
           const { src, srcdoc, width, height } = node as HTMLIFrameElement;
           if ((src || srcdoc) && width && height) {
             elementList.push({
-              value: "",
+              value: '',
               type: ElementType.BLOCK,
               block: {
                 type: BlockType.IFRAME,
                 iframeBlock: {
                   src,
-                  srcdoc,
-                },
+                  srcdoc
+                }
               },
               width: parseInt(width),
-              height: parseInt(height),
+              height: parseInt(height)
             });
           }
-        } else if (node.nodeName === "TABLE") {
+        } else if (node.nodeName === 'TABLE') {
           const tableElement = node as HTMLTableElement;
           const element: IElement = {
             type: ElementType.TABLE,
-            value: "\n",
+            value: '\n',
             colgroup: [],
-            trList: [],
+            trList: []
           };
           // colgroup
-          const colElements = tableElement.querySelectorAll("colgroup col");
-          tableElement.querySelectorAll("tr").forEach((trElement) => {
+          const colElements = tableElement.querySelectorAll('colgroup col');
+          tableElement.querySelectorAll('tr').forEach(trElement => {
             const trHeightStr = Number(
-              window.getComputedStyle(trElement).height.replace("px", ""),
+              window.getComputedStyle(trElement).height.replace('px', '')
             );
             const tr: ITr = {
               height: trHeightStr,
               minHeight: trHeightStr,
-              tdList: [],
+              tdList: []
             };
-            trElement.querySelectorAll("th,td").forEach((tdElement) => {
+            trElement.querySelectorAll('th,td').forEach(tdElement => {
               const tableCell = <HTMLTableCellElement>tdElement;
               const valueList = getElementListByHTML(
                 tableCell.innerHTML,
-                options,
+                options
               );
               const td: ITd = {
                 colspan: tableCell.colSpan,
@@ -1573,7 +1579,7 @@ export function getElementListByHTML(
                 value: valueList,
                 verticalAlign: window.getComputedStyle(tdElement)
                   .verticalAlign as VerticalAlign,
-                width: parseFloat(window.getComputedStyle(tdElement).width),
+                width: parseFloat(window.getComputedStyle(tdElement).width)
               };
               if (tableCell.style.backgroundColor) {
                 td.backgroundColor = tableCell.style.backgroundColor;
@@ -1585,62 +1591,62 @@ export function getElementListByHTML(
           if (element.trList!.length) {
             const tdCount = element.trList![0].tdList.reduce(
               (pre, cur) => pre + cur.colspan,
-              0,
+              0
             );
             const width = Math.ceil(options.innerWidth / tdCount);
             for (let i = 0; i < tdCount; i++) {
-              const colElement = colElements[i]?.getAttribute("width");
+              const colElement = colElements[i]?.getAttribute('width');
               element.colgroup!.push({
-                width: colElement ? parseFloat(colElement) : width,
+                width: colElement ? parseFloat(colElement) : width
               });
             }
             elementList.push(element);
           }
         } else if (
-          node.nodeName === "INPUT" &&
+          node.nodeName === 'INPUT' &&
           (<HTMLInputElement>node).type === ControlComponent.CHECKBOX
         ) {
           elementList.push({
             type: ElementType.CHECKBOX,
-            value: "",
+            value: '',
             checkbox: {
-              value: (<HTMLInputElement>node).checked,
-            },
+              value: (<HTMLInputElement>node).checked
+            }
           });
         } else if (
-          node.nodeName === "INPUT" &&
+          node.nodeName === 'INPUT' &&
           (<HTMLInputElement>node).type === ControlComponent.RADIO
         ) {
           elementList.push({
             type: ElementType.RADIO,
-            value: "",
+            value: '',
             radio: {
-              value: (<HTMLInputElement>node).checked,
-            },
+              value: (<HTMLInputElement>node).checked
+            }
           });
         } else if (
-          node.nodeName === "SPAN" &&
-          (node as HTMLElement).hasAttribute("data-component-badge")
+          node.nodeName === 'SPAN' &&
+          (node as HTMLElement).hasAttribute('data-component-badge')
         ) {
           const spanEl = node as HTMLElement;
-          const componentId = spanEl.getAttribute("data-component-id") || "";
+          const componentId = spanEl.getAttribute('data-component-id') || '';
           const componentName =
-            spanEl.getAttribute("data-component-name") || "";
+            spanEl.getAttribute('data-component-name') || '';
           const componentSource =
-            spanEl.getAttribute("data-component-source") || "";
+            spanEl.getAttribute('data-component-source') || '';
           elementList.push({
             type: ElementType.LABEL,
             value: `\u2297 ${componentName}`,
             id: componentId,
             labelId: componentId,
             label: {
-              backgroundColor: "#E8F5F0",
-              color: "#2D6B4A",
-              borderColor: "#B8DCC9",
+              backgroundColor: '#E8F5F0',
+              color: '#2D6B4A',
+              borderColor: '#B8DCC9',
               borderRadius: 6,
-              padding: [4, 8, 4, 6],
+              padding: [4, 8, 4, 6]
             },
-            extension: { source: componentSource, name: componentName },
+            extension: { source: componentSource, name: componentName }
           } as IElement);
         } else {
           findTextNode(node);
@@ -1648,13 +1654,13 @@ export function getElementListByHTML(
             const nodeElement = node as Element;
             const display = window.getComputedStyle(nodeElement).display;
             if (
-              display === "block" &&
+              display === 'block' &&
               !/(\n|\r\n)$/.test(nodeElement.textContent!)
             ) {
               const lastPushed = elementList[elementList.length - 1];
-              if (!lastPushed || lastPushed.value !== "\n") {
+              if (!lastPushed || lastPushed.value !== '\n') {
                 elementList.push({
-                  value: "\n",
+                  value: '\n'
                 });
               }
             }
@@ -1663,16 +1669,16 @@ export function getElementListByHTML(
       }
     }
   }
-  const clipboardDom = document.createElement("div");
+  const clipboardDom = document.createElement('div');
   clipboardDom.innerHTML = htmlText;
   document.body.appendChild(clipboardDom);
   const deleteNodes: ChildNode[] = [];
-  clipboardDom.childNodes.forEach((child) => {
+  clipboardDom.childNodes.forEach(child => {
     if (child.nodeType !== 1 && !child.textContent?.trim()) {
       deleteNodes.push(child);
     }
   });
-  deleteNodes.forEach((node) => node.remove());
+  deleteNodes.forEach(node => node.remove());
   findTextNode(clipboardDom);
   clipboardDom.remove();
   return elementList;
@@ -1680,7 +1686,7 @@ export function getElementListByHTML(
 
 export function getTextFromElementList(elementList: IElement[]) {
   function buildText(payload: IElement[]): string {
-    let text = "";
+    let text = '';
     for (let e = 0; e < payload.length; e++) {
       const element = payload[e];
       if (element.type === ElementType.TABLE) {
@@ -1699,13 +1705,13 @@ export function getTextFromElementList(elementList: IElement[]) {
       } else if (element.type === ElementType.TAB) {
         text += `\t`;
       } else if (element.type === ElementType.HYPERLINK) {
-        text += element.valueList!.map((v) => v.value).join("");
+        text += element.valueList!.map(v => v.value).join('');
       } else if (element.type === ElementType.TITLE) {
         text += `${buildText(zipElementList(element.valueList!))}`;
       } else if (element.type === ElementType.LIST) {
         const zipList = zipElementList(element.valueList!);
         const listElementListMap = splitListElement(zipList);
-        let ulListStyleText = "";
+        let ulListStyleText = '';
         if (element.listType === ListType.UL) {
           ulListStyleText =
             ulStyleMapping[<UlStyle>(<unknown>element.listStyle)];
@@ -1713,7 +1719,7 @@ export function getTextFromElementList(elementList: IElement[]) {
         listElementListMap.forEach((listElementList, listIndex) => {
           const isLast = listElementListMap.size - 1 === listIndex;
           text += `\n${ulListStyleText || `${listIndex + 1}.`}${buildText(
-            listElementList,
+            listElementList
           )}${isLast ? `\n` : ``}`;
         });
       } else if (element.type === ElementType.CHECKBOX) {
@@ -1725,20 +1731,20 @@ export function getTextFromElementList(elementList: IElement[]) {
         element.type === ElementType.LATEX ||
         TEXTLIKE_ELEMENT_TYPE.includes(element.type)
       ) {
-        let textLike = "";
+        let textLike = '';
         if (element.type === ElementType.CONTROL) {
-          const controlValue = element.control!.value?.[0]?.value || "";
+          const controlValue = element.control!.value?.[0]?.value || '';
           textLike = controlValue
-            ? `${element.control?.preText || ""}${controlValue}${
-                element.control?.postText || ""
+            ? `${element.control?.preText || ''}${controlValue}${
+                element.control?.postText || ''
               }`
-            : "";
+            : '';
         } else if (element.type === ElementType.DATE) {
-          textLike = element.valueList?.map((v) => v.value).join("") || "";
+          textLike = element.valueList?.map(v => v.value).join('') || '';
         } else {
           textLike = element.value;
         }
-        text += textLike.replace(new RegExp(`${ZERO}`, "g"), "\n");
+        text += textLike.replace(new RegExp(`${ZERO}`, 'g'), '\n');
       }
     }
     return text;
@@ -1748,8 +1754,8 @@ export function getTextFromElementList(elementList: IElement[]) {
 
 export function getSlimCloneElementList(elementList: IElement[]) {
   return deepCloneOmitKeys<IElement[], IRowElement>(elementList, [
-    "metrics",
-    "style",
+    'metrics',
+    'style'
   ]);
 }
 
@@ -1763,7 +1769,7 @@ export function getIsBlockElement(element?: IElement) {
 
 export function replaceHTMLElementTag(
   oldDom: HTMLElement,
-  tagName: keyof HTMLElementTagNameMap,
+  tagName: keyof HTMLElementTagNameMap
 ): HTMLElement {
   const newDom = document.createElement(tagName);
   for (let i = 0; i < oldDom.attributes.length; i++) {
@@ -1787,7 +1793,7 @@ export function pickSurroundElementList(elementList: IElement[]) {
 
 export function deleteSurroundElementList(
   elementList: IElement[],
-  pageNo: number,
+  pageNo: number
 ) {
   for (let s = elementList.length - 1; s >= 0; s--) {
     const surroundElement = elementList[s];
@@ -1800,7 +1806,7 @@ export function deleteSurroundElementList(
 export function getNonHideElementIndex(
   elementList: IElement[],
   index: number,
-  position: LocationPosition = LocationPosition.BEFORE,
+  position: LocationPosition = LocationPosition.BEFORE
 ) {
   if (
     !elementList[index]?.hide &&

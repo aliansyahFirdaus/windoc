@@ -3,9 +3,9 @@ https://oeis.org/wiki/List_of_LaTeX_mathematical_symbols
 https://en.wikibooks.org/wiki/LaTeX/Mathematics
 */
 export interface Symb {
-  glyph: number
-  arity?: number
-  flags: Record<string, boolean>
+  glyph: number;
+  arity?: number;
+  flags: Record<string, boolean>;
 }
 
 const SYMB: Record<string, Symb> = {
@@ -240,58 +240,58 @@ const SYMB: Record<string, Symb> = {
   '\\Chi': { glyph: 2048, flags: {} },
   '\\Psi': { glyph: 2049, flags: {} },
   '\\Omega': { glyph: 2050, flags: {} }
-}
+};
 
-export { SYMB }
+export { SYMB };
 
 export function asciiMap(x: string, mode = 'math'): number {
-  const c = x.charCodeAt(0)
+  const c = x.charCodeAt(0);
   if (65 <= c && c <= 90) {
-    const d = c - 65
+    const d = c - 65;
     if (mode == 'text' || mode == 'rm') {
-      return d + 2001
+      return d + 2001;
     } else if (mode == 'tt') {
-      return d + 501
+      return d + 501;
     } else if (mode == 'bf' || mode == 'bb') {
-      return d + 3001
+      return d + 3001;
     } else if (mode == 'sf') {
-      return d + 2501
+      return d + 2501;
     } else if (mode == 'frak') {
-      return d + 3301
+      return d + 3301;
     } else if (mode == 'scr' || mode == 'cal') {
-      return d + 2551
+      return d + 2551;
     } else {
-      return d + 2051
+      return d + 2051;
     }
   }
   if (97 <= c && c <= 122) {
-    const d = c - 97
+    const d = c - 97;
     if (mode == 'text' || mode == 'rm') {
-      return d + 2101
+      return d + 2101;
     } else if (mode == 'tt') {
-      return d + 601
+      return d + 601;
     } else if (mode == 'bf' || mode == 'bb') {
-      return d + 3101
+      return d + 3101;
     } else if (mode == 'sf') {
-      return d + 2601
+      return d + 2601;
     } else if (mode == 'frak') {
-      return d + 3401
+      return d + 3401;
     } else if (mode == 'scr' || mode == 'cal') {
-      return d + 2651
+      return d + 2651;
     } else {
-      return d + 2151
+      return d + 2151;
     }
   }
   if (48 <= c && c <= 57) {
-    const d = c - 48
+    const d = c - 48;
     if (mode == 'it') {
-      return d + 2750
+      return d + 2750;
     } else if (mode == 'bf') {
-      return d + 3200
+      return d + 3200;
     } else if (mode == 'tt') {
-      return d + 700
+      return d + 700;
     } else {
-      return d + 2200
+      return d + 2200;
     }
   }
 
@@ -302,7 +302,7 @@ export function asciiMap(x: string, mode = 'math'): number {
     ';': 2213,
     '!': 2214,
     '?': 2215,
-    '\'': 2216,
+    "'": 2216,
     '"': 2217,
     '*': 2219,
     '/': 2220,
@@ -314,5 +314,5 @@ export function asciiMap(x: string, mode = 'math'): number {
     '~': 2246,
     '@': 2273,
     '\\': 804
-  }[x]
+  }[x];
 }

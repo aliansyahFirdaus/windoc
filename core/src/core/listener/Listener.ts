@@ -10,32 +10,32 @@ import {
   ISaved,
   IVisiblePageNoListChange,
   IZoneChange
-} from '../../interface/Listener'
+} from '../../interface/Listener';
 
 export class Listener {
-  public rangeStyleChange: IRangeStyleChange | null
-  public visiblePageNoListChange: IVisiblePageNoListChange | null
-  public intersectionPageNoChange: IIntersectionPageNoChange | null
-  public pageSizeChange: IPageSizeChange | null
-  public pageScaleChange: IPageScaleChange | null
-  public saved: ISaved | null
-  public contentChange: IContentChange | null
-  public controlChange: IControlChange | null
-  public controlContentChange: IControlContentChange | null
-  public pageModeChange: IPageModeChange | null
-  public zoneChange: IZoneChange | null
+  public rangeStyleChange: IRangeStyleChange | null;
+  public visiblePageNoListChange: IVisiblePageNoListChange | null;
+  public intersectionPageNoChange: IIntersectionPageNoChange | null;
+  public pageSizeChange: IPageSizeChange | null;
+  public pageScaleChange: IPageScaleChange | null;
+  public saved: ISaved | null;
+  public contentChange: IContentChange | null;
+  public controlChange: IControlChange | null;
+  public controlContentChange: IControlContentChange | null;
+  public pageModeChange: IPageModeChange | null;
+  public zoneChange: IZoneChange | null;
 
   constructor() {
-    this.rangeStyleChange = null
-    this.visiblePageNoListChange = null
-    this.intersectionPageNoChange = null
-    this.pageSizeChange = null
-    this.pageScaleChange = null
-    this.saved = null
-    this.contentChange = null
-    this.controlChange = null
-    this.controlContentChange = null
-    this.pageModeChange = null
-    this.zoneChange = null
+    this.rangeStyleChange = null;
+    this.visiblePageNoListChange = null;
+    this.intersectionPageNoChange = null;
+    this.pageSizeChange = null;
+    this.pageScaleChange = null;
+    this.saved = null;
+    this.contentChange = null;
+    this.controlChange = null;
+    this.controlContentChange = null;
+    this.pageModeChange = null;
+    this.zoneChange = null;
   }
 }

@@ -1,66 +1,66 @@
-import { EditorMode, EditorZone } from '../../../../dataset/enum/Editor'
-import { KeyMap } from '../../../../dataset/enum/KeyMap'
-import { isMod } from '../../../../utils/hotkey'
-import { CanvasEvent } from '../../CanvasEvent'
-import { backspace } from './backspace'
-import { del } from './delete'
-import { enter } from './enter'
-import { left } from './left'
-import { right } from './right'
-import { tab } from './tab'
-import { updown } from './updown'
+import { EditorMode, EditorZone } from '../../../../dataset/enum/Editor';
+import { KeyMap } from '../../../../dataset/enum/KeyMap';
+import { isMod } from '../../../../utils/hotkey';
+import { CanvasEvent } from '../../CanvasEvent';
+import { backspace } from './backspace';
+import { del } from './delete';
+import { enter } from './enter';
+import { left } from './left';
+import { right } from './right';
+import { tab } from './tab';
+import { updown } from './updown';
 
 export function keydown(evt: KeyboardEvent, host: CanvasEvent) {
-  if (host.isComposing) return
-  const draw = host.getDraw()
+  if (host.isComposing) return;
+  const draw = host.getDraw();
   if (evt.key === KeyMap.Backspace) {
-    backspace(evt, host)
+    backspace(evt, host);
   } else if (evt.key === KeyMap.Delete) {
-    del(evt, host)
+    del(evt, host);
   } else if (evt.key === KeyMap.Enter) {
-    enter(evt, host)
+    enter(evt, host);
   } else if (evt.key === KeyMap.Left) {
-    left(evt, host)
+    left(evt, host);
   } else if (evt.key === KeyMap.Right) {
-    right(evt, host)
+    right(evt, host);
   } else if (evt.key === KeyMap.Up || evt.key === KeyMap.Down) {
-    updown(evt, host)
+    updown(evt, host);
   } else if (isMod(evt) && evt.key.toLocaleLowerCase() === KeyMap.Z) {
-    if (draw.isReadonly() && draw.getMode() !== EditorMode.FORM) return
-    draw.getHistoryManager().undo()
-    evt.preventDefault()
+    if (draw.isReadonly() && draw.getMode() !== EditorMode.FORM) return;
+    draw.getHistoryManager().undo();
+    evt.preventDefault();
   } else if (isMod(evt) && evt.key.toLocaleLowerCase() === KeyMap.Y) {
-    if (draw.isReadonly() && draw.getMode() !== EditorMode.FORM) return
-    draw.getHistoryManager().redo()
-    evt.preventDefault()
+    if (draw.isReadonly() && draw.getMode() !== EditorMode.FORM) return;
+    draw.getHistoryManager().redo();
+    evt.preventDefault();
   } else if (isMod(evt) && evt.key.toLocaleLowerCase() === KeyMap.C) {
-    host.copy()
-    evt.preventDefault()
+    host.copy();
+    evt.preventDefault();
   } else if (isMod(evt) && evt.key.toLocaleLowerCase() === KeyMap.X) {
-    host.cut()
-    evt.preventDefault()
+    host.cut();
+    evt.preventDefault();
   } else if (isMod(evt) && evt.key.toLocaleLowerCase() === KeyMap.A) {
-    host.selectAll()
-    evt.preventDefault()
+    host.selectAll();
+    evt.preventDefault();
   } else if (isMod(evt) && evt.key.toLocaleLowerCase() === KeyMap.S) {
-    if (draw.isReadonly()) return
-    const listener = draw.getListener()
+    if (draw.isReadonly()) return;
+    const listener = draw.getListener();
     if (listener.saved) {
-      listener.saved(draw.getValue())
+      listener.saved(draw.getValue());
     }
-    const eventBus = draw.getEventBus()
+    const eventBus = draw.getEventBus();
     if (eventBus.isSubscribe('saved')) {
-      eventBus.emit('saved', draw.getValue())
+      eventBus.emit('saved', draw.getValue());
     }
-    evt.preventDefault()
+    evt.preventDefault();
   } else if (evt.key === KeyMap.ESC) {
-    host.clearPainterStyle()
-    const zoneManager = draw.getZone()
+    host.clearPainterStyle();
+    const zoneManager = draw.getZone();
     if (!zoneManager.isMainActive()) {
-      zoneManager.setZone(EditorZone.MAIN)
+      zoneManager.setZone(EditorZone.MAIN);
     }
-    evt.preventDefault()
+    evt.preventDefault();
   } else if (evt.key === KeyMap.TAB) {
-    tab(evt, host)
+    tab(evt, host);
   }
 }

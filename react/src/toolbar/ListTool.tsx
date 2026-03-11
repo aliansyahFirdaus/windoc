@@ -1,11 +1,11 @@
-import { useRef } from 'react'
-import { List, ListOrdered, Indent, Outdent } from 'lucide-react'
-import { useEditor } from '../EditorContext'
+import { useRef } from 'react';
+import { List, ListOrdered, Indent, Outdent } from 'lucide-react';
+import { useEditor } from '../EditorContext';
 
 interface PresetOption {
-  preset: string
-  label: string
-  preview: string[]
+  preset: string;
+  label: string;
+  preview: string[];
 }
 
 const OL_PRESETS: PresetOption[] = [
@@ -14,8 +14,8 @@ const OL_PRESETS: PresetOption[] = [
   { preset: 'olOutline', label: 'Outline', preview: ['1.', '1.1.', '1.1.1.'] },
   { preset: 'olUpperA', label: 'Upper Alpha', preview: ['A.', 'a.', 'i.'] },
   { preset: 'olRoman', label: 'Roman', preview: ['I.', 'A.', '1.'] },
-  { preset: 'olZeroPad', label: 'Zero Pad', preview: ['01.', 'a.', 'i.'] },
-]
+  { preset: 'olZeroPad', label: 'Zero Pad', preview: ['01.', 'a.', 'i.'] }
+];
 
 const UL_PRESETS: PresetOption[] = [
   { preset: 'ulDefault', label: 'Default', preview: ['●', '○', '■'] },
@@ -23,59 +23,72 @@ const UL_PRESETS: PresetOption[] = [
   { preset: 'ulHollowSq', label: 'Hollow Square', preview: ['□', '□', '□'] },
   { preset: 'ulArrow', label: 'Arrow', preview: ['→', '◆', '●'] },
   { preset: 'ulStar', label: 'Star', preview: ['★', '○', '■'] },
-  { preset: 'ulCheckArr', label: 'Check Arrow', preview: ['➤', '○', '■'] },
-]
+  { preset: 'ulCheckArr', label: 'Check Arrow', preview: ['➤', '○', '■'] }
+];
 
-function PresetCell({ option, onClick }: { option: PresetOption; onClick: () => void }) {
+function PresetCell({
+  option,
+  onClick
+}: {
+  option: PresetOption;
+  onClick: () => void;
+}) {
   return (
-    <div
-      onClick={onClick}
-      className="list-preset-cell"
-      title={option.label}
-    >
+    <div onClick={onClick} className="list-preset-cell" title={option.label}>
       {option.preview.map((item, i) => (
-        <div key={i} className="list-preset-line" style={{ paddingLeft: `${i * 10}px` }}>
+        <div
+          key={i}
+          className="list-preset-line"
+          style={{ paddingLeft: `${i * 10}px` }}
+        >
           <span className="list-preset-marker">{item}</span>
           <span className="list-preset-text" />
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 export default function ListTool() {
-  const { editorRef, isApple, rangeStyle } = useEditor()
-  const optionsRef = useRef<HTMLDivElement>(null)
-  const isActive = !!rangeStyle?.listType
+  const { editorRef, isApple, rangeStyle } = useEditor();
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const isActive = !!rangeStyle?.listType;
 
-  const close = () => optionsRef.current?.classList.remove('visible')
+  const close = () => optionsRef.current?.classList.remove('visible');
 
   const handleList = (type: string | null, style?: string) => {
-    editorRef.current?.command.executeList(type, style)
-    close()
-  }
+    editorRef.current?.command.executeList(type, style);
+    close();
+  };
 
   const handlePreset = (type: 'ol' | 'ul', preset: string) => {
-    const style = type === 'ol' ? 'decimal' : 'disc'
-    editorRef.current?.command.executeListWithPreset(type, style, preset)
-    close()
-  }
+    const style = type === 'ol' ? 'decimal' : 'disc';
+    editorRef.current?.command.executeListWithPreset(type, style, preset);
+    close();
+  };
 
   const handleIndent = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    editorRef.current?.command.executeListIndent()
-    close()
-  }
+    e.stopPropagation();
+    editorRef.current?.command.executeListIndent();
+    close();
+  };
 
   const handleOutdent = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    editorRef.current?.command.executeListOutdent()
-    close()
-  }
+    e.stopPropagation();
+    editorRef.current?.command.executeListOutdent();
+    close();
+  };
 
   return (
-    <div className={`menu-item__list ${isActive ? 'active' : ''}`} title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}>
-      <List size={16} onClick={() => optionsRef.current?.classList.toggle('visible')} style={{ cursor: 'pointer' }} />
+    <div
+      className={`menu-item__list ${isActive ? 'active' : ''}`}
+      title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}
+    >
+      <List
+        size={16}
+        onClick={() => optionsRef.current?.classList.toggle('visible')}
+        style={{ cursor: 'pointer' }}
+      />
       <div className="options" ref={optionsRef} style={{ width: '320px' }}>
         <div style={{ padding: '8px' }}>
           {/* Quick Actions */}
@@ -86,17 +99,35 @@ export default function ListTool() {
             >
               Checkbox
             </button>
-            <button onClick={handleIndent} className="list-quick-btn" title="Indent (Tab)">
+            <button
+              onClick={handleIndent}
+              className="list-quick-btn"
+              title="Indent (Tab)"
+            >
               <Indent size={14} />
             </button>
-            <button onClick={handleOutdent} className="list-quick-btn" title="Outdent (Shift+Tab)">
+            <button
+              onClick={handleOutdent}
+              className="list-quick-btn"
+              title="Outdent (Shift+Tab)"
+            >
               <Outdent size={14} />
             </button>
           </div>
 
           {/* Ordered List Presets */}
           <div style={{ marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#667085', marginBottom: '6px', fontWeight: 500 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '11px',
+                color: '#667085',
+                marginBottom: '6px',
+                fontWeight: 500
+              }}
+            >
               <ListOrdered size={12} />
               Ordered List
             </div>
@@ -113,7 +144,17 @@ export default function ListTool() {
 
           {/* Unordered List Presets */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#667085', marginBottom: '6px', fontWeight: 500 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '11px',
+                color: '#667085',
+                marginBottom: '6px',
+                fontWeight: 500
+              }}
+            >
               <List size={12} />
               Unordered List
             </div>
@@ -130,5 +171,5 @@ export default function ListTool() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 export const NAME_PLACEHOLDER = {
   SELECTED_TEXT: '%s'
-}
+};
 
 export const INTERNAL_CONTEXT_MENU_KEY = {
   GLOBAL: {
@@ -58,4 +58,4 @@ export const INTERNAL_CONTEXT_MENU_KEY = {
     MERGE_CELL: 'tableMergeCell',
     CANCEL_MERGE_CELL: 'tableCancelMergeCell'
   }
-}
+};

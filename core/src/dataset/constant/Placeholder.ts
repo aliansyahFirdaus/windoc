@@ -1,4 +1,4 @@
-import { IPlaceholder } from '../../interface/Placeholder'
+import { IPlaceholder } from '../../interface/Placeholder';
 
 export const defaultPlaceholderOption: Readonly<Required<IPlaceholder>> = {
   data: '',
@@ -6,4 +6,4 @@ export const defaultPlaceholderOption: Readonly<Required<IPlaceholder>> = {
   opacity: 1,
   size: 12,
   font: 'Arial'
-}
+};

@@ -3,5 +3,5 @@ export default function PainterTool() {
     <div className="menu-item__painter" title="Format Brush">
       <i></i>
     </div>
-  )
+  );
 }

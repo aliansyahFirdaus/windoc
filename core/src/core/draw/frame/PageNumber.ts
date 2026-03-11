@@ -1,17 +1,17 @@
-import { FORMAT_PLACEHOLDER } from '../../../dataset/constant/PageNumber'
-import { NumberType } from '../../../dataset/enum/Common'
-import { RowFlex } from '../../../dataset/enum/Row'
-import { DeepRequired } from '../../../interface/Common'
-import { IEditorOption } from '../../../interface/Editor'
-import { Draw } from '../Draw'
+import { FORMAT_PLACEHOLDER } from '../../../dataset/constant/PageNumber';
+import { NumberType } from '../../../dataset/enum/Common';
+import { RowFlex } from '../../../dataset/enum/Row';
+import { DeepRequired } from '../../../interface/Common';
+import { IEditorOption } from '../../../interface/Editor';
+import { Draw } from '../Draw';
 
 export class PageNumber {
-  private draw: Draw
-  private options: DeepRequired<IEditorOption>
+  private draw: Draw;
+  private options: DeepRequired<IEditorOption>;
 
   constructor(draw: Draw) {
-    this.draw = draw
-    this.options = draw.getOptions()
+    this.draw = draw;
+    this.options = draw.getOptions();
   }
 
   static formatNumberPlaceholder(
@@ -20,8 +20,8 @@ export class PageNumber {
     replaceReg: RegExp,
     _numberType: NumberType
   ) {
-    const pageNoText = `${pageNo}`
-    return text.replace(replaceReg, pageNoText)
+    const pageNoText = `${pageNo}`;
+    return text.replace(replaceReg, pageNoText);
   }
 
   public render(ctx: CanvasRenderingContext2D, pageNo: number) {
@@ -37,45 +37,45 @@ export class PageNumber {
         startPageNo,
         fromPageNo
       }
-    } = this.options
-    if (pageNo < fromPageNo) return
-    let text = format
-    const pageNoReg = new RegExp(FORMAT_PLACEHOLDER.PAGE_NO)
+    } = this.options;
+    if (pageNo < fromPageNo) return;
+    let text = format;
+    const pageNoReg = new RegExp(FORMAT_PLACEHOLDER.PAGE_NO);
     if (pageNoReg.test(text)) {
       text = PageNumber.formatNumberPlaceholder(
         text,
         pageNo + startPageNo - fromPageNo,
         pageNoReg,
         numberType
-      )
+      );
     }
-    const pageCountReg = new RegExp(FORMAT_PLACEHOLDER.PAGE_COUNT)
+    const pageCountReg = new RegExp(FORMAT_PLACEHOLDER.PAGE_COUNT);
     if (pageCountReg.test(text)) {
       text = PageNumber.formatNumberPlaceholder(
         text,
         this.draw.getPageCount() - fromPageNo,
         pageCountReg,
         numberType
-      )
+      );
     }
-    const width = this.draw.getWidth()
-    const height = this.draw.getHeight()
-    const pageNumberBottom = this.draw.getPageNumberBottom()
-    const y = height - pageNumberBottom
-    ctx.save()
-    ctx.fillStyle = color
-    ctx.font = `${size * scale}px ${font}`
-    let x = 0
-    const margins = this.draw.getMargins()
-    const { width: textWidth } = ctx.measureText(text)
+    const width = this.draw.getWidth();
+    const height = this.draw.getHeight();
+    const pageNumberBottom = this.draw.getPageNumberBottom();
+    const y = height - pageNumberBottom;
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = `${size * scale}px ${font}`;
+    let x = 0;
+    const margins = this.draw.getMargins();
+    const { width: textWidth } = ctx.measureText(text);
     if (rowFlex === RowFlex.CENTER) {
-      x = (width - textWidth) / 2
+      x = (width - textWidth) / 2;
     } else if (rowFlex === RowFlex.RIGHT) {
-      x = width - textWidth - margins[1]
+      x = width - textWidth - margins[1];
     } else {
-      x = margins[3]
+      x = margins[3];
     }
-    ctx.fillText(text, x, y)
-    ctx.restore()
+    ctx.fillText(text, x, y);
+    ctx.restore();
   }
 }

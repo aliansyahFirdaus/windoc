@@ -3,5 +3,5 @@ export default function LaTeXTool() {
     <div className="menu-item__latex" title="LaTeX">
       <i></i>
     </div>
-  )
+  );
 }

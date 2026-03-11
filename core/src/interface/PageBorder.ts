@@ -1,8 +1,8 @@
-import { IPadding } from './Common'
+import { IPadding } from './Common';
 
 export interface IPageBorderOption {
-  color?: string
-  lineWidth?: number
-  padding?: IPadding
-  disabled?: boolean
+  color?: string;
+  lineWidth?: number;
+  padding?: IPadding;
+  disabled?: boolean;
 }

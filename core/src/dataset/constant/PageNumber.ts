@@ -1,11 +1,11 @@
-import { IPageNumber } from '../../interface/PageNumber'
-import { NumberType } from '../enum/Common'
-import { RowFlex } from '../enum/Row'
+import { IPageNumber } from '../../interface/PageNumber';
+import { NumberType } from '../enum/Common';
+import { RowFlex } from '../enum/Row';
 
 export const FORMAT_PLACEHOLDER = {
   PAGE_NO: '{pageNo}',
   PAGE_COUNT: '{pageCount}'
-}
+};
 
 export const defaultPageNumberOption: Readonly<Required<IPageNumber>> = {
   bottom: 60,
@@ -19,4 +19,4 @@ export const defaultPageNumberOption: Readonly<Required<IPageNumber>> = {
   startPageNo: 1,
   fromPageNo: 0,
   maxPageNo: null
-}
+};

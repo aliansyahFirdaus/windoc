@@ -1,9 +1,9 @@
-import { BackgroundRepeat, BackgroundSize } from '../dataset/enum/Background'
+import { BackgroundRepeat, BackgroundSize } from '../dataset/enum/Background';
 
 export interface IBackgroundOption {
-  color?: string
-  image?: string
-  size?: BackgroundSize
-  repeat?: BackgroundRepeat
-  applyPageNumbers?: number[]
+  color?: string;
+  image?: string;
+  size?: BackgroundSize;
+  repeat?: BackgroundRepeat;
+  applyPageNumbers?: number[];
 }

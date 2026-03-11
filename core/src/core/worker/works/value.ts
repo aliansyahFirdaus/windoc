@@ -1,16 +1,16 @@
-import { IGetValueOption } from '../../../interface/Draw'
-import { IEditorData } from '../../../interface/Editor'
-import { zipElementList } from '../../../utils/element'
+import { IGetValueOption } from '../../../interface/Draw';
+import { IEditorData } from '../../../interface/Editor';
+import { zipElementList } from '../../../utils/element';
 
 interface IGetValueWorkerOption {
-  data: Required<IEditorData>
-  options: IGetValueOption
+  data: Required<IEditorData>;
+  options: IGetValueOption;
 }
 
 onmessage = evt => {
-  const payload = <IGetValueWorkerOption>evt.data
-  const { options, data } = payload
-  const { extraPickAttrs = [] } = options || {}
+  const payload = <IGetValueWorkerOption>evt.data;
+  const { options, data } = payload;
+  const { extraPickAttrs = [] } = options || {};
 
   const editorData: IEditorData = {
     header: zipElementList(data.header, {
@@ -26,7 +26,7 @@ onmessage = evt => {
       extraPickAttrs,
       isClone: false
     })
-  }
+  };
 
-  postMessage(editorData)
-}
+  postMessage(editorData);
+};

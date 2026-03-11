@@ -1,4 +1,4 @@
 interface CanvasRenderingContext2D {
-  letterSpacing: string
-  wordSpacing: string
+  letterSpacing: string;
+  wordSpacing: string;
 }

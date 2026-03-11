@@ -1,67 +1,67 @@
-'use client'
+'use client';
 
-import React, { useEffect, useRef, useState } from 'react'
-import type { EditorInstance, RangeStylePayload } from './types'
-import { EditorProvider } from './EditorContext'
-import { FooterProvider, useFooter } from './FooterContext'
-import EditorToolbar from './EditorToolbar'
-import EditorFooter from './EditorFooter'
+import React, { useEffect, useRef, useState } from 'react';
+import type { EditorInstance, RangeStylePayload } from './types';
+import { EditorProvider } from './EditorContext';
+import { FooterProvider, useFooter } from './FooterContext';
+import EditorToolbar from './EditorToolbar';
+import EditorFooter from './EditorFooter';
 
 interface EditorOptions {
-  margins?: number[]
-  defaultBasicRowMarginHeight?: number
-  watermark?: { data: string; size?: number; color?: string; opacity?: number }
-  header?: { top?: number; disabled?: boolean }
-  footer?: { bottom?: number; disabled?: boolean; backgroundColor?: string }
+  margins?: number[];
+  defaultBasicRowMarginHeight?: number;
+  watermark?: { data: string; size?: number; color?: string; opacity?: number };
+  header?: { top?: number; disabled?: boolean };
+  footer?: { bottom?: number; disabled?: boolean; backgroundColor?: string };
   pageNumber?: {
-    disabled?: boolean
-    format?: string
-    color?: string
-    font?: string
-    size?: number
-    rowFlex?: string
-    bottom?: number
-  }
-  placeholder?: { data: string }
-  zone?: { tipDisabled?: boolean }
-  maskMargin?: number[]
-  scrollContainerSelector?: string
-  [key: string]: unknown
+    disabled?: boolean;
+    format?: string;
+    color?: string;
+    font?: string;
+    size?: number;
+    rowFlex?: string;
+    bottom?: number;
+  };
+  placeholder?: { data: string };
+  zone?: { tipDisabled?: boolean };
+  maskMargin?: number[];
+  scrollContainerSelector?: string;
+  [key: string]: unknown;
 }
 
 interface EditorData {
-  header?: object[]
-  main: object[]
-  footer?: object[]
+  header?: object[];
+  main: object[];
+  footer?: object[];
 }
 
 interface EditorProps {
   /** Initial document data */
-  defaultValue?: EditorData
+  defaultValue?: EditorData;
   /** Editor configuration options */
-  options?: EditorOptions
+  options?: EditorOptions;
   /** Called when editor content changes */
-  onChange?: (data: object) => void
+  onChange?: (data: object) => void;
   /** Called when editor instance is ready */
-  onReady?: (editor: EditorInstance) => void
+  onReady?: (editor: EditorInstance) => void;
   /** Show built-in toolbar (default: true) */
-  toolbar?: boolean
+  toolbar?: boolean;
   /** Show built-in footer/statusbar (default: true) */
-  footer?: boolean
+  footer?: boolean;
   /** Custom toolbar component to replace built-in one */
-  renderToolbar?: React.ReactNode
+  renderToolbar?: React.ReactNode;
   /** Custom footer component to replace built-in one */
-  renderFooter?: React.ReactNode
+  renderFooter?: React.ReactNode;
   /** Additional content rendered inside EditorProvider (e.g. sidebars) */
-  children?: React.ReactNode
+  children?: React.ReactNode;
   /** CSS class for the editor container */
-  className?: string
+  className?: string;
   /** Inline style for the editor container */
-  style?: React.CSSProperties
+  style?: React.CSSProperties;
   /** Enable drag-and-drop badge insertion */
-  onDrop?: (e: React.DragEvent, editor: EditorInstance) => void
+  onDrop?: (e: React.DragEvent, editor: EditorInstance) => void;
   /** Called when cursor/selection style changes — use this instead of overwriting editor.listener.rangeStyleChange via onReady */
-  onRangeStyleChange?: (payload: RangeStylePayload) => void
+  onRangeStyleChange?: (payload: RangeStylePayload) => void;
 }
 
 export function Editor({
@@ -77,7 +77,7 @@ export function Editor({
   children,
   className,
   style,
-  onDrop: userOnDrop,
+  onDrop: userOnDrop
 }: EditorProps) {
   return (
     <FooterProvider>
@@ -98,7 +98,7 @@ export function Editor({
         {children}
       </EditorInner>
     </FooterProvider>
-  )
+  );
 }
 
 function EditorInner({
@@ -114,11 +114,11 @@ function EditorInner({
   children,
   className,
   style,
-  onDrop: userOnDrop,
+  onDrop: userOnDrop
 }: Omit<EditorProps, 'onDrop'> & { onDrop?: EditorProps['onDrop'] }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const editorRef = useRef<EditorInstance | null>(null)
-  const [rangeStyle, setRangeStyle] = useState<RangeStylePayload | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<EditorInstance | null>(null);
+  const [rangeStyle, setRangeStyle] = useState<RangeStylePayload | null>(null);
 
   const {
     setPageNoList,
@@ -127,14 +127,14 @@ function EditorInner({
     setWordCount,
     setRowNo,
     setColNo,
-    setPageScale,
-  } = useFooter()
+    setPageScale
+  } = useFooter();
 
   useEffect(() => {
-    let instance: EditorInstance | null = null
+    let instance: EditorInstance | null = null;
 
     const initEditor = async () => {
-      if (!containerRef.current) return
+      if (!containerRef.current) return;
 
       const {
         default: EditorClass,
@@ -143,54 +143,54 @@ function EditorInner({
         EditorZone,
         ElementType,
         Dialog,
-        Signature,
-      } = await import('@windoc/core')
+        Signature
+      } = await import('@windoc/core');
 
-      const data = (defaultValue ?? { main: [] }) as any
+      const data = (defaultValue ?? { main: [] }) as any;
 
       instance = new EditorClass(
         containerRef.current!,
         data,
         (userOptions ?? {}) as any
-      ) as unknown as EditorInstance
+      ) as unknown as EditorInstance;
 
-      editorRef.current = instance
+      editorRef.current = instance;
 
       // Setup listeners
       instance.listener.rangeStyleChange = (payload: RangeStylePayload) => {
-        setRangeStyle(payload)
-        onRangeStyleChange?.(payload)
-        const rangeContext = instance?.command.getRangeContext()
+        setRangeStyle(payload);
+        onRangeStyleChange?.(payload);
+        const rangeContext = instance?.command.getRangeContext();
         if (rangeContext) {
-          setRowNo(rangeContext.startRowNo + 1)
-          setColNo(rangeContext.startColNo + 1)
+          setRowNo(rangeContext.startRowNo + 1);
+          setColNo(rangeContext.startColNo + 1);
         }
-      }
+      };
 
       instance.listener.visiblePageNoListChange = (payload: number[]) => {
-        setPageNoList(payload.map((i) => i + 1).join(', '))
-      }
+        setPageNoList(payload.map(i => i + 1).join(', '));
+      };
 
       instance.listener.pageSizeChange = (payload: number) => {
-        setPageSize(payload)
-      }
+        setPageSize(payload);
+      };
 
       instance.listener.intersectionPageNoChange = (payload: number) => {
-        setPageNo(payload + 1)
-      }
+        setPageNo(payload + 1);
+      };
 
       instance.listener.pageScaleChange = (payload: number) => {
-        setPageScale(Math.floor(payload * 10 * 10))
-      }
+        setPageScale(Math.floor(payload * 10 * 10));
+      };
 
       instance.listener.contentChange = async () => {
-        const count = await instance?.command.getWordCount()
-        setWordCount(count || 0)
+        const count = await instance?.command.getWordCount();
+        setWordCount(count || 0);
         if (onChange) {
-          const value = instance?.command.getValue()
-          if (value) onChange(value)
+          const value = instance?.command.getValue();
+          if (value) onChange(value);
         }
-      }
+      };
 
       // Register shortcuts
       instance.register.shortcutList([
@@ -199,103 +199,110 @@ function EditorInner({
           mod: true,
           isGlobal: true,
           callback: (command: { executePrint: () => void }) => {
-            command.executePrint()
-          },
+            command.executePrint();
+          }
         },
         {
           key: KeyMap.MINUS,
           ctrl: true,
           isGlobal: true,
           callback: (command: { executePageScaleMinus: () => void }) => {
-            command.executePageScaleMinus()
-          },
+            command.executePageScaleMinus();
+          }
         },
         {
           key: KeyMap.EQUAL,
           ctrl: true,
           isGlobal: true,
           callback: (command: { executePageScaleAdd: () => void }) => {
-            command.executePageScaleAdd()
-          },
+            command.executePageScaleAdd();
+          }
         },
         {
           key: KeyMap.ZERO,
           ctrl: true,
           isGlobal: true,
           callback: (command: { executePageScaleRecovery: () => void }) => {
-            command.executePageScaleRecovery()
-          },
-        },
-      ])
+            command.executePageScaleRecovery();
+          }
+        }
+      ]);
 
       // Register context menus
       instance.register.contextMenuList([
         {
           name: 'Signature',
           icon: 'signature',
-          when: (payload: { isReadonly: boolean; editorTextFocus: boolean }) => {
-            return !payload.isReadonly && payload.editorTextFocus
+          when: (payload: {
+            isReadonly: boolean;
+            editorTextFocus: boolean;
+          }) => {
+            return !payload.isReadonly && payload.editorTextFocus;
           },
-          callback: (command: { executeInsertElementList: (elements: object[]) => void }) => {
+          callback: (command: {
+            executeInsertElementList: (elements: object[]) => void;
+          }) => {
             new Signature({
-              onConfirm(payload: { value: string; width: number; height: number } | null) {
-                if (!payload) return
-                const { value, width, height } = payload
-                if (!value || !width || !height) return
+              onConfirm(
+                payload: { value: string; width: number; height: number } | null
+              ) {
+                if (!payload) return;
+                const { value, width, height } = payload;
+                if (!value || !width || !height) return;
                 command.executeInsertElementList([
-                  { value, width, height, type: ElementType.IMAGE },
-                ])
-              },
-            })
-          },
+                  { value, width, height, type: ElementType.IMAGE }
+                ]);
+              }
+            });
+          }
         },
         {
           name: 'Format Cleanup',
           icon: 'word-tool',
           when: (payload: { isReadonly: boolean }) => !payload.isReadonly,
           callback: (command: { executeWordTool: () => void }) => {
-            command.executeWordTool()
-          },
-        },
-      ])
+            command.executeWordTool();
+          }
+        }
+      ]);
 
       // Global click handler to close dropdowns
       const closeDropdowns = (evt: MouseEvent) => {
-        const visibleDom = document.querySelector('.visible')
-        if (!visibleDom) return
-        const parent = visibleDom.parentElement
-        if (parent && parent.contains(evt.target as Node)) return
-        visibleDom.classList.remove('visible')
-      }
-      window.addEventListener('click', closeDropdowns, { capture: true })
+        const visibleDom = document.querySelector('.visible');
+        if (!visibleDom) return;
+        const parent = visibleDom.parentElement;
+        if (parent && parent.contains(evt.target as Node)) return;
+        visibleDom.classList.remove('visible');
+      };
+      window.addEventListener('click', closeDropdowns, { capture: true });
 
       // Initial content change
-      const count = await instance.command.getWordCount()
-      setWordCount(count || 0)
+      const count = await instance.command.getWordCount();
+      setWordCount(count || 0);
 
       // Notify consumer
-      onReady?.(instance)
-    }
+      onReady?.(instance);
+    };
 
-    initEditor()
+    initEditor();
 
     return () => {
-      instance?.destroy()
-    }
+      instance?.destroy();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (userOnDrop && editorRef.current) {
-      userOnDrop(e, editorRef.current)
+      userOnDrop(e, editorRef.current);
     }
-  }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'copy'
-  }
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
 
   return (
     <EditorProvider editorRef={editorRef} rangeStyle={rangeStyle}>
@@ -312,5 +319,5 @@ function EditorInner({
       {footer && !renderFooter && <EditorFooter />}
       {renderFooter}
     </EditorProvider>
-  )
+  );
 }

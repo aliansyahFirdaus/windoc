@@ -1,4 +1,4 @@
 export interface ISeparatorOption {
-  strokeStyle?: string
-  lineWidth?: number
+  strokeStyle?: string;
+  lineWidth?: number;
 }

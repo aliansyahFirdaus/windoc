@@ -1,6 +1,6 @@
-import { Command, TitleLevel } from '../../..'
-import { KeyMap } from '../../../dataset/enum/KeyMap'
-import { IRegisterShortcut } from '../../../interface/shortcut/Shortcut'
+import { Command, TitleLevel } from '../../..';
+import { KeyMap } from '../../../dataset/enum/KeyMap';
+import { IRegisterShortcut } from '../../../interface/shortcut/Shortcut';
 
 export const titleKeys: IRegisterShortcut[] = [
   {
@@ -8,7 +8,7 @@ export const titleKeys: IRegisterShortcut[] = [
     alt: true,
     ctrl: true,
     callback: (command: Command) => {
-      command.executeTitle(null)
+      command.executeTitle(null);
     }
   },
   {
@@ -16,7 +16,7 @@ export const titleKeys: IRegisterShortcut[] = [
     alt: true,
     ctrl: true,
     callback: (command: Command) => {
-      command.executeTitle(TitleLevel.FIRST)
+      command.executeTitle(TitleLevel.FIRST);
     }
   },
   {
@@ -24,7 +24,7 @@ export const titleKeys: IRegisterShortcut[] = [
     alt: true,
     ctrl: true,
     callback: (command: Command) => {
-      command.executeTitle(TitleLevel.SECOND)
+      command.executeTitle(TitleLevel.SECOND);
     }
   },
   {
@@ -32,7 +32,7 @@ export const titleKeys: IRegisterShortcut[] = [
     alt: true,
     ctrl: true,
     callback: (command: Command) => {
-      command.executeTitle(TitleLevel.THIRD)
+      command.executeTitle(TitleLevel.THIRD);
     }
   },
   {
@@ -40,7 +40,7 @@ export const titleKeys: IRegisterShortcut[] = [
     alt: true,
     ctrl: true,
     callback: (command: Command) => {
-      command.executeTitle(TitleLevel.FOURTH)
+      command.executeTitle(TitleLevel.FOURTH);
     }
   },
   {
@@ -48,7 +48,7 @@ export const titleKeys: IRegisterShortcut[] = [
     alt: true,
     ctrl: true,
     callback: (command: Command) => {
-      command.executeTitle(TitleLevel.FIFTH)
+      command.executeTitle(TitleLevel.FIFTH);
     }
   },
   {
@@ -56,7 +56,7 @@ export const titleKeys: IRegisterShortcut[] = [
     alt: true,
     ctrl: true,
     callback: (command: Command) => {
-      command.executeTitle(TitleLevel.SIXTH)
+      command.executeTitle(TitleLevel.SIXTH);
     }
   }
-]
+];

@@ -1,9 +1,9 @@
-import { MaxHeightRatio } from '../dataset/enum/Common'
+import { MaxHeightRatio } from '../dataset/enum/Common';
 
 export interface IHeader {
-  top?: number
-  inactiveAlpha?: number
-  maxHeightRadio?: MaxHeightRatio
-  disabled?: boolean
-  editable?: boolean
+  top?: number;
+  inactiveAlpha?: number;
+  maxHeightRadio?: MaxHeightRatio;
+  disabled?: boolean;
+  editable?: boolean;
 }

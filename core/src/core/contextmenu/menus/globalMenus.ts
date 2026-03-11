@@ -1,10 +1,10 @@
-import { INTERNAL_CONTEXT_MENU_KEY } from '../../../dataset/constant/ContextMenu'
-import { IRegisterContextMenu } from '../../../interface/contextmenu/ContextMenu'
-import { isApple } from '../../../utils/ua'
-import { Command } from '../../command/Command'
+import { INTERNAL_CONTEXT_MENU_KEY } from '../../../dataset/constant/ContextMenu';
+import { IRegisterContextMenu } from '../../../interface/contextmenu/ContextMenu';
+import { isApple } from '../../../utils/ua';
+import { Command } from '../../command/Command';
 const {
   GLOBAL: { CUT, COPY, PASTE, SELECT_ALL, PRINT }
-} = INTERNAL_CONTEXT_MENU_KEY
+} = INTERNAL_CONTEXT_MENU_KEY;
 
 export const globalMenus: IRegisterContextMenu[] = [
   {
@@ -12,10 +12,10 @@ export const globalMenus: IRegisterContextMenu[] = [
     i18nPath: 'contextmenu.global.cut',
     shortCut: `${isApple ? '⌘' : 'Ctrl'} + X`,
     when: payload => {
-      return !payload.isReadonly
+      return !payload.isReadonly;
     },
     callback: (command: Command) => {
-      command.executeCut()
+      command.executeCut();
     }
   },
   {
@@ -23,10 +23,10 @@ export const globalMenus: IRegisterContextMenu[] = [
     i18nPath: 'contextmenu.global.copy',
     shortCut: `${isApple ? '⌘' : 'Ctrl'} + C`,
     when: payload => {
-      return payload.editorHasSelection || payload.isCrossRowCol
+      return payload.editorHasSelection || payload.isCrossRowCol;
     },
     callback: (command: Command) => {
-      command.executeCopy()
+      command.executeCopy();
     }
   },
   {
@@ -34,10 +34,10 @@ export const globalMenus: IRegisterContextMenu[] = [
     i18nPath: 'contextmenu.global.paste',
     shortCut: `${isApple ? '⌘' : 'Ctrl'} + V`,
     when: payload => {
-      return !payload.isReadonly && payload.editorTextFocus
+      return !payload.isReadonly && payload.editorTextFocus;
     },
     callback: (command: Command) => {
-      command.executePaste()
+      command.executePaste();
     }
   },
   {
@@ -45,10 +45,10 @@ export const globalMenus: IRegisterContextMenu[] = [
     i18nPath: 'contextmenu.global.selectAll',
     shortCut: `${isApple ? '⌘' : 'Ctrl'} + A`,
     when: payload => {
-      return payload.editorTextFocus
+      return payload.editorTextFocus;
     },
     callback: (command: Command) => {
-      command.executeSelectAll()
+      command.executeSelectAll();
     }
   },
   {
@@ -60,7 +60,7 @@ export const globalMenus: IRegisterContextMenu[] = [
     icon: 'print',
     when: () => true,
     callback: (command: Command) => {
-      command.executePrint()
+      command.executePrint();
     }
   }
-]
+];

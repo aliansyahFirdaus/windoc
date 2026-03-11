@@ -1,5 +1,5 @@
-import { IFooter } from '../../interface/Footer'
-import { MaxHeightRatio } from '../enum/Common'
+import { IFooter } from '../../interface/Footer';
+import { MaxHeightRatio } from '../enum/Common';
 
 export const defaultFooterOption: Readonly<Required<IFooter>> = {
   bottom: 48,
@@ -8,4 +8,4 @@ export const defaultFooterOption: Readonly<Required<IFooter>> = {
   disabled: false,
   editable: true,
   backgroundColor: ''
-}
+};

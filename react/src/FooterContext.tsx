@@ -1,55 +1,69 @@
-'use client'
+'use client';
 
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState } from 'react';
 
 interface FooterContextValue {
-  pageNoList: string
-  pageNo: number
-  pageSize: number
-  wordCount: number
-  rowNo: number
-  colNo: number
-  pageScale: number
-  setPageNoList: (v: string) => void
-  setPageNo: (v: number) => void
-  setPageSize: (v: number) => void
-  setWordCount: (v: number) => void
-  setRowNo: (v: number) => void
-  setColNo: (v: number) => void
-  setPageScale: (v: number) => void
-  handleToggleCatalogAction?: () => void
+  pageNoList: string;
+  pageNo: number;
+  pageSize: number;
+  wordCount: number;
+  rowNo: number;
+  colNo: number;
+  pageScale: number;
+  setPageNoList: (v: string) => void;
+  setPageNo: (v: number) => void;
+  setPageSize: (v: number) => void;
+  setWordCount: (v: number) => void;
+  setRowNo: (v: number) => void;
+  setColNo: (v: number) => void;
+  setPageScale: (v: number) => void;
+  handleToggleCatalogAction?: () => void;
 }
 
-const FooterContext = createContext<FooterContextValue | null>(null)
+const FooterContext = createContext<FooterContextValue | null>(null);
 
 export function FooterProvider({
   handleToggleCatalogAction,
   children
 }: {
-  handleToggleCatalogAction?: () => void
-  children: React.ReactNode
+  handleToggleCatalogAction?: () => void;
+  children: React.ReactNode;
 }) {
-  const [pageNoList, setPageNoList] = useState("1")
-  const [pageNo, setPageNo] = useState(1)
-  const [pageSize, setPageSize] = useState(1)
-  const [wordCount, setWordCount] = useState(0)
-  const [rowNo, setRowNo] = useState(0)
-  const [colNo, setColNo] = useState(0)
-  const [pageScale, setPageScale] = useState(100)
+  const [pageNoList, setPageNoList] = useState('1');
+  const [pageNo, setPageNo] = useState(1);
+  const [pageSize, setPageSize] = useState(1);
+  const [wordCount, setWordCount] = useState(0);
+  const [rowNo, setRowNo] = useState(0);
+  const [colNo, setColNo] = useState(0);
+  const [pageScale, setPageScale] = useState(100);
 
   return (
-    <FooterContext.Provider value={{
-      pageNoList, pageNo, pageSize, wordCount, rowNo, colNo, pageScale,
-      setPageNoList, setPageNo, setPageSize, setWordCount, setRowNo, setColNo, setPageScale,
-      handleToggleCatalogAction
-    }}>
+    <FooterContext.Provider
+      value={{
+        pageNoList,
+        pageNo,
+        pageSize,
+        wordCount,
+        rowNo,
+        colNo,
+        pageScale,
+        setPageNoList,
+        setPageNo,
+        setPageSize,
+        setWordCount,
+        setRowNo,
+        setColNo,
+        setPageScale,
+        handleToggleCatalogAction
+      }}
+    >
       {children}
     </FooterContext.Provider>
-  )
+  );
 }
 
 export function useFooter() {
-  const ctx = useContext(FooterContext)
-  if (!ctx) throw new Error('useFooter must be used within FooterProvider')
-  return ctx
+  const ctx = useContext(FooterContext);
+  if (!ctx) throw new Error('useFooter must be used within FooterProvider');
+  return ctx;
 }

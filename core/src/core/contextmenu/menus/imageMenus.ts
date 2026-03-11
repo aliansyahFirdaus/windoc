@@ -1,11 +1,11 @@
-import { INTERNAL_CONTEXT_MENU_KEY } from '../../../dataset/constant/ContextMenu'
-import { ImageDisplay } from '../../../dataset/enum/Common'
-import { ElementType } from '../../../dataset/enum/Element'
+import { INTERNAL_CONTEXT_MENU_KEY } from '../../../dataset/constant/ContextMenu';
+import { ImageDisplay } from '../../../dataset/enum/Common';
+import { ElementType } from '../../../dataset/enum/Element';
 import {
   IContextMenuContext,
   IRegisterContextMenu
-} from '../../../interface/contextmenu/ContextMenu'
-import { Command } from '../../command/Command'
+} from '../../../interface/contextmenu/ContextMenu';
+import { Command } from '../../command/Command';
 const {
   IMAGE: {
     CHANGE,
@@ -17,7 +17,7 @@ const {
     TEXT_WRAP_FLOAT_TOP,
     TEXT_WRAP_FLOAT_BOTTOM
   }
-} = INTERNAL_CONTEXT_MENU_KEY
+} = INTERNAL_CONTEXT_MENU_KEY;
 
 export const imageMenus: IRegisterContextMenu[] = [
   {
@@ -29,22 +29,22 @@ export const imageMenus: IRegisterContextMenu[] = [
         !payload.isReadonly &&
         !payload.editorHasSelection &&
         payload.startElement?.type === ElementType.IMAGE
-      )
+      );
     },
     callback: (command: Command) => {
-      const proxyInputFile = document.createElement('input')
-      proxyInputFile.type = 'file'
-      proxyInputFile.accept = '.png, .jpg, .jpeg'
+      const proxyInputFile = document.createElement('input');
+      proxyInputFile.type = 'file';
+      proxyInputFile.accept = '.png, .jpg, .jpeg';
       proxyInputFile.onchange = () => {
-        const file = proxyInputFile.files![0]!
-        const fileReader = new FileReader()
-        fileReader.readAsDataURL(file)
+        const file = proxyInputFile.files![0]!;
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
         fileReader.onload = () => {
-          const value = fileReader.result as string
-          command.executeReplaceImageElement(value)
-        }
-      }
-      proxyInputFile.click()
+          const value = fileReader.result as string;
+          command.executeReplaceImageElement(value);
+        };
+      };
+      proxyInputFile.click();
     }
   },
   {
@@ -55,10 +55,10 @@ export const imageMenus: IRegisterContextMenu[] = [
       return (
         !payload.editorHasSelection &&
         payload.startElement?.type === ElementType.IMAGE
-      )
+      );
     },
     callback: (command: Command) => {
-      command.executeSaveAsImageElement()
+      command.executeSaveAsImageElement();
     }
   },
   {
@@ -69,7 +69,7 @@ export const imageMenus: IRegisterContextMenu[] = [
         !payload.isReadonly &&
         !payload.editorHasSelection &&
         payload.startElement?.type === ElementType.IMAGE
-      )
+      );
     },
     childMenus: [
       {
@@ -80,7 +80,7 @@ export const imageMenus: IRegisterContextMenu[] = [
           command.executeChangeImageDisplay(
             context.startElement!,
             ImageDisplay.BLOCK
-          )
+          );
         }
       },
       {
@@ -91,7 +91,7 @@ export const imageMenus: IRegisterContextMenu[] = [
           command.executeChangeImageDisplay(
             context.startElement!,
             ImageDisplay.INLINE
-          )
+          );
         }
       },
       {
@@ -102,7 +102,7 @@ export const imageMenus: IRegisterContextMenu[] = [
           command.executeChangeImageDisplay(
             context.startElement!,
             ImageDisplay.SURROUND
-          )
+          );
         }
       },
       {
@@ -113,7 +113,7 @@ export const imageMenus: IRegisterContextMenu[] = [
           command.executeChangeImageDisplay(
             context.startElement!,
             ImageDisplay.FLOAT_TOP
-          )
+          );
         }
       },
       {
@@ -124,9 +124,9 @@ export const imageMenus: IRegisterContextMenu[] = [
           command.executeChangeImageDisplay(
             context.startElement!,
             ImageDisplay.FLOAT_BOTTOM
-          )
+          );
         }
       }
     ]
   }
-]
+];

@@ -1,0 +1,92 @@
+{
+  "contextmenu": {
+    "global": {
+      "cut": "Potong",
+      "copy": "Salin",
+      "paste": "Tempel",
+      "selectAll": "Pilih semua",
+      "print": "Cetak"
+    },
+    "control": {
+      "delete": "Hapus kontrol"
+    },
+    "hyperlink": {
+      "delete": "Hapus tautan",
+      "cancel": "Batal tautan",
+      "edit": "Edit tautan"
+    },
+    "image": {
+      "change": "Ubah gambar",
+      "saveAs": "Simpan sebagai gambar",
+      "textWrap": "Pembungkus teks",
+      "textWrapType": {
+        "embed": "Sematkan",
+        "upDown": "Atas bawah",
+        "surround": "Mengelilingi",
+        "floatTop": "Mengapung di atas teks",
+        "floatBottom": "Mengapung di bawah teks"
+      }
+    },
+    "table": {
+      "insertRowCol": "Sisipkan baris/kolom",
+      "insertTopRow": "Sisipkan 1 baris atas",
+      "insertBottomRow": "Sisipkan 1 baris bawah",
+      "insertLeftCol": "Sisipkan 1 kolom kiri",
+      "insertRightCol": "Sisipkan 1 kolom kanan",
+      "deleteRowCol": "Hapus baris/kolom",
+      "deleteRow": "Hapus 1 baris",
+      "deleteCol": "Hapus 1 kolom",
+      "deleteTable": "Hapus tabel",
+      "mergeCell": "Gabung sel",
+      "mergeCancelCell": "Batal gabung sel",
+      "verticalAlign": "Perataan vertikal",
+      "verticalAlignTop": "Atas",
+      "verticalAlignMiddle": "Tengah",
+      "verticalAlignBottom": "Bawah",
+      "border": "Batas tabel",
+      "borderAll": "Semua",
+      "borderEmpty": "Kosong",
+      "borderDash": "Putus-putus",
+      "borderExternal": "Eksternal",
+      "borderInternal": "Internal",
+      "borderTd": "Batas sel tabel",
+      "borderTdTop": "Atas",
+      "borderTdRight": "Kanan",
+      "borderTdBottom": "Bawah",
+      "borderTdLeft": "Kiri",
+      "borderTdForward": "Maju",
+      "borderTdBack": "Mundur"
+    }
+  },
+  "datePicker": {
+    "now": "Sekarang",
+    "confirm": "Konfirmasi",
+    "return": "Kembali",
+    "timeSelect": "Pilih waktu",
+    "weeks": {
+      "sun": "Min",
+      "mon": "Sen",
+      "tue": "Sel",
+      "wed": "Rab",
+      "thu": "Kam",
+      "fri": "Jum",
+      "sat": "Sab"
+    },
+    "year": " ",
+    "month": " ",
+    "hour": "Jam",
+    "minute": "Menit",
+    "second": "Detik"
+  },
+  "frame": {
+    "header": "Header",
+    "footer": "Footer"
+  },
+  "pageBreak": {
+    "displayName": "Henti Halaman"
+  },
+  "zone": {
+    "headerTip": "Klik dua kali untuk edit header",
+    "footerTip": "Klik dua kali untuk edit footer"
+  }
+}

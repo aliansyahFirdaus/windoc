@@ -1,4 +1,4 @@
-import { IElement } from '../../../interface/Element'
+import { IElement } from '../../../interface/Element';
 
 enum ElementType {
   TEXT = 'text',
@@ -11,115 +11,115 @@ enum ControlComponent {
   VALUE = 'value'
 }
 
-const ZERO = '\u200B'
-const WRAP = '\n'
+const ZERO = '\u200B';
+const WRAP = '\n';
 
 function pickText(elementList: IElement[]): string {
-  let text = ''
-  let e = 0
+  let text = '';
+  let e = 0;
   while (e < elementList.length) {
-    const element = elementList[e]
+    const element = elementList[e];
     if (element.type === ElementType.TABLE) {
       if (element.trList) {
         for (let t = 0; t < element.trList.length; t++) {
-          const tr = element.trList[t]
+          const tr = element.trList[t];
           for (let d = 0; d < tr.tdList.length; d++) {
-            const td = tr.tdList[d]
-            text += pickText(td.value)
+            const td = tr.tdList[d];
+            text += pickText(td.value);
           }
         }
       }
     } else if (element.type === ElementType.HYPERLINK) {
-      const hyperlinkId = element.hyperlinkId
-      const valueList: IElement[] = []
+      const hyperlinkId = element.hyperlinkId;
+      const valueList: IElement[] = [];
       while (e < elementList.length) {
-        const hyperlinkE = elementList[e]
+        const hyperlinkE = elementList[e];
         if (hyperlinkId !== hyperlinkE.hyperlinkId) {
-          e--
-          break
+          e--;
+          break;
         }
-        delete hyperlinkE.type
-        valueList.push(hyperlinkE)
-        e++
+        delete hyperlinkE.type;
+        valueList.push(hyperlinkE);
+        e++;
       }
-      text += pickText(valueList)
+      text += pickText(valueList);
     } else if (element.controlId) {
       if (!element.control?.hide) {
-        const controlId = element.controlId
-        const valueList: IElement[] = []
+        const controlId = element.controlId;
+        const valueList: IElement[] = [];
         while (e < elementList.length) {
-          const controlE = elementList[e]
+          const controlE = elementList[e];
           if (controlId !== controlE.controlId) {
-            e--
-            break
+            e--;
+            break;
           }
           if (controlE.controlComponent === ControlComponent.VALUE) {
-            delete controlE.controlId
-            valueList.push(controlE)
+            delete controlE.controlId;
+            valueList.push(controlE);
           }
-          e++
+          e++;
         }
-        text += pickText(valueList)
+        text += pickText(valueList);
       }
     } else if (
       (!element.type || element.type === ElementType.TEXT) &&
       !element.area?.hide
     ) {
-      text += element.value
+      text += element.value;
     }
-    e++
+    e++;
   }
-  return text
+  return text;
 }
 
 function groupText(text: string): string[] {
-  const characterList: string[] = []
-  const numberReg = /[0-9]/
-  const letterReg = /[A-Za-z]/
-  const blankReg = /\s/
-  let isPreLetter = false
-  let isPreNumber = false
-  let compositionText = ''
+  const characterList: string[] = [];
+  const numberReg = /[0-9]/;
+  const letterReg = /[A-Za-z]/;
+  const blankReg = /\s/;
+  let isPreLetter = false;
+  let isPreNumber = false;
+  let compositionText = '';
   function pushCompositionText() {
     if (compositionText) {
-      characterList.push(compositionText)
-      compositionText = ''
+      characterList.push(compositionText);
+      compositionText = '';
     }
   }
   for (const t of text) {
     if (letterReg.test(t)) {
       if (!isPreLetter) {
-        pushCompositionText()
+        pushCompositionText();
       }
-      compositionText += t
-      isPreLetter = true
-      isPreNumber = false
+      compositionText += t;
+      isPreLetter = true;
+      isPreNumber = false;
     } else if (numberReg.test(t)) {
       if (!isPreNumber) {
-        pushCompositionText()
+        pushCompositionText();
       }
-      compositionText += t
-      isPreLetter = false
-      isPreNumber = true
+      compositionText += t;
+      isPreLetter = false;
+      isPreNumber = true;
     } else {
-      pushCompositionText()
-      isPreLetter = false
-      isPreNumber = false
+      pushCompositionText();
+      isPreLetter = false;
+      isPreNumber = false;
       if (!blankReg.test(t)) {
-        characterList.push(t)
+        characterList.push(t);
       }
     }
   }
-  pushCompositionText()
-  return characterList
+  pushCompositionText();
+  return characterList;
 }
 
 onmessage = evt => {
-  const elementList = <IElement[]>evt.data
-  const originText = pickText(elementList)
+  const elementList = <IElement[]>evt.data;
+  const originText = pickText(elementList);
   const filterText = originText
     .replace(new RegExp(`^${ZERO}`), '')
-    .replace(new RegExp(ZERO, 'g'), WRAP)
-  const textGroup = groupText(filterText)
-  postMessage(textGroup.length)
-}
+    .replace(new RegExp(ZERO, 'g'), WRAP);
+  const textGroup = groupText(filterText);
+  postMessage(textGroup.length);
+};

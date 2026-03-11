@@ -1,3 +1,3 @@
 export interface IZoneOption {
-  tipDisabled?: boolean
+  tipDisabled?: boolean;
 }

@@ -1,17 +1,17 @@
-import { useRef } from 'react'
-import { useEditor } from '../EditorContext'
+import { useRef } from 'react';
+import { useEditor } from '../EditorContext';
 
 export default function PageBreakTool() {
-  const { editorRef } = useEditor()
-  const optionsRef = useRef<HTMLDivElement>(null)
+  const { editorRef } = useEditor();
+  const optionsRef = useRef<HTMLDivElement>(null);
 
   const handlePageBreak = () => {
-    editorRef.current?.command.executePageBreak()
-  }
+    editorRef.current?.command.executePageBreak();
+  };
 
   const handleColumnBreak = () => {
-    editorRef.current?.command.executeColumnBreak()
-  }
+    editorRef.current?.command.executeColumnBreak();
+  };
 
   return (
     <div
@@ -26,5 +26,5 @@ export default function PageBreakTool() {
         </ul>
       </div>
     </div>
-  )
+  );
 }

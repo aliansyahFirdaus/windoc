@@ -1,8 +1,8 @@
-import { IRowElement } from '../../../interface/Row'
+import { IRowElement } from '../../../interface/Row';
 
 export class SubscriptParticle {
   public getOffsetY(element: IRowElement): number {
-    return element.metrics.height / 2
+    return element.metrics.height / 2;
   }
 
   public render(
@@ -11,12 +11,12 @@ export class SubscriptParticle {
     x: number,
     y: number
   ) {
-    ctx.save()
-    ctx.font = element.style
+    ctx.save();
+    ctx.font = element.style;
     if (element.color) {
-      ctx.fillStyle = element.color
+      ctx.fillStyle = element.color;
     }
-    ctx.fillText(element.value, x, y + this.getOffsetY(element))
-    ctx.restore()
+    ctx.fillText(element.value, x, y + this.getOffsetY(element));
+    ctx.restore();
   }
 }

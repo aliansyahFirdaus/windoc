@@ -1,62 +1,62 @@
-import { IRegisterShortcut } from '../../interface/shortcut/Shortcut'
-import { richtextKeys } from './keys/richtextKeys'
-import { Command } from '../command/Command'
-import { Draw } from '../draw/Draw'
-import { isMod } from '../../utils/hotkey'
-import { titleKeys } from './keys/titleKeys'
-import { listKeys } from './keys/listKeys'
+import { IRegisterShortcut } from '../../interface/shortcut/Shortcut';
+import { richtextKeys } from './keys/richtextKeys';
+import { Command } from '../command/Command';
+import { Draw } from '../draw/Draw';
+import { isMod } from '../../utils/hotkey';
+import { titleKeys } from './keys/titleKeys';
+import { listKeys } from './keys/listKeys';
 
 export class Shortcut {
-  private command: Command
-  private globalShortcutList: IRegisterShortcut[]
-  private agentShortcutList: IRegisterShortcut[]
+  private command: Command;
+  private globalShortcutList: IRegisterShortcut[];
+  private agentShortcutList: IRegisterShortcut[];
 
   constructor(draw: Draw, command: Command) {
-    this.command = command
-    this.globalShortcutList = []
-    this.agentShortcutList = []
-    this._addShortcutList([...richtextKeys, ...titleKeys, ...listKeys])
-    this._addEvent()
-    const agentDom = draw.getCursor().getAgentDom()
-    agentDom.addEventListener('keydown', this._agentKeydown.bind(this))
+    this.command = command;
+    this.globalShortcutList = [];
+    this.agentShortcutList = [];
+    this._addShortcutList([...richtextKeys, ...titleKeys, ...listKeys]);
+    this._addEvent();
+    const agentDom = draw.getCursor().getAgentDom();
+    agentDom.addEventListener('keydown', this._agentKeydown.bind(this));
   }
 
   private _addEvent() {
-    document.addEventListener('keydown', this._globalKeydown)
+    document.addEventListener('keydown', this._globalKeydown);
   }
 
   public removeEvent() {
-    document.removeEventListener('keydown', this._globalKeydown)
+    document.removeEventListener('keydown', this._globalKeydown);
   }
 
   private _addShortcutList(payload: IRegisterShortcut[]) {
     for (let s = payload.length - 1; s >= 0; s--) {
-      const shortCut = payload[s]
+      const shortCut = payload[s];
       if (shortCut.isGlobal) {
-        this.globalShortcutList.unshift(shortCut)
+        this.globalShortcutList.unshift(shortCut);
       } else {
-        this.agentShortcutList.unshift(shortCut)
+        this.agentShortcutList.unshift(shortCut);
       }
     }
   }
 
   public registerShortcutList(payload: IRegisterShortcut[]) {
-    this._addShortcutList(payload)
+    this._addShortcutList(payload);
   }
 
   private _globalKeydown = (evt: KeyboardEvent) => {
-    if (!this.globalShortcutList.length) return
-    this._execute(evt, this.globalShortcutList)
-  }
+    if (!this.globalShortcutList.length) return;
+    this._execute(evt, this.globalShortcutList);
+  };
 
   private _agentKeydown(evt: KeyboardEvent) {
-    if (!this.agentShortcutList.length) return
-    this._execute(evt, this.agentShortcutList)
+    if (!this.agentShortcutList.length) return;
+    this._execute(evt, this.agentShortcutList);
   }
 
   private _execute(evt: KeyboardEvent, shortCutList: IRegisterShortcut[]) {
     for (let s = 0; s < shortCutList.length; s++) {
-      const shortCut = shortCutList[s]
+      const shortCut = shortCutList[s];
       if (
         (shortCut.mod
           ? isMod(evt) === !!shortCut.mod
@@ -67,10 +67,10 @@ export class Shortcut {
         evt.key.toLowerCase() === shortCut.key.toLowerCase()
       ) {
         if (!shortCut.disable) {
-          shortCut?.callback?.(this.command)
-          evt.preventDefault()
+          shortCut?.callback?.(this.command);
+          evt.preventDefault();
         }
-        break
+        break;
       }
     }
   }

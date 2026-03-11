@@ -1,6 +1,6 @@
-import { IWatermark } from '../../interface/Watermark'
-import { NumberType } from '../enum/Common'
-import { WatermarkType } from '../enum/Watermark'
+import { IWatermark } from '../../interface/Watermark';
+import { NumberType } from '../enum/Common';
+import { WatermarkType } from '../enum/Watermark';
 
 export const defaultWatermarkOption: Readonly<Required<IWatermark>> = {
   data: '',
@@ -16,4 +16,4 @@ export const defaultWatermarkOption: Readonly<Required<IWatermark>> = {
   numberType: NumberType.ARABIC,
   rotation: -45,
   inFront: false
-}
+};

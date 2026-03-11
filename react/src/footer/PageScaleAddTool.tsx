@@ -1,10 +1,14 @@
-import { useEditor } from '../EditorContext'
+import { useEditor } from '../EditorContext';
 
 export default function PageScaleAddTool() {
-  const { editorRef } = useEditor()
+  const { editorRef } = useEditor();
   return (
-    <div className="page-scale-add" title="Zoom In (Ctrl+=)" onClick={() => editorRef.current?.command.executePageScaleAdd()}>
+    <div
+      className="page-scale-add"
+      title="Zoom In (Ctrl+=)"
+      onClick={() => editorRef.current?.command.executePageScaleAdd()}
+    >
       <i></i>
     </div>
-  )
+  );
 }

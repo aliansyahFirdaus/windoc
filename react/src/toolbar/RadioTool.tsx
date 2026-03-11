@@ -3,5 +3,5 @@ export default function RadioTool() {
     <div className="menu-item__radio" title="Radio">
       <i></i>
     </div>
-  )
+  );
 }

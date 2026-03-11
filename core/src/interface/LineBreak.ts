@@ -1,5 +1,5 @@
 export interface ILineBreakOption {
-  disabled?: boolean
-  color?: string
-  lineWidth?: number
+  disabled?: boolean;
+  color?: string;
+  lineWidth?: number;
 }

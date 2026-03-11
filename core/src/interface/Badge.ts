@@ -1,17 +1,17 @@
 export interface IBadge {
-  top?: number
-  left?: number
-  width: number
-  height: number
-  value: string
+  top?: number;
+  left?: number;
+  width: number;
+  height: number;
+  value: string;
 }
 
 export interface IBadgeOption {
-  top?: number
-  left?: number
+  top?: number;
+  left?: number;
 }
 
 export interface IAreaBadge {
-  areaId: string
-  badge: IBadge
+  areaId: string;
+  badge: IBadge;
 }

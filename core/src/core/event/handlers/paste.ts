@@ -1,156 +1,156 @@
-import { ZERO } from '../../../dataset/constant/Common'
-import { VIRTUAL_ELEMENT_TYPE } from '../../../dataset/constant/Element'
-import { ElementType } from '../../../dataset/enum/Element'
-import { IElement } from '../../../interface/Element'
-import { IPasteOption } from '../../../interface/Event'
+import { ZERO } from '../../../dataset/constant/Common';
+import { VIRTUAL_ELEMENT_TYPE } from '../../../dataset/constant/Element';
+import { ElementType } from '../../../dataset/enum/Element';
+import { IElement } from '../../../interface/Element';
+import { IPasteOption } from '../../../interface/Event';
 import {
   getClipboardData,
   getIsClipboardContainFile,
   removeClipboardData
-} from '../../../utils/clipboard'
+} from '../../../utils/clipboard';
 import {
   formatElementContext,
   getElementListByHTML
-} from '../../../utils/element'
-import { CanvasEvent } from '../CanvasEvent'
-import { IOverrideResult } from '../../override/Override'
-import { normalizeLineBreak } from '../../../utils'
+} from '../../../utils/element';
+import { CanvasEvent } from '../CanvasEvent';
+import { IOverrideResult } from '../../override/Override';
+import { normalizeLineBreak } from '../../../utils';
 
 export function pasteElement(host: CanvasEvent, elementList: IElement[]) {
-  const draw = host.getDraw()
+  const draw = host.getDraw();
   if (
     draw.isReadonly() ||
     draw.isDisabled() ||
     draw.getControl().getIsDisabledPasteControl()
   ) {
-    return
+    return;
   }
-  const rangeManager = draw.getRange()
-  const { startIndex } = rangeManager.getRange()
-  const originalElementList = draw.getElementList()
+  const rangeManager = draw.getRange();
+  const { startIndex } = rangeManager.getRange();
+  const originalElementList = draw.getElementList();
   if (~startIndex && !rangeManager.getIsSelectAll()) {
-    const anchorElement = originalElementList[startIndex]
+    const anchorElement = originalElementList[startIndex];
     if (anchorElement?.titleId || anchorElement?.listId) {
-      let start = 0
+      let start = 0;
       while (start < elementList.length) {
-        const pasteElement = elementList[start]
+        const pasteElement = elementList[start];
         if (anchorElement.titleId && /^\n/.test(pasteElement.value)) {
-          break
+          break;
         }
         if (VIRTUAL_ELEMENT_TYPE.includes(pasteElement.type!)) {
-          elementList.splice(start, 1)
+          elementList.splice(start, 1);
           if (pasteElement.valueList) {
             for (let v = 0; v < pasteElement.valueList.length; v++) {
-              const element = pasteElement.valueList[v]
+              const element = pasteElement.valueList[v];
               if (element.value === ZERO || element.value === '\n') {
-                continue
+                continue;
               }
-              elementList.splice(start, 0, element)
-              start++
+              elementList.splice(start, 0, element);
+              start++;
             }
           }
-          start--
+          start--;
         }
-        start++
+        start++;
       }
     }
     formatElementContext(originalElementList, elementList, startIndex, {
       isBreakWhenWrap: true,
       editorOptions: draw.getOptions()
-    })
+    });
   }
-  draw.insertElementList(elementList)
+  draw.insertElementList(elementList);
 }
 
 export function pasteHTML(host: CanvasEvent, htmlText: string) {
-  const draw = host.getDraw()
-  if (draw.isReadonly() || draw.isDisabled()) return
+  const draw = host.getDraw();
+  if (draw.isReadonly() || draw.isDisabled()) return;
   const elementList = getElementListByHTML(htmlText, {
     innerWidth: draw.getOriginalInnerWidth()
-  })
-  pasteElement(host, elementList)
+  });
+  pasteElement(host, elementList);
 }
 
 export function pasteImage(host: CanvasEvent, file: File | Blob) {
-  const draw = host.getDraw()
-  if (draw.isReadonly() || draw.isDisabled()) return
-  const rangeManager = draw.getRange()
-  const { startIndex } = rangeManager.getRange()
-  const elementList = draw.getElementList()
-  const fileReader = new FileReader()
-  fileReader.readAsDataURL(file)
+  const draw = host.getDraw();
+  if (draw.isReadonly() || draw.isDisabled()) return;
+  const rangeManager = draw.getRange();
+  const { startIndex } = rangeManager.getRange();
+  const elementList = draw.getElementList();
+  const fileReader = new FileReader();
+  fileReader.readAsDataURL(file);
   fileReader.onload = () => {
-    const image = new Image()
-    const value = fileReader.result as string
-    image.src = value
+    const image = new Image();
+    const value = fileReader.result as string;
+    image.src = value;
     image.onload = () => {
       const imageElement: IElement = {
         value,
         type: ElementType.IMAGE,
         width: image.width,
         height: image.height
-      }
+      };
       if (~startIndex) {
         formatElementContext(elementList, [imageElement], startIndex, {
           editorOptions: draw.getOptions()
-        })
+        });
       }
-      draw.insertElementList([imageElement])
-    }
-  }
+      draw.insertElementList([imageElement]);
+    };
+  };
 }
 
 export function pasteByEvent(host: CanvasEvent, evt: ClipboardEvent) {
-  const draw = host.getDraw()
-  if (draw.isReadonly() || draw.isDisabled()) return
-  const clipboardData = evt.clipboardData
-  if (!clipboardData) return
-  const { paste } = draw.getOverride()
+  const draw = host.getDraw();
+  if (draw.isReadonly() || draw.isDisabled()) return;
+  const clipboardData = evt.clipboardData;
+  if (!clipboardData) return;
+  const { paste } = draw.getOverride();
   if (paste) {
-    const overrideResult = paste(evt)
-    if ((<IOverrideResult>overrideResult)?.preventDefault !== false) return
+    const overrideResult = paste(evt);
+    if ((<IOverrideResult>overrideResult)?.preventDefault !== false) return;
   }
   if (!getIsClipboardContainFile(clipboardData)) {
-    const clipboardText = clipboardData.getData('text')
-    const editorClipboardData = getClipboardData()
+    const clipboardText = clipboardData.getData('text');
+    const editorClipboardData = getClipboardData();
     if (
       editorClipboardData &&
       normalizeLineBreak(clipboardText) ===
         normalizeLineBreak(editorClipboardData.text)
     ) {
-      pasteElement(host, editorClipboardData.elementList)
-      return
+      pasteElement(host, editorClipboardData.elementList);
+      return;
     }
   }
-  removeClipboardData()
-  let isHTML = false
+  removeClipboardData();
+  let isHTML = false;
   for (let i = 0; i < clipboardData.items.length; i++) {
-    const item = clipboardData.items[i]
+    const item = clipboardData.items[i];
     if (item.type === 'text/html') {
-      isHTML = true
-      break
+      isHTML = true;
+      break;
     }
   }
   for (let i = 0; i < clipboardData.items.length; i++) {
-    const item = clipboardData.items[i]
+    const item = clipboardData.items[i];
     if (item.kind === 'string') {
       if (item.type === 'text/plain' && !isHTML) {
         item.getAsString(plainText => {
-          host.input(plainText)
-        })
-        break
+          host.input(plainText);
+        });
+        break;
       }
       if (item.type === 'text/html' && isHTML) {
         item.getAsString(htmlText => {
-          pasteHTML(host, htmlText)
-        })
-        break
+          pasteHTML(host, htmlText);
+        });
+        break;
       }
     } else if (item.kind === 'file') {
       if (item.type.includes('image')) {
-        const file = item.getAsFile()
+        const file = item.getAsFile();
         if (file) {
-          pasteImage(host, file)
+          pasteImage(host, file);
         }
       }
     }
@@ -158,54 +158,54 @@ export function pasteByEvent(host: CanvasEvent, evt: ClipboardEvent) {
 }
 
 export async function pasteByApi(host: CanvasEvent, options?: IPasteOption) {
-  const draw = host.getDraw()
-  if (draw.isReadonly() || draw.isDisabled()) return
-  const { paste } = draw.getOverride()
+  const draw = host.getDraw();
+  if (draw.isReadonly() || draw.isDisabled()) return;
+  const { paste } = draw.getOverride();
   if (paste) {
-    const overrideResult = paste()
-    if ((<IOverrideResult>overrideResult)?.preventDefault !== false) return
+    const overrideResult = paste();
+    if ((<IOverrideResult>overrideResult)?.preventDefault !== false) return;
   }
-  const clipboardText = await navigator.clipboard.readText()
-  const editorClipboardData = getClipboardData()
+  const clipboardText = await navigator.clipboard.readText();
+  const editorClipboardData = getClipboardData();
   if (
     editorClipboardData &&
     normalizeLineBreak(clipboardText) ===
       normalizeLineBreak(editorClipboardData.text)
   ) {
-    pasteElement(host, editorClipboardData.elementList)
-    return
+    pasteElement(host, editorClipboardData.elementList);
+    return;
   }
-  removeClipboardData()
+  removeClipboardData();
   if (options?.isPlainText) {
     if (clipboardText) {
-      host.input(clipboardText)
+      host.input(clipboardText);
     }
   } else {
-    const clipboardData = await navigator.clipboard.read()
-    let isHTML = false
+    const clipboardData = await navigator.clipboard.read();
+    let isHTML = false;
     for (const item of clipboardData) {
       if (item.types.includes('text/html')) {
-        isHTML = true
-        break
+        isHTML = true;
+        break;
       }
     }
     for (const item of clipboardData) {
       if (item.types.includes('text/plain') && !isHTML) {
-        const textBlob = await item.getType('text/plain')
-        const text = await textBlob.text()
+        const textBlob = await item.getType('text/plain');
+        const text = await textBlob.text();
         if (text) {
-          host.input(text)
+          host.input(text);
         }
       } else if (item.types.includes('text/html') && isHTML) {
-        const htmlTextBlob = await item.getType('text/html')
-        const htmlText = await htmlTextBlob.text()
+        const htmlTextBlob = await item.getType('text/html');
+        const htmlText = await htmlTextBlob.text();
         if (htmlText) {
-          pasteHTML(host, htmlText)
+          pasteHTML(host, htmlText);
         }
       } else if (item.types.some(type => type.startsWith('image/'))) {
-        const type = item.types.find(type => type.startsWith('image/'))!
-        const imageBlob = await item.getType(type)
-        pasteImage(host, imageBlob)
+        const type = item.types.find(type => type.startsWith('image/'))!;
+        const imageBlob = await item.getType(type);
+        pasteImage(host, imageBlob);
       }
     }
   }

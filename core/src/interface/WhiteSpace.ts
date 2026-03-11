@@ -1,5 +1,5 @@
 export interface IWhiteSpaceOption {
-  disabled?: boolean
-  color?: string
-  radius?: number
+  disabled?: boolean;
+  color?: string;
+  radius?: number;
 }

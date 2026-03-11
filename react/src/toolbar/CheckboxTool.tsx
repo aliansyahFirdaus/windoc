@@ -3,5 +3,5 @@ export default function CheckboxTool() {
     <div className="menu-item__checkbox" title="Checkbox">
       <i></i>
     </div>
-  )
+  );
 }

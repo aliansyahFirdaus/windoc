@@ -3,5 +3,5 @@ export default function CodeBlockTool() {
     <div className="menu-item__codeblock" title="Code Block">
       <i></i>
     </div>
-  )
+  );
 }

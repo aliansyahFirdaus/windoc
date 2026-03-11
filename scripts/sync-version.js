@@ -75,4 +75,13 @@ replace(
   ]
 )
 
+// ── core/src/version.ts ──────────────────────────────
+replace(
+  path.join(root, 'core/src/version.ts'),
+  [
+    /export const version = '[\d.]+'/,
+    `export const version = '${coreVersion}'`,
+  ]
+)
+
 console.log('done.')

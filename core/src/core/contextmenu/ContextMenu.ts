@@ -1,126 +1,126 @@
-import { NAME_PLACEHOLDER } from '../../dataset/constant/ContextMenu'
-import { EDITOR_COMPONENT, EDITOR_PREFIX } from '../../dataset/constant/Editor'
-import { EditorComponent } from '../../dataset/enum/Editor'
-import { DeepRequired } from '../../interface/Common'
-import { IEditorOption } from '../../interface/Editor'
-import { IElement } from '../../interface/Element'
+import { NAME_PLACEHOLDER } from '../../dataset/constant/ContextMenu';
+import { EDITOR_COMPONENT, EDITOR_PREFIX } from '../../dataset/constant/Editor';
+import { EditorComponent } from '../../dataset/enum/Editor';
+import { DeepRequired } from '../../interface/Common';
+import { IEditorOption } from '../../interface/Editor';
+import { IElement } from '../../interface/Element';
 import {
   IContextMenuContext,
   IRegisterContextMenu
-} from '../../interface/contextmenu/ContextMenu'
-import { findParent } from '../../utils'
-import { zipElementList } from '../../utils/element'
-import { Command } from '../command/Command'
-import { Draw } from '../draw/Draw'
-import { I18n } from '../i18n/I18n'
-import { Position } from '../position/Position'
-import { RangeManager } from '../range/RangeManager'
-import { controlMenus } from './menus/controlMenus'
-import { globalMenus } from './menus/globalMenus'
-import { hyperlinkMenus } from './menus/hyperlinkMenus'
-import { imageMenus } from './menus/imageMenus'
-import { tableMenus } from './menus/tableMenus'
+} from '../../interface/contextmenu/ContextMenu';
+import { findParent } from '../../utils';
+import { zipElementList } from '../../utils/element';
+import { Command } from '../command/Command';
+import { Draw } from '../draw/Draw';
+import { I18n } from '../i18n/I18n';
+import { Position } from '../position/Position';
+import { RangeManager } from '../range/RangeManager';
+import { controlMenus } from './menus/controlMenus';
+import { globalMenus } from './menus/globalMenus';
+import { hyperlinkMenus } from './menus/hyperlinkMenus';
+import { imageMenus } from './menus/imageMenus';
+import { tableMenus } from './menus/tableMenus';
 
 interface IRenderPayload {
-  contextMenuList: IRegisterContextMenu[]
-  left: number
-  top: number
-  parentMenuContainer?: HTMLDivElement
+  contextMenuList: IRegisterContextMenu[];
+  left: number;
+  top: number;
+  parentMenuContainer?: HTMLDivElement;
 }
 
 export class ContextMenu {
-  private options: DeepRequired<IEditorOption>
-  private draw: Draw
-  private command: Command
-  private range: RangeManager
-  private position: Position
-  private i18n: I18n
-  private container: HTMLDivElement
-  private contextMenuList: IRegisterContextMenu[]
-  private contextMenuContainerList: HTMLDivElement[]
-  private contextMenuRelationShip: Map<HTMLDivElement, HTMLDivElement>
-  private context: IContextMenuContext | null
+  private options: DeepRequired<IEditorOption>;
+  private draw: Draw;
+  private command: Command;
+  private range: RangeManager;
+  private position: Position;
+  private i18n: I18n;
+  private container: HTMLDivElement;
+  private contextMenuList: IRegisterContextMenu[];
+  private contextMenuContainerList: HTMLDivElement[];
+  private contextMenuRelationShip: Map<HTMLDivElement, HTMLDivElement>;
+  private context: IContextMenuContext | null;
 
   constructor(draw: Draw, command: Command) {
-    this.options = draw.getOptions()
-    this.draw = draw
-    this.command = command
-    this.range = draw.getRange()
-    this.position = draw.getPosition()
-    this.i18n = draw.getI18n()
-    this.container = draw.getContainer()
-    this.context = null
+    this.options = draw.getOptions();
+    this.draw = draw;
+    this.command = command;
+    this.range = draw.getRange();
+    this.position = draw.getPosition();
+    this.i18n = draw.getI18n();
+    this.container = draw.getContainer();
+    this.context = null;
     this.contextMenuList = [
       ...globalMenus,
       ...tableMenus,
       ...imageMenus,
       ...controlMenus,
       ...hyperlinkMenus
-    ]
-    this.contextMenuContainerList = []
-    this.contextMenuRelationShip = new Map()
-    this._addEvent()
+    ];
+    this.contextMenuContainerList = [];
+    this.contextMenuRelationShip = new Map();
+    this._addEvent();
   }
 
   public getContextMenuList(): IRegisterContextMenu[] {
-    return this.contextMenuList
+    return this.contextMenuList;
   }
 
   private _addEvent() {
-    this.container.addEventListener('contextmenu', this._proxyContextMenuEvent)
-    document.addEventListener('mousedown', this._handleSideEffect)
+    this.container.addEventListener('contextmenu', this._proxyContextMenuEvent);
+    document.addEventListener('mousedown', this._handleSideEffect);
   }
 
   public removeEvent() {
     this.container.removeEventListener(
       'contextmenu',
       this._proxyContextMenuEvent
-    )
-    document.removeEventListener('mousedown', this._handleSideEffect)
+    );
+    document.removeEventListener('mousedown', this._handleSideEffect);
   }
 
   private _filterMenuList(
     menuList: IRegisterContextMenu[]
   ): IRegisterContextMenu[] {
-    const { contextMenuDisableKeys } = this.options
-    const renderList: IRegisterContextMenu[] = []
+    const { contextMenuDisableKeys } = this.options;
+    const renderList: IRegisterContextMenu[] = [];
     for (let m = 0; m < menuList.length; m++) {
-      const menu = menuList[m]
+      const menu = menuList[m];
       if (
         menu.disable ||
         (menu.key && contextMenuDisableKeys.includes(menu.key))
       ) {
-        continue
+        continue;
       }
       if (menu.isDivider) {
-        renderList.push(menu)
+        renderList.push(menu);
       } else {
         if (menu.when?.(this.context!)) {
-          renderList.push(menu)
+          renderList.push(menu);
         }
       }
     }
-    return renderList
+    return renderList;
   }
 
   private _proxyContextMenuEvent = (evt: MouseEvent) => {
-    this.context = this._getContext()
-    const renderList = this._filterMenuList(this.contextMenuList)
-    const isRegisterContextMenu = renderList.some(menu => !menu.isDivider)
+    this.context = this._getContext();
+    const renderList = this._filterMenuList(this.contextMenuList);
+    const isRegisterContextMenu = renderList.some(menu => !menu.isDivider);
     if (isRegisterContextMenu) {
-      this.dispose()
+      this.dispose();
       this._render({
         contextMenuList: renderList,
         left: evt.x,
         top: evt.y
-      })
+      });
     }
-    evt.preventDefault()
-  }
+    evt.preventDefault();
+  };
 
   private _handleSideEffect = (evt: MouseEvent) => {
     if (this.contextMenuContainerList.length) {
-      const target = <Element>(evt?.composedPath()[0] || evt.target)
+      const target = <Element>(evt?.composedPath()[0] || evt.target);
       const contextMenuDom = findParent(
         target,
         (node: Node & Element) =>
@@ -128,39 +128,39 @@ export class ContextMenu {
           node.nodeType === 1 &&
           node.getAttribute(EDITOR_COMPONENT) === EditorComponent.CONTEXTMENU,
         true
-      )
+      );
       if (!contextMenuDom) {
-        this.dispose()
+        this.dispose();
       }
     }
-  }
+  };
 
   private _getContext(): IContextMenuContext {
-    const isReadonly = this.draw.isReadonly()
+    const isReadonly = this.draw.isReadonly();
     const {
       isCrossRowCol: crossRowCol,
       startIndex,
       endIndex
-    } = this.range.getRange()
-    const editorTextFocus = !!(~startIndex || ~endIndex)
-    const editorHasSelection = editorTextFocus && startIndex !== endIndex
+    } = this.range.getRange();
+    const editorTextFocus = !!(~startIndex || ~endIndex);
+    const editorHasSelection = editorTextFocus && startIndex !== endIndex;
     const { isTable, trIndex, tdIndex, index } =
-      this.position.getPositionContext()
-    let tableElement: IElement | null = null
+      this.position.getPositionContext();
+    let tableElement: IElement | null = null;
     if (isTable) {
-      const originalElementList = this.draw.getOriginalElementList()
-      const originTableElement = originalElementList[index!] || null
+      const originalElementList = this.draw.getOriginalElementList();
+      const originTableElement = originalElementList[index!] || null;
       if (originTableElement) {
         tableElement = zipElementList([originTableElement], {
           extraPickAttrs: ['id']
-        })[0]
+        })[0];
       }
     }
-    const isCrossRowCol = isTable && !!crossRowCol
-    const elementList = this.draw.getElementList()
-    const startElement = elementList[startIndex] || null
-    const endElement = elementList[endIndex] || null
-    const zone = this.draw.getZone().getZone()
+    const isCrossRowCol = isTable && !!crossRowCol;
+    const elementList = this.draw.getElementList();
+    const startElement = elementList[startIndex] || null;
+    const endElement = elementList[endIndex] || null;
+    const zone = this.draw.getZone().getZone();
     return {
       startElement,
       endElement,
@@ -174,132 +174,136 @@ export class ContextMenu {
       tdIndex: tdIndex ?? null,
       tableElement,
       options: this.options
-    }
+    };
   }
 
   private _createContextMenuContainer(): HTMLDivElement {
-    const contextMenuContainer = document.createElement('div')
-    contextMenuContainer.classList.add(`${EDITOR_PREFIX}-contextmenu-container`)
+    const contextMenuContainer = document.createElement('div');
+    contextMenuContainer.classList.add(
+      `${EDITOR_PREFIX}-contextmenu-container`
+    );
     contextMenuContainer.setAttribute(
       EDITOR_COMPONENT,
       EditorComponent.CONTEXTMENU
-    )
-    this.container.append(contextMenuContainer)
-    return contextMenuContainer
+    );
+    this.container.append(contextMenuContainer);
+    return contextMenuContainer;
   }
 
   private _render(payload: IRenderPayload): HTMLDivElement {
-    const { contextMenuList, left, top, parentMenuContainer } = payload
-    const contextMenuContainer = this._createContextMenuContainer()
-    const contextMenuContent = document.createElement('div')
-    contextMenuContent.classList.add(`${EDITOR_PREFIX}-contextmenu-content`)
-    let childMenuContainer: HTMLDivElement | null = null
+    const { contextMenuList, left, top, parentMenuContainer } = payload;
+    const contextMenuContainer = this._createContextMenuContainer();
+    const contextMenuContent = document.createElement('div');
+    contextMenuContent.classList.add(`${EDITOR_PREFIX}-contextmenu-content`);
+    let childMenuContainer: HTMLDivElement | null = null;
     if (parentMenuContainer) {
       this.contextMenuRelationShip.set(
         parentMenuContainer,
         contextMenuContainer
-      )
+      );
     }
     for (let c = 0; c < contextMenuList.length; c++) {
-      const menu = contextMenuList[c]
+      const menu = contextMenuList[c];
       if (menu.isDivider) {
         if (
           c !== 0 &&
           c !== contextMenuList.length - 1 &&
           !contextMenuList[c - 1]?.isDivider
         ) {
-          const divider = document.createElement('div')
-          divider.classList.add(`${EDITOR_PREFIX}-contextmenu-divider`)
-          contextMenuContent.append(divider)
+          const divider = document.createElement('div');
+          divider.classList.add(`${EDITOR_PREFIX}-contextmenu-divider`);
+          contextMenuContent.append(divider);
         }
       } else {
-        const menuItem = document.createElement('div')
-        menuItem.classList.add(`${EDITOR_PREFIX}-contextmenu-item`)
+        const menuItem = document.createElement('div');
+        menuItem.classList.add(`${EDITOR_PREFIX}-contextmenu-item`);
         if (menu.childMenus) {
-          const childMenus = this._filterMenuList(menu.childMenus)
-          const isRegisterContextMenu = childMenus.some(menu => !menu.isDivider)
+          const childMenus = this._filterMenuList(menu.childMenus);
+          const isRegisterContextMenu = childMenus.some(
+            menu => !menu.isDivider
+          );
           if (isRegisterContextMenu) {
-            menuItem.classList.add(`${EDITOR_PREFIX}-contextmenu-sub-item`)
+            menuItem.classList.add(`${EDITOR_PREFIX}-contextmenu-sub-item`);
             menuItem.onmouseenter = () => {
-              this._setHoverStatus(menuItem, true)
-              this._removeSubMenu(contextMenuContainer)
-              const subMenuRect = menuItem.getBoundingClientRect()
-              const left = subMenuRect.left + subMenuRect.width
-              const top = subMenuRect.top
+              this._setHoverStatus(menuItem, true);
+              this._removeSubMenu(contextMenuContainer);
+              const subMenuRect = menuItem.getBoundingClientRect();
+              const left = subMenuRect.left + subMenuRect.width;
+              const top = subMenuRect.top;
               childMenuContainer = this._render({
                 contextMenuList: childMenus,
                 left,
                 top,
                 parentMenuContainer: contextMenuContainer
-              })
-            }
+              });
+            };
             menuItem.onmouseleave = evt => {
               if (
                 !childMenuContainer ||
                 !childMenuContainer.contains(evt.relatedTarget as Node)
               ) {
-                this._setHoverStatus(menuItem, false)
+                this._setHoverStatus(menuItem, false);
               }
-            }
+            };
           }
         } else {
           menuItem.onmouseenter = () => {
-            this._setHoverStatus(menuItem, true)
-            this._removeSubMenu(contextMenuContainer)
-          }
+            this._setHoverStatus(menuItem, true);
+            this._removeSubMenu(contextMenuContainer);
+          };
           menuItem.onmouseleave = () => {
-            this._setHoverStatus(menuItem, false)
-          }
+            this._setHoverStatus(menuItem, false);
+          };
           menuItem.onclick = () => {
             if (menu.callback && this.context) {
-              menu.callback(this.command, this.context)
+              menu.callback(this.command, this.context);
             }
-            this.dispose()
-          }
+            this.dispose();
+          };
         }
-        const icon = document.createElement('i')
-        menuItem.append(icon)
+        const icon = document.createElement('i');
+        menuItem.append(icon);
         if (menu.icon) {
-          icon.classList.add(`${EDITOR_PREFIX}-contextmenu-${menu.icon}`)
+          icon.classList.add(`${EDITOR_PREFIX}-contextmenu-${menu.icon}`);
         }
-        const span = document.createElement('span')
+        const span = document.createElement('span');
         const name = menu.i18nPath
           ? this._formatName(this.i18n.t(menu.i18nPath))
-          : this._formatName(menu.name || '')
-        span.append(document.createTextNode(name))
-        menuItem.append(span)
+          : this._formatName(menu.name || '');
+        span.append(document.createTextNode(name));
+        menuItem.append(span);
         if (menu.shortCut) {
-          const span = document.createElement('span')
-          span.classList.add(`${EDITOR_PREFIX}-shortcut`)
-          span.append(document.createTextNode(menu.shortCut))
-          menuItem.append(span)
+          const span = document.createElement('span');
+          span.classList.add(`${EDITOR_PREFIX}-shortcut`);
+          span.append(document.createTextNode(menu.shortCut));
+          menuItem.append(span);
         }
-        contextMenuContent.append(menuItem)
+        contextMenuContent.append(menuItem);
       }
     }
-    contextMenuContainer.append(contextMenuContent)
-    contextMenuContainer.style.display = 'block'
-    const innerWidth = window.innerWidth
-    const contextmenuRect = contextMenuContainer.getBoundingClientRect()
-    const contextMenuWidth = contextmenuRect.width
+    contextMenuContainer.append(contextMenuContent);
+    contextMenuContainer.style.display = 'block';
+    const innerWidth = window.innerWidth;
+    const contextmenuRect = contextMenuContainer.getBoundingClientRect();
+    const contextMenuWidth = contextmenuRect.width;
     const adjustLeft =
-      left + contextMenuWidth > innerWidth ? left - contextMenuWidth : left
-    contextMenuContainer.style.left = `${adjustLeft}px`
-    const innerHeight = window.innerHeight
-    const contextMenuHeight = contextmenuRect.height
+      left + contextMenuWidth > innerWidth ? left - contextMenuWidth : left;
+    contextMenuContainer.style.left = `${adjustLeft}px`;
+    const innerHeight = window.innerHeight;
+    const contextMenuHeight = contextmenuRect.height;
     const adjustTop =
-      top + contextMenuHeight > innerHeight ? top - contextMenuHeight : top
-    contextMenuContainer.style.top = `${adjustTop}px`
-    this.contextMenuContainerList.push(contextMenuContainer)
-    return contextMenuContainer
+      top + contextMenuHeight > innerHeight ? top - contextMenuHeight : top;
+    contextMenuContainer.style.top = `${adjustTop}px`;
+    this.contextMenuContainerList.push(contextMenuContainer);
+    return contextMenuContainer;
   }
 
   private _removeSubMenu(payload: HTMLDivElement) {
-    const childMenu = this.contextMenuRelationShip.get(payload)
+    const childMenu = this.contextMenuRelationShip.get(payload);
     if (childMenu) {
-      this._removeSubMenu(childMenu)
-      childMenu.remove()
-      this.contextMenuRelationShip.delete(payload)
+      this._removeSubMenu(childMenu);
+      childMenu.remove();
+      this.contextMenuRelationShip.delete(payload);
     }
   }
 
@@ -307,34 +311,34 @@ export class ContextMenu {
     if (status) {
       payload.parentNode
         ?.querySelectorAll(`${EDITOR_PREFIX}-contextmenu-item`)
-        .forEach(child => child.classList.remove('hover'))
-      payload.classList.add('hover')
+        .forEach(child => child.classList.remove('hover'));
+      payload.classList.add('hover');
     } else {
-      payload.classList.remove('hover')
+      payload.classList.remove('hover');
     }
   }
 
   private _formatName(name: string): string {
-    const placeholderValues = Object.values(NAME_PLACEHOLDER)
-    const placeholderReg = new RegExp(`${placeholderValues.join('|')}`)
-    let formatName = name
+    const placeholderValues = Object.values(NAME_PLACEHOLDER);
+    const placeholderReg = new RegExp(`${placeholderValues.join('|')}`);
+    let formatName = name;
     if (placeholderReg.test(formatName)) {
-      const selectedReg = new RegExp(NAME_PLACEHOLDER.SELECTED_TEXT, 'g')
+      const selectedReg = new RegExp(NAME_PLACEHOLDER.SELECTED_TEXT, 'g');
       if (selectedReg.test(formatName)) {
-        const selectedText = this.range.toString()
-        formatName = formatName.replace(selectedReg, selectedText)
+        const selectedText = this.range.toString();
+        formatName = formatName.replace(selectedReg, selectedText);
       }
     }
-    return formatName
+    return formatName;
   }
 
   public registerContextMenuList(payload: IRegisterContextMenu[]) {
-    this.contextMenuList.push(...payload)
+    this.contextMenuList.push(...payload);
   }
 
   public dispose() {
-    this.contextMenuContainerList.forEach(child => child.remove())
-    this.contextMenuContainerList = []
-    this.contextMenuRelationShip.clear()
+    this.contextMenuContainerList.forEach(child => child.remove());
+    this.contextMenuContainerList = [];
+    this.contextMenuRelationShip.clear();
   }
 }

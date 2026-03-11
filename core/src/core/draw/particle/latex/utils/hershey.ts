@@ -1,51 +1,51 @@
 interface HersheyEntry {
-  w: number
-  xmin: number
-  xmax: number
-  ymin: number
-  ymax: number
-  polylines: Array<Array<Array<number>>>
+  w: number;
+  xmin: number;
+  xmax: number;
+  ymin: number;
+  ymax: number;
+  polylines: Array<Array<Array<number>>>;
 }
 
-const ordR = 'R'.charCodeAt(0)
+const ordR = 'R'.charCodeAt(0);
 
 export function HERSHEY(i: number): HersheyEntry {
   if (data[i] == null) {
-    compile(i)
+    compile(i);
   }
-  return data[i]
+  return data[i];
 }
 
 function compile(i: number): void {
-  const entry: string = raw[i]
+  const entry: string = raw[i];
   if (entry == null) {
-    return
+    return;
   }
-  const bound: string = entry.substring(3, 5)
-  const xmin: number = 1 * bound.charCodeAt(0) - ordR
-  const xmax: number = 1 * bound.charCodeAt(1) - ordR
-  const content: string = entry.substring(5)
+  const bound: string = entry.substring(3, 5);
+  const xmin: number = 1 * bound.charCodeAt(0) - ordR;
+  const xmax: number = 1 * bound.charCodeAt(1) - ordR;
+  const content: string = entry.substring(5);
 
-  const polylines: Array<Array<Array<number>>> = [[]]
-  let ymin = Infinity
-  let ymax = -Infinity
-  let zmin = Infinity
-  let zmax = -Infinity
-  let j = 0
+  const polylines: Array<Array<Array<number>>> = [[]];
+  let ymin = Infinity;
+  let ymax = -Infinity;
+  let zmin = Infinity;
+  let zmax = -Infinity;
+  let j = 0;
   while (j < content.length) {
-    const digit: string = content.substring(j, j + 2)
+    const digit: string = content.substring(j, j + 2);
     if (digit == ' R') {
-      polylines.push([])
+      polylines.push([]);
     } else {
-      const x: number = digit.charCodeAt(0) - ordR - xmin
-      const y: number = digit.charCodeAt(1) - ordR
-      ymin = Math.min(y, ymin)
-      ymax = Math.max(y, ymax)
-      zmin = Math.min(x, zmin)
-      zmax = Math.max(x, zmax)
-      polylines[polylines.length - 1].push([x, y])
+      const x: number = digit.charCodeAt(0) - ordR - xmin;
+      const y: number = digit.charCodeAt(1) - ordR;
+      ymin = Math.min(y, ymin);
+      ymax = Math.max(y, ymax);
+      zmin = Math.min(x, zmin);
+      zmax = Math.max(x, zmax);
+      polylines[polylines.length - 1].push([x, y]);
     }
-    j += 2
+    j += 2;
   }
   data[i] = {
     w: xmax - xmin,
@@ -54,9 +54,9 @@ function compile(i: number): void {
     ymin: ymin,
     ymax: ymax,
     polylines: polylines
-  }
+  };
 }
-const data: Record<number, HersheyEntry> = {}
+const data: Record<number, HersheyEntry> = {};
 
 const raw: Record<number, string> = {
   1: '  9MWRMNV RRMVV RPSTS',
@@ -1629,4 +1629,4 @@ const raw: Record<number, string> = {
   3924: ' 39I[LONPUZV[XY RMNOOUYWZ RLONMONVXXY RXMVMVOXOXMVOSS RQUNYL[N[NYLYL[ RNTQT RSTVT',
   3925: ' 49I[KOLOMPMYP[UY RMNNONYPZ RKOMMOOOXRZ RVMXOWPW]V_U`SaQaO`MaObQa RVPWOVNUOVPV^U_ RPaNa RVMTOUPU^T`Sa',
   3926: ' 43L[RNOPOORNTMWOWSRU RTNVOVS RRNUPUSTT RRUWWW]V_U`SaQaO`MaObQa RVWV^U_ RPaNa RTVUWU^T`Sa'
-}
+};

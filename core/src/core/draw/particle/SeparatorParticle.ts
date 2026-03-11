@@ -1,13 +1,13 @@
-import { DeepRequired } from '../../../interface/Common'
-import { IEditorOption } from '../../../interface/Editor'
-import { IRowElement } from '../../../interface/Row'
-import { Draw } from '../Draw'
+import { DeepRequired } from '../../../interface/Common';
+import { IEditorOption } from '../../../interface/Editor';
+import { IRowElement } from '../../../interface/Row';
+import { Draw } from '../Draw';
 
 export class SeparatorParticle {
-  private options: DeepRequired<IEditorOption>
+  private options: DeepRequired<IEditorOption>;
 
   constructor(draw: Draw) {
-    this.options = draw.getOptions()
+    this.options = draw.getOptions();
   }
 
   public render(
@@ -16,23 +16,23 @@ export class SeparatorParticle {
     x: number,
     y: number
   ) {
-    ctx.save()
+    ctx.save();
     const {
       scale,
       separator: { lineWidth, strokeStyle }
-    } = this.options
-    ctx.lineWidth = (element.lineWidth || lineWidth) * scale
-    ctx.strokeStyle = element.color || strokeStyle
+    } = this.options;
+    ctx.lineWidth = (element.lineWidth || lineWidth) * scale;
+    ctx.strokeStyle = element.color || strokeStyle;
     if (element.dashArray?.length) {
-      ctx.setLineDash(element.dashArray)
+      ctx.setLineDash(element.dashArray);
     }
-    const sideGap = 4 * scale
-    const offsetY = Math.round(y)
-    ctx.translate(0, ctx.lineWidth / 2)
-    ctx.beginPath()
-    ctx.moveTo(x + sideGap, offsetY)
-    ctx.lineTo(x + element.width! * scale - sideGap, offsetY)
-    ctx.stroke()
-    ctx.restore()
+    const sideGap = 4 * scale;
+    const offsetY = Math.round(y);
+    ctx.translate(0, ctx.lineWidth / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + sideGap, offsetY);
+    ctx.lineTo(x + element.width! * scale - sideGap, offsetY);
+    ctx.stroke();
+    ctx.restore();
   }
 }

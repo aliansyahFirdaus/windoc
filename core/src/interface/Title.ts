@@ -1,32 +1,32 @@
-import { EditorZone } from '../dataset/enum/Editor'
-import { IElement } from './Element'
+import { EditorZone } from '../dataset/enum/Editor';
+import { IElement } from './Element';
 
 export interface ITitleSizeOption {
-  defaultFirstSize?: number
-  defaultSecondSize?: number
-  defaultThirdSize?: number
-  defaultFourthSize?: number
-  defaultFifthSize?: number
-  defaultSixthSize?: number
+  defaultFirstSize?: number;
+  defaultSecondSize?: number;
+  defaultThirdSize?: number;
+  defaultFourthSize?: number;
+  defaultFifthSize?: number;
+  defaultSixthSize?: number;
 }
 
-export type ITitleOption = ITitleSizeOption & {}
+export type ITitleOption = ITitleSizeOption & {};
 
 export interface ITitleRule {
-  deletable?: boolean
-  disabled?: boolean
+  deletable?: boolean;
+  disabled?: boolean;
 }
 
 export type ITitle = ITitleRule & {
-  conceptId?: string
-}
+  conceptId?: string;
+};
 
 export interface IGetTitleValueOption {
-  conceptId: string
+  conceptId: string;
 }
 
 export type IGetTitleValueResult = (ITitle & {
-  value: string | null
-  elementList: IElement[]
-  zone: EditorZone
-})[]
+  value: string | null;
+  elementList: IElement[];
+  zone: EditorZone;
+})[];

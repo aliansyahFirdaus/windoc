@@ -3,5 +3,5 @@ export default function BlockTool() {
     <div className="menu-item__block" title="Block">
       <i></i>
     </div>
-  )
+  );
 }

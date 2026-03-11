@@ -1,9 +1,9 @@
-import { IPadding } from '../Common'
+import { IPadding } from '../Common';
 
 export interface ITableOption {
-  tdPadding?: IPadding
-  defaultTrMinHeight?: number
-  defaultColMinWidth?: number
-  defaultBorderColor?: string
-  overflow?: boolean
+  tdPadding?: IPadding;
+  defaultTrMinHeight?: number;
+  defaultColMinWidth?: number;
+  defaultBorderColor?: string;
+  overflow?: boolean;
 }

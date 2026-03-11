@@ -1,10 +1,14 @@
-import { useFooter } from '../FooterContext'
+import { useFooter } from '../FooterContext';
 
 export default function CatalogToggleTool() {
-  const { handleToggleCatalogAction } = useFooter()
+  const { handleToggleCatalogAction } = useFooter();
   return (
-    <div className="catalog-mode" title="Catalog" onClick={handleToggleCatalogAction}>
+    <div
+      className="catalog-mode"
+      title="Catalog"
+      onClick={handleToggleCatalogAction}
+    >
       <i></i>
     </div>
-  )
+  );
 }

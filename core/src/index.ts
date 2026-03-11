@@ -1,25 +1,25 @@
-import './assets/css/index.css'
-import { version } from './version'
-import { IEditorData, IEditorOption, IEditorResult } from './interface/Editor'
-import { IElement } from './interface/Element'
-import { Draw } from './core/draw/Draw'
-import { Command } from './core/command/Command'
-import { CommandAdapt } from './core/command/CommandAdapt'
-import { Listener } from './core/listener/Listener'
-import { RowFlex } from './dataset/enum/Row'
+import './assets/css/index.css';
+import { version } from './version';
+import { IEditorData, IEditorOption, IEditorResult } from './interface/Editor';
+import { IElement } from './interface/Element';
+import { Draw } from './core/draw/Draw';
+import { Command } from './core/command/Command';
+import { CommandAdapt } from './core/command/CommandAdapt';
+import { Listener } from './core/listener/Listener';
+import { RowFlex } from './dataset/enum/Row';
 import {
   FlexDirection,
   ImageDisplay,
   LocationPosition
-} from './dataset/enum/Common'
-import { ElementType } from './dataset/enum/Element'
-import { formatElementList } from './utils/element'
-import { Register } from './core/register/Register'
-import { ContextMenu } from './core/contextmenu/ContextMenu'
+} from './dataset/enum/Common';
+import { ElementType } from './dataset/enum/Element';
+import { formatElementList } from './utils/element';
+import { Register } from './core/register/Register';
+import { ContextMenu } from './core/contextmenu/ContextMenu';
 import {
   IContextMenuContext,
   IRegisterContextMenu
-} from './interface/contextmenu/ContextMenu'
+} from './interface/contextmenu/ContextMenu';
 import {
   EditorComponent,
   EditorZone,
@@ -28,64 +28,64 @@ import {
   PaperDirection,
   WordBreak,
   RenderMode
-} from './dataset/enum/Editor'
-import { EDITOR_CLIPBOARD, EDITOR_COMPONENT } from './dataset/constant/Editor'
-import { IWatermark } from './interface/Watermark'
+} from './dataset/enum/Editor';
+import { EDITOR_CLIPBOARD, EDITOR_COMPONENT } from './dataset/constant/Editor';
+import { IWatermark } from './interface/Watermark';
 import {
   ControlComponent,
   ControlIndentation,
   ControlState,
   ControlType
-} from './dataset/enum/Control'
-import { INavigateInfo } from './core/draw/interactive/Search'
-import { Shortcut } from './core/shortcut/Shortcut'
-import { KeyMap } from './dataset/enum/KeyMap'
-import { BlockType } from './dataset/enum/Block'
-import { IBlock } from './interface/Block'
-import { ILang } from './interface/i18n/I18n'
-import { VerticalAlign } from './dataset/enum/VerticalAlign'
-import { TableBorder, TdBorder, TdSlash } from './dataset/enum/table/Table'
-import { MaxHeightRatio, NumberType } from './dataset/enum/Common'
-import { TitleLevel } from './dataset/enum/Title'
-import { ListStyle, ListType, OlPreset, UlPreset } from './dataset/enum/List'
-import { ICatalog, ICatalogItem } from './interface/Catalog'
-import { Plugin } from './core/plugin/Plugin'
-import { UsePlugin } from './interface/Plugin'
-import { EventBus } from './core/event/eventbus/EventBus'
-import { EventBusMap } from './interface/EventBus'
-import { IRangeStyle } from './interface/Listener'
-import { Override } from './core/override/Override'
-import { LETTER_CLASS } from './dataset/constant/Common'
-import { INTERNAL_CONTEXT_MENU_KEY } from './dataset/constant/ContextMenu'
-import { IRange } from './interface/Range'
-import { deepClone, splitText } from './utils'
+} from './dataset/enum/Control';
+import { INavigateInfo } from './core/draw/interactive/Search';
+import { Shortcut } from './core/shortcut/Shortcut';
+import { KeyMap } from './dataset/enum/KeyMap';
+import { BlockType } from './dataset/enum/Block';
+import { IBlock } from './interface/Block';
+import { ILang } from './interface/i18n/I18n';
+import { VerticalAlign } from './dataset/enum/VerticalAlign';
+import { TableBorder, TdBorder, TdSlash } from './dataset/enum/table/Table';
+import { MaxHeightRatio, NumberType } from './dataset/enum/Common';
+import { TitleLevel } from './dataset/enum/Title';
+import { ListStyle, ListType, OlPreset, UlPreset } from './dataset/enum/List';
+import { ICatalog, ICatalogItem } from './interface/Catalog';
+import { Plugin } from './core/plugin/Plugin';
+import { UsePlugin } from './interface/Plugin';
+import { EventBus } from './core/event/eventbus/EventBus';
+import { EventBusMap } from './interface/EventBus';
+import { IRangeStyle } from './interface/Listener';
+import { Override } from './core/override/Override';
+import { LETTER_CLASS } from './dataset/constant/Common';
+import { INTERNAL_CONTEXT_MENU_KEY } from './dataset/constant/ContextMenu';
+import { IRange } from './interface/Range';
+import { deepClone, splitText } from './utils';
 import {
   createDomFromElementList,
   getElementListByHTML,
   getTextFromElementList,
   type IGetElementListByHTMLOption
-} from './utils/element'
-import { BackgroundRepeat, BackgroundSize } from './dataset/enum/Background'
-import { TextDecorationStyle } from './dataset/enum/Text'
-import { mergeOption } from './utils/option'
-import { LineNumberType } from './dataset/enum/LineNumber'
-import { AreaMode } from './dataset/enum/Area'
-import { IBadge } from './interface/Badge'
-import { WatermarkType } from './dataset/enum/Watermark'
-import { INTERNAL_SHORTCUT_KEY } from './dataset/constant/Shortcut'
-import { IGraffitiData } from './interface/Graffiti'
-import { Dialog } from './components/dialog/Dialog'
-import { Signature } from './components/signature/Signature'
+} from './utils/element';
+import { BackgroundRepeat, BackgroundSize } from './dataset/enum/Background';
+import { TextDecorationStyle } from './dataset/enum/Text';
+import { mergeOption } from './utils/option';
+import { LineNumberType } from './dataset/enum/LineNumber';
+import { AreaMode } from './dataset/enum/Area';
+import { IBadge } from './interface/Badge';
+import { WatermarkType } from './dataset/enum/Watermark';
+import { INTERNAL_SHORTCUT_KEY } from './dataset/constant/Shortcut';
+import { IGraffitiData } from './interface/Graffiti';
+import { Dialog } from './components/dialog/Dialog';
+import { Signature } from './components/signature/Signature';
 
 export default class Editor {
-  public command: Command
-  public version: string
-  public listener: Listener
-  public eventBus: EventBus<EventBusMap>
-  public override: Override
-  public register: Register
-  public destroy: () => void
-  public use: UsePlugin
+  public command: Command;
+  public version: string;
+  public listener: Listener;
+  public eventBus: EventBus<EventBusMap>;
+  public override: Override;
+  public register: Register;
+  public destroy: () => void;
+  public use: UsePlugin;
 
   constructor(
     container: HTMLDivElement,
@@ -93,40 +93,45 @@ export default class Editor {
     options: IEditorOption = {}
   ) {
     // Merge options
-    const editorOptions = mergeOption(options)
+    const editorOptions = mergeOption(options);
     // Data processing
-    data = deepClone(data)
-    let headerElementList: IElement[] = []
-    let mainElementList: IElement[] = []
-    let footerElementList: IElement[] = []
-    let graffitiData: IGraffitiData[] = []
+    data = deepClone(data);
+
+    let headerElementList: IElement[] = [];
+    let mainElementList: IElement[] = [];
+    let footerElementList: IElement[] = [];
+    let graffitiData: IGraffitiData[] = [];
+
     if (Array.isArray(data)) {
-      mainElementList = data
+      mainElementList = data;
     } else {
-      headerElementList = data.header || []
-      mainElementList = data.main
-      footerElementList = data.footer || []
-      graffitiData = data.graffiti || []
+      headerElementList = data.header || [];
+      mainElementList = data.main;
+      footerElementList = data.footer || [];
+      graffitiData = data.graffiti || [];
     }
+
     const pageComponentData = [
       headerElementList,
       mainElementList,
       footerElementList
-    ]
+    ];
+
     pageComponentData.forEach(elementList => {
       formatElementList(elementList, {
         editorOptions,
         isForceCompensation: true
-      })
-    })
+      });
+    });
+
     // Version
-    this.version = version
+    this.version = version;
     // Listener
-    this.listener = new Listener()
+    this.listener = new Listener();
     // Event bus
-    this.eventBus = new EventBus<EventBusMap>()
+    this.eventBus = new EventBus<EventBusMap>();
     // Override
-    this.override = new Override()
+    this.override = new Override();
     // Initialize draw
     const draw = new Draw(
       container,
@@ -140,29 +145,29 @@ export default class Editor {
       this.listener,
       this.eventBus,
       this.override
-    )
+    );
     // Command
-    this.command = new Command(new CommandAdapt(draw))
+    this.command = new Command(new CommandAdapt(draw));
     // Context menu
-    const contextMenu = new ContextMenu(draw, this.command)
+    const contextMenu = new ContextMenu(draw, this.command);
     // Shortcut
-    const shortcut = new Shortcut(draw, this.command)
+    const shortcut = new Shortcut(draw, this.command);
     // Register
     this.register = new Register({
       contextMenu,
       shortcut,
       i18n: draw.getI18n()
-    })
+    });
     // Register destroy method
     this.destroy = () => {
-      draw.destroy()
-      shortcut.removeEvent()
-      contextMenu.removeEvent()
-      this.eventBus.dangerouslyClearAll()
-    }
+      draw.destroy();
+      shortcut.removeEvent();
+      contextMenu.removeEvent();
+      this.eventBus.dangerouslyClearAll();
+    };
     // Plugin
-    const plugin = new Plugin(this)
-    this.use = plugin.use.bind(plugin)
+    const plugin = new Plugin(this);
+    this.use = plugin.use.bind(plugin);
   }
 }
 
@@ -172,13 +177,10 @@ export {
   createDomFromElementList,
   getElementListByHTML,
   getTextFromElementList
-}
+};
 
 // Public components
-export {
-  Dialog,
-  Signature
-}
+export { Dialog, Signature };
 
 // Public constants
 export {
@@ -187,10 +189,10 @@ export {
   INTERNAL_CONTEXT_MENU_KEY,
   INTERNAL_SHORTCUT_KEY,
   EDITOR_CLIPBOARD
-}
+};
 
 // Unit conversion helpers
-export { cm, cmToPx, pxToCm, mm, inch } from './utils/unit'
+export { cm, cmToPx, pxToCm, mm, inch } from './utils/unit';
 
 // Public enums
 export {
@@ -231,7 +233,7 @@ export {
   ControlState,
   FlexDirection,
   WatermarkType
-}
+};
 
 // Public types
 export type {
@@ -251,4 +253,4 @@ export type {
   IRangeStyle,
   IBadge,
   IGetElementListByHTMLOption
-}
+};

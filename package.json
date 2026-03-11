@@ -12,11 +12,13 @@
     "dev": "yarn workspace @windoc/core dev & yarn workspace @windoc/react dev",
     "sync-version": "node scripts/sync-version.js",
     "changelog": "npx git-cliff@latest -o CHANGELOG.md",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format": "prettier --write \"core/src/**/*.{ts,tsx}\" \"react/src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.3",
     "@commitlint/config-conventional": "^20.4.3",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3"
   }
 }
