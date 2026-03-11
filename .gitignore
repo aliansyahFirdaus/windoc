@@ -5,3 +5,4 @@ build/
 *.tsbuildinfo
 .DS_Store
 **/.yarn/install-state.gz
+.claude/
