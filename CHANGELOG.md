@@ -3,6 +3,12 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.5] — 2026-03-11
+
+### Fixed
+- Add null guards for richtext commands and fix drop override
+
+
 ## [0.3.4] — 2026-03-11
 
 ### Fixed
