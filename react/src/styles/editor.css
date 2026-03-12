@@ -130,7 +130,9 @@ ul {
 .menu-item .select {
     border: none;
     font-size: 12px;
-    line-height: 28px;
+    display: flex;
+    align-items: center;
+    height: 100%;
     user-select: none;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
