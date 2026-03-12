@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useEditor } from '../EditorContext';
 
-const SIZES = [72, 48, 36, 24, 20, 18, 16, 14, 12, 11, 10, 9, 8];
+const SIZES = [72, 48, 36, 24, 20, 18, 16, 14, 12, 11, 10, 9, 8, 7];
 
 export default function FontSizeTool() {
   const { editorRef, rangeStyle } = useEditor();
