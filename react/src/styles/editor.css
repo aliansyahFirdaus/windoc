@@ -291,7 +291,7 @@ ul {
     border: 1px solid #d0d5dd;
     border-radius: 8px;
     background: #fff;
-    padding: 0 4px;
+    padding: 0 18px 0 4px;
     margin: 0 2px;
     display: flex;
     align-items: center;
