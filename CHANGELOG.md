@@ -3,6 +3,12 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.9] — 2026-03-12
+
+### Fixed
+- Prevent dropdown arrow from overlapping icon in UnderlineTool
+
+
 ## [0.3.7] — 2026-03-11
 
 ### Fixed
