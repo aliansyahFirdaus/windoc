@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         'architecture/internals',
       ],
     },
+    'changelog',
   ],
 };
 
