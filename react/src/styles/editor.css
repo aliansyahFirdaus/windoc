@@ -954,7 +954,7 @@ ul {
 
 .menu-item__line-height {
     width: auto;
-    min-width: 40px;
+    min-width: 52px;
     height: 28px;
     position: relative;
     display: flex;
