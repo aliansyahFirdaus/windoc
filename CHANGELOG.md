@@ -3,7 +3,11 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.3.11] — 2026-03-12
+
+### Added
+- Add size 7 to FontSizeTool dropdown
+
 
 ### Fixed
 - Fix line-height arrow spacing; feat(docs): add changelog page synced from CHANGELOG.md
