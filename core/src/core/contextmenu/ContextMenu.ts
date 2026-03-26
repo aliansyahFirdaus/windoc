@@ -266,6 +266,11 @@ export class ContextMenu {
         if (menu.icon) {
           icon.classList.add(`${EDITOR_PREFIX}-contextmenu-${menu.icon}`);
         }
+        if (menu.color) {
+          const swatch = document.createElement('span');
+          swatch.style.cssText = `display:inline-block;width:12px;height:12px;border-radius:2px;background:${menu.color};border:1px solid rgba(0,0,0,0.2);margin-right:4px;vertical-align:middle;flex-shrink:0`;
+          menuItem.append(swatch);
+        }
         const span = document.createElement('span');
         const name = menu.i18nPath
           ? this._formatName(this.i18n.t(menu.i18nPath))

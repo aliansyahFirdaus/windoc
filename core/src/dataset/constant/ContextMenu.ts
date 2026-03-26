@@ -56,6 +56,13 @@ export const INTERNAL_CONTEXT_MENU_KEY = {
     DELETE_COL: 'tableDeleteCol',
     DELETE_TABLE: 'tableDeleteTable',
     MERGE_CELL: 'tableMergeCell',
-    CANCEL_MERGE_CELL: 'tableCancelMergeCell'
+    CANCEL_MERGE_CELL: 'tableCancelMergeCell',
+    TD_BG_COLOR: 'tableTdBgColor',
+    TD_BORDER_COLOR: 'tableTdBorderColor',
+    TD_PADDING: 'tableTdPadding',
+    TD_PADDING_COMPACT: 'tableTdPaddingCompact',
+    TD_PADDING_NORMAL: 'tableTdPaddingNormal',
+    TD_PADDING_COMFORTABLE: 'tableTdPaddingComfortable',
+    TD_PADDING_NONE: 'tableTdPaddingNone'
   }
 };

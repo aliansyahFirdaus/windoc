@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useEditor } from '../EditorContext';
 
 const LINE_HEIGHTS = ['1.0', '1.15', '1.5', '2.0', '2.5'];
@@ -12,32 +13,35 @@ export default function LineHeightTool() {
     ? `${activeMargin}.0`
     : String(activeMargin);
 
-  const handleLineHeight = (value: string) => {
-    editorRef.current?.command.executeRowMargin(Number(value));
-  };
+  const toggle = () => optionsRef.current?.classList.toggle('visible');
+  const close = () => optionsRef.current?.classList.remove('visible');
 
   return (
-    <div
-      className="menu-item__line-height"
-      onClick={() => optionsRef.current?.classList.toggle('visible')}
-    >
-      <span className="select" title="Line Height">
+    <div className="menu-item__select-group">
+      <div className="menu-item__select-text" title="Line Height" onClick={toggle}>
         {activeLabel}
-      </span>
-      <div className="options" ref={optionsRef}>
-        <ul>
-          {LINE_HEIGHTS.map(h => (
-            <li
-              key={h}
-              className={
-                String(activeMargin) === h || activeLabel === h ? 'active' : ''
-              }
-              onClick={() => handleLineHeight(h)}
-            >
-              {h}
-            </li>
-          ))}
-        </ul>
+      </div>
+      <div className="menu-item__select-arrow" onClick={toggle}>
+        <ChevronDown size={10} strokeWidth={2.5} />
+        <div className="options" ref={optionsRef} style={{ width: '60px' }}>
+          <ul>
+            {LINE_HEIGHTS.map(h => (
+              <li
+                key={h}
+                className={
+                  String(activeMargin) === h || activeLabel === h ? 'active' : ''
+                }
+                onClick={e => {
+                  e.stopPropagation();
+                  editorRef.current?.command.executeRowMargin(Number(h));
+                  close();
+                }}
+              >
+                {h}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

@@ -213,6 +213,10 @@ export class TableParticle {
         const height = td.height! * scale;
         const x = Math.round(td.x! * scale + startX + width);
         const y = Math.round(td.y! * scale + startY);
+        if (td.borderColor) {
+          ctx.save();
+          ctx.strokeStyle = td.borderColor;
+        }
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
         if (td.borderTypes?.includes(TdBorder.TOP)) {
@@ -279,6 +283,27 @@ export class TableParticle {
           ctx.stroke();
         }
         ctx.translate(-0.5, -0.5);
+        // For cells with per-cell border color, also redraw outer edges
+        // (top for first row, left for first column) to cover _drawOuterBorder
+        if (td.borderColor && !isEmptyBorderType && !isExternalBorderType) {
+          ctx.translate(0.5, 0.5);
+          ctx.beginPath();
+          if (td.rowIndex === 0) {
+            ctx.moveTo(x - width, y);
+            ctx.lineTo(x, y);
+          }
+          if (td.colIndex === 0) {
+            ctx.moveTo(x - width, y);
+            ctx.lineTo(x - width, y + height);
+          }
+          if (td.rowIndex === 0 || td.colIndex === 0) {
+            ctx.stroke();
+          }
+          ctx.translate(-0.5, -0.5);
+        }
+        if (td.borderColor) {
+          ctx.restore();
+        }
       }
     }
     ctx.restore();

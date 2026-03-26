@@ -28,6 +28,8 @@ export { default as RightAlignTool } from './toolbar/RightAlignTool';
 export { default as JustifyTool } from './toolbar/JustifyTool';
 export { default as ListTool } from './toolbar/ListTool';
 export { default as TableTool } from './toolbar/TableTool';
+export { default as TableCellBgColorTool } from './toolbar/TableCellBgColorTool';
+export { default as TableCellBorderColorTool } from './toolbar/TableCellBorderColorTool';
 export { default as ImageTool } from './toolbar/ImageTool';
 export { default as ColumnTool } from './toolbar/ColumnTool';
 export { default as SeparatorTool } from './toolbar/SeparatorTool';

@@ -55,7 +55,14 @@
       "borderTdBottom": "Bawah",
       "borderTdLeft": "Kiri",
       "borderTdForward": "Maju",
-      "borderTdBack": "Mundur"
+      "borderTdBack": "Mundur",
+      "cellBackgroundColor": "Warna latar sel",
+      "tdBorderColor": "Warna garis sel",
+      "cellPadding": "Padding sel",
+      "cellPaddingCompact": "Rapat (2px)",
+      "cellPaddingNormal": "Normal (4px)",
+      "cellPaddingComfortable": "Lega (8px)",
+      "cellPaddingNone": "Tanpa padding"
     }
   },
   "datePicker": {

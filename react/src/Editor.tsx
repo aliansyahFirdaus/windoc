@@ -119,6 +119,7 @@ function EditorInner({
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorInstance | null>(null);
   const [rangeStyle, setRangeStyle] = useState<RangeStylePayload | null>(null);
+  const [isInTable, setIsInTable] = useState(false);
 
   const {
     setPageNoList,
@@ -166,6 +167,7 @@ function EditorInner({
         setRangeStyle(payload);
         onRangeStyleChange?.(payload);
         const rangeContext = instance?.command.getRangeContext();
+        setIsInTable(rangeContext?.isTable === true);
         if (rangeContext) {
           setRowNo(rangeContext.startRowNo + 1);
           setColNo(rangeContext.startColNo + 1);
@@ -316,7 +318,7 @@ function EditorInner({
   };
 
   return (
-    <EditorProvider editorRef={editorRef} rangeStyle={rangeStyle}>
+    <EditorProvider editorRef={editorRef} rangeStyle={rangeStyle} isInTable={isInTable}>
       {toolbar && !renderToolbar && <EditorToolbar />}
       {renderToolbar}
       {children}

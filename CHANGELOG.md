@@ -3,6 +3,12 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+- Fix vertical centering of text in dropdown select buttons
+
+
 ## [0.3.11] — 2026-03-12
 
 ### Added

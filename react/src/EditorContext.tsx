@@ -8,6 +8,7 @@ interface EditorContextValue {
   editorRef: MutableRefObject<EditorInstance | null>;
   isApple: boolean;
   rangeStyle: RangeStylePayload | null;
+  isInTable: boolean;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -15,10 +16,12 @@ const EditorContext = createContext<EditorContextValue | null>(null);
 export function EditorProvider({
   editorRef,
   rangeStyle,
+  isInTable,
   children
 }: {
   editorRef: MutableRefObject<EditorInstance | null>;
   rangeStyle: RangeStylePayload | null;
+  isInTable: boolean;
   children: React.ReactNode;
 }) {
   const [isApple, setIsApple] = useState(false);
@@ -28,7 +31,7 @@ export function EditorProvider({
   }, []);
 
   return (
-    <EditorContext.Provider value={{ editorRef, isApple, rangeStyle }}>
+    <EditorContext.Provider value={{ editorRef, isApple, rangeStyle, isInTable }}>
       {children}
     </EditorContext.Provider>
   );

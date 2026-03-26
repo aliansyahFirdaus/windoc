@@ -20,7 +20,7 @@ export default defineConfig({
       },
       {
         find: '@windoc/react',
-        replacement: path.resolve(__dirname, '../react/dist/index.mjs'),
+        replacement: path.resolve(__dirname, '../react/src/index.ts'),
       },
     ],
   },
@@ -29,7 +29,7 @@ export default defineConfig({
   },
   server: {
     watch: {
-      ignored: ['!**/core/dist/**', '!**/react/dist/**'],
+      ignored: ['!**/core/dist/**', '!**/react/src/**'],
     },
   },
 })

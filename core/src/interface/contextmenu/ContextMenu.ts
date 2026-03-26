@@ -24,6 +24,7 @@ export interface IRegisterContextMenu {
   i18nPath?: string;
   isDivider?: boolean;
   icon?: string;
+  color?: string;
   name?: string;
   shortCut?: string;
   disable?: boolean;

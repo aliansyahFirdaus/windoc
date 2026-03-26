@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Underline as UnderlineIcon } from 'lucide-react';
+import { Underline as UnderlineIcon, ChevronDown } from 'lucide-react';
 import { useEditor } from '../EditorContext';
 
 const STYLES = ['solid', 'double', 'dashed', 'dotted', 'wavy'];
@@ -10,33 +10,36 @@ export default function UnderlineTool() {
   const isActive = rangeStyle?.underline === true;
 
   return (
-    <div
-      className={`menu-item__underline ${isActive ? 'active' : ''}`}
-      title={`Underline(${isApple ? '⌘' : 'Ctrl'}+U)`}
-    >
-      <UnderlineIcon
-        size={16}
+    <div className="menu-item__underline-group">
+      <div
+        className={`menu-item__underline-btn${isActive ? ' active' : ''}`}
+        title={`Underline(${isApple ? '⌘' : 'Ctrl'}+U)`}
         onClick={() => editorRef.current?.command.executeUnderline()}
-        style={{ cursor: 'pointer' }}
-      />
-      <span
-        className="select"
+      >
+        <UnderlineIcon size={16} />
+      </div>
+      <div
+        className="menu-item__underline-arrow"
         onClick={() => optionsRef.current?.classList.toggle('visible')}
-      ></span>
-      <div className="options" ref={optionsRef}>
-        <ul>
-          {STYLES.map(style => (
-            <li
-              key={style}
-              data-decoration-style={style}
-              onClick={() => {
-                editorRef.current?.command.executeUnderline({ style });
-              }}
-            >
-              <i></i>
-            </li>
-          ))}
-        </ul>
+      >
+        <ChevronDown size={10} strokeWidth={2.5} />
+        <div className="options" ref={optionsRef}>
+          <ul>
+            {STYLES.map(style => (
+              <li
+                key={style}
+                data-decoration-style={style}
+                onClick={e => {
+                  e.stopPropagation();
+                  editorRef.current?.command.executeUnderline({ style });
+                  optionsRef.current?.classList.remove('visible');
+                }}
+              >
+                <i></i>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

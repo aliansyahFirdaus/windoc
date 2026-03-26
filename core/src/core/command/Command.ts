@@ -54,6 +54,8 @@ export class Command {
   public executeTableTdBorderType: CommandAdapt['tableTdBorderType'];
   public executeTableTdSlashType: CommandAdapt['tableTdSlashType'];
   public executeTableTdBackgroundColor: CommandAdapt['tableTdBackgroundColor'];
+  public executeTableTdBorderColor: CommandAdapt['tableTdBorderColor'];
+  public executeTableTdPadding: CommandAdapt['tableTdPadding'];
   public executeTableSelectAll: CommandAdapt['tableSelectAll'];
   public executeImage: CommandAdapt['image'];
   public executeHyperlink: CommandAdapt['hyperlink'];
@@ -204,6 +206,8 @@ export class Command {
     this.executeTableTdSlashType = adapt.tableTdSlashType.bind(adapt);
     this.executeTableTdBackgroundColor =
       adapt.tableTdBackgroundColor.bind(adapt);
+    this.executeTableTdBorderColor = adapt.tableTdBorderColor.bind(adapt);
+    this.executeTableTdPadding = adapt.tableTdPadding.bind(adapt);
     this.executeTableSelectAll = adapt.tableSelectAll.bind(adapt);
     this.executeImage = adapt.image.bind(adapt);
     this.executeHyperlink = adapt.hyperlink.bind(adapt);

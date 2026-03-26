@@ -8,6 +8,49 @@ import {
 } from '../../../dataset/enum/table/Table';
 import { IRegisterContextMenu } from '../../../interface/contextmenu/ContextMenu';
 import { Command } from '../../command/Command';
+
+const COLOR_PALETTE: Array<{ name: string; value: string }> = [
+  { name: 'Black', value: '#000000' },
+  { name: 'Dark gray', value: '#444444' },
+  { name: 'Gray', value: '#888888' },
+  { name: 'Light gray', value: '#cccccc' },
+  { name: 'White', value: '#ffffff' },
+  { name: 'Red', value: '#ff0000' },
+  { name: 'Orange', value: '#ff9900' },
+  { name: 'Yellow', value: '#ffff00' },
+  { name: 'Green', value: '#00aa00' },
+  { name: 'Cyan', value: '#00aaff' },
+  { name: 'Blue', value: '#0000ff' },
+  { name: 'Purple', value: '#9900ff' },
+  { name: 'Pink', value: '#ff00aa' },
+  { name: 'Light red', value: '#ffcccc' },
+  { name: 'Light orange', value: '#ffeecc' },
+  { name: 'Light yellow', value: '#ffffcc' },
+  { name: 'Light green', value: '#ccffcc' },
+  { name: 'Light blue', value: '#ccecff' },
+  { name: 'Light purple', value: '#eeccff' }
+];
+
+function openNativeColorPicker(
+  defaultColor: string,
+  onSelect: (color: string) => void
+) {
+  const input = document.createElement('input');
+  input.type = 'color';
+  input.value = defaultColor;
+  input.style.cssText =
+    'position:fixed;opacity:0;pointer-events:none;top:0;left:0;width:0;height:0';
+  document.body.appendChild(input);
+  input.addEventListener('change', () => {
+    onSelect(input.value);
+    document.body.removeChild(input);
+  });
+  input.addEventListener('cancel', () => {
+    document.body.removeChild(input);
+  });
+  input.click();
+}
+
 const {
   TABLE: {
     BORDER,
@@ -37,7 +80,14 @@ const {
     DELETE_COL,
     DELETE_TABLE,
     MERGE_CELL,
-    CANCEL_MERGE_CELL
+    CANCEL_MERGE_CELL,
+    TD_BG_COLOR,
+    TD_BORDER_COLOR,
+    TD_PADDING,
+    TD_PADDING_COMPACT,
+    TD_PADDING_NORMAL,
+    TD_PADDING_COMFORTABLE,
+    TD_PADDING_NONE
   }
 } = INTERNAL_CONTEXT_MENU_KEY;
 
@@ -327,5 +377,139 @@ export const tableMenus: IRegisterContextMenu[] = [
     callback: (command: Command) => {
       command.executeCancelMergeTableCell();
     }
+  },
+  {
+    key: TD_BG_COLOR,
+    i18nPath: 'contextmenu.table.cellBackgroundColor',
+    icon: 'td-bg-color',
+    when: payload => {
+      return (
+        !payload.isReadonly &&
+        payload.isInTable &&
+        payload.options.mode !== EditorMode.FORM
+      );
+    },
+    childMenus: [
+      ...COLOR_PALETTE.map(c => ({
+        key: `${TD_BG_COLOR}_${c.value}`,
+        name: c.name,
+        color: c.value,
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdBackgroundColor(c.value);
+        }
+      })),
+      {
+        isDivider: true
+      },
+      {
+        key: `${TD_BG_COLOR}_custom`,
+        name: 'Custom color...',
+        when: () => true,
+        callback: (command: Command) => {
+          openNativeColorPicker('#ffffff', color => {
+            command.executeTableTdBackgroundColor(color);
+          });
+        }
+      },
+      {
+        key: `${TD_BG_COLOR}_none`,
+        name: 'No fill',
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdBackgroundColor('');
+        }
+      }
+    ]
+  },
+  {
+    key: TD_BORDER_COLOR,
+    i18nPath: 'contextmenu.table.tdBorderColor',
+    icon: 'td-border-color',
+    when: payload => {
+      return (
+        !payload.isReadonly &&
+        payload.isInTable &&
+        payload.options.mode !== EditorMode.FORM
+      );
+    },
+    childMenus: [
+      ...COLOR_PALETTE.map(c => ({
+        key: `${TD_BORDER_COLOR}_${c.value}`,
+        name: c.name,
+        color: c.value,
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdBorderColor(c.value);
+        }
+      })),
+      {
+        isDivider: true
+      },
+      {
+        key: `${TD_BORDER_COLOR}_custom`,
+        name: 'Custom color...',
+        when: () => true,
+        callback: (command: Command) => {
+          openNativeColorPicker('#000000', color => {
+            command.executeTableTdBorderColor(color);
+          });
+        }
+      },
+      {
+        key: `${TD_BORDER_COLOR}_reset`,
+        name: 'Reset to default',
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdBorderColor('');
+        }
+      }
+    ]
+  },
+  {
+    key: TD_PADDING,
+    i18nPath: 'contextmenu.table.cellPadding',
+    icon: 'td-padding',
+    when: payload => {
+      return (
+        !payload.isReadonly &&
+        payload.isInTable &&
+        payload.options.mode !== EditorMode.FORM
+      );
+    },
+    childMenus: [
+      {
+        key: TD_PADDING_NONE,
+        i18nPath: 'contextmenu.table.cellPaddingNone',
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdPadding([0, 0, 0, 0]);
+        }
+      },
+      {
+        key: TD_PADDING_COMPACT,
+        i18nPath: 'contextmenu.table.cellPaddingCompact',
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdPadding([2, 4, 2, 4]);
+        }
+      },
+      {
+        key: TD_PADDING_NORMAL,
+        i18nPath: 'contextmenu.table.cellPaddingNormal',
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdPadding([4, 5, 4, 5]);
+        }
+      },
+      {
+        key: TD_PADDING_COMFORTABLE,
+        i18nPath: 'contextmenu.table.cellPaddingComfortable',
+        when: () => true,
+        callback: (command: Command) => {
+          command.executeTableTdPadding([8, 12, 8, 12]);
+        }
+      }
+    ]
   }
 ];

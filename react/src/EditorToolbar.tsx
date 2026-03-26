@@ -1,5 +1,8 @@
+import { useEditor } from './EditorContext';
 import UndoTool from './toolbar/UndoTool';
 import RedoTool from './toolbar/RedoTool';
+import TableCellBgColorTool from './toolbar/TableCellBgColorTool';
+import TableCellBorderColorTool from './toolbar/TableCellBorderColorTool';
 // import PainterTool from "./toolbar/PainterTool";
 // import ClearFormatTool from "./toolbar/ClearFormatTool";
 import ColumnTool from './toolbar/ColumnTool';
@@ -41,6 +44,8 @@ import PageBreakTool from './toolbar/PageBreakTool';
 // import PrintTool from "./toolbar/PrintTool";
 
 export default function EditorToolbar() {
+  const { isInTable } = useEditor();
+
   return (
     <div className="menu" editor-component="menu">
       {/* Undo/Redo */}
@@ -68,6 +73,17 @@ export default function EditorToolbar() {
         <TableTool />
       </div>
       <div className="menu-divider"></div>
+
+      {/* Table cell tools — only visible when cursor is inside a table */}
+      {isInTable && (
+        <>
+          <div className="menu-item">
+            <TableCellBgColorTool />
+            <TableCellBorderColorTool />
+          </div>
+          <div className="menu-divider"></div>
+        </>
+      )}
 
       {/* Typography */}
       <div className="menu-item">

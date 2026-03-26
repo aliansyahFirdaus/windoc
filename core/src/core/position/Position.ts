@@ -213,12 +213,13 @@ export class Position {
         index++;
         x += metrics.width;
         if (element.type === ElementType.TABLE && !element.hide) {
-          const tdPaddingWidth = tdPadding[1] + tdPadding[3];
-          const tdPaddingHeight = tdPadding[0] + tdPadding[2];
           for (let t = 0; t < element.trList!.length; t++) {
             const tr = element.trList![t];
             for (let d = 0; d < tr.tdList!.length; d++) {
               const td = tr.tdList[d];
+              const cellPadding = td.padding || tdPadding;
+              const cellPaddingWidth = cellPadding[1] + cellPadding[3];
+              const cellPaddingHeight = cellPadding[0] + cellPadding[2];
               td.positionList = [];
               const rowList = td.rowList!;
               const drawRowResult = this.computePageRowPosition({
@@ -228,11 +229,11 @@ export class Position {
                 startRowIndex: 0,
                 startIndex: 0,
                 startX:
-                  (td.x! + tdPadding[3]) * scale +
+                  (td.x! + cellPadding[3]) * scale +
                   tablePreX +
                   (element.translateX || 0) * scale,
-                startY: (td.y! + tdPadding[0]) * scale + tablePreY,
-                innerWidth: (td.width! - tdPaddingWidth) * scale,
+                startY: (td.y! + cellPadding[0]) * scale + tablePreY,
+                innerWidth: (td.width! - cellPaddingWidth) * scale,
                 isTable: true,
                 index: index - 1,
                 tdIndex: d,
@@ -248,7 +249,7 @@ export class Position {
                   0
                 );
                 const blankHeight =
-                  (td.height! - tdPaddingHeight) * scale - rowsHeight;
+                  (td.height! - cellPaddingHeight) * scale - rowsHeight;
                 const offsetHeight =
                   td.verticalAlign === VerticalAlign.MIDDLE
                     ? blankHeight / 2

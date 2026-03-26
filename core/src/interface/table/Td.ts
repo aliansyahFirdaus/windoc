@@ -1,6 +1,7 @@
 import { VerticalAlign } from '../../dataset/enum/VerticalAlign';
 import { TdBorder, TdSlash } from '../../dataset/enum/table/Table';
 import { IElement, IElementPosition } from '../Element';
+import { IPadding } from '../Common';
 import { IRow } from '../Row';
 
 export interface ITd {
@@ -26,6 +27,8 @@ export interface ITd {
   positionList?: IElementPosition[];
   verticalAlign?: VerticalAlign;
   backgroundColor?: string;
+  borderColor?: string;
+  padding?: IPadding;
   borderTypes?: TdBorder[];
   slashTypes?: TdSlash[];
   mainHeight?: number;

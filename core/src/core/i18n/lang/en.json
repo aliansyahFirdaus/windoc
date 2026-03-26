@@ -55,7 +55,14 @@
       "borderTdBottom": "Bottom",
       "borderTdLeft": "Left",
       "borderTdForward": "Forward",
-      "borderTdBack": "Back"
+      "borderTdBack": "Back",
+      "cellBackgroundColor": "Cell background color",
+      "tdBorderColor": "Cell border color",
+      "cellPadding": "Cell padding",
+      "cellPaddingCompact": "Compact (2px)",
+      "cellPaddingNormal": "Normal (4px)",
+      "cellPaddingComfortable": "Comfortable (8px)",
+      "cellPaddingNone": "No padding"
     }
   },
   "datePicker": {

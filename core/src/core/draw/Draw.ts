@@ -1487,8 +1487,6 @@ export class Draw {
         }
         metrics.boundingBoxAscent = 0;
       } else if (element.type === ElementType.TABLE) {
-        const tdPaddingWidth = tdPadding[1] + tdPadding[3];
-        const tdPaddingHeight = tdPadding[0] + tdPadding[2];
         if (element.pagingId) {
           let tableIndex = i + 1;
           let combineCount = 0;
@@ -1522,15 +1520,18 @@ export class Draw {
           const tr = trList[t];
           for (let d = 0; d < tr.tdList.length; d++) {
             const td = tr.tdList[d];
+            const cellPadding = td.padding || tdPadding;
+            const cellPaddingWidth = cellPadding[1] + cellPadding[3];
+            const cellPaddingHeight = cellPadding[0] + cellPadding[2];
             const rowList = this.computeRowList({
-              innerWidth: (td.width! - tdPaddingWidth) * scale,
+              innerWidth: (td.width! - cellPaddingWidth) * scale,
               elementList: td.value,
               isFromTable: true,
               isPagingMode
             });
             const rowHeight = rowList.reduce((pre, cur) => pre + cur.height, 0);
             td.rowList = rowList;
-            const curTdHeight = rowHeight / scale + tdPaddingHeight;
+            const curTdHeight = rowHeight / scale + cellPaddingHeight;
             if (td.height! < curTdHeight) {
               const extraHeight = curTdHeight - td.height!;
               const changeTr = trList[t + td.rowspan - 1];
@@ -1607,8 +1608,11 @@ export class Draw {
             const tr = constrainedTrList[t];
             for (let d = 0; d < tr.tdList.length; d++) {
               const td = tr.tdList[d];
+              const cellPadding = td.padding || tdPadding;
+              const cellPaddingWidth = cellPadding[1] + cellPadding[3];
+              const cellPaddingHeight = cellPadding[0] + cellPadding[2];
               const tdRowList = this.computeRowList({
-                innerWidth: (td.width! - tdPaddingWidth) * scale,
+                innerWidth: (td.width! - cellPaddingWidth) * scale,
                 elementList: td.value,
                 isFromTable: true,
                 isPagingMode
@@ -1618,7 +1622,7 @@ export class Draw {
                 0
               );
               td.rowList = tdRowList;
-              const curTdHeight = rowHeight / scale + tdPaddingHeight;
+              const curTdHeight = rowHeight / scale + cellPaddingHeight;
               if (td.height! < curTdHeight) {
                 const extraHeight = curTdHeight - td.height!;
                 const changeTr = constrainedTrList[t + td.rowspan - 1];
@@ -2582,18 +2586,19 @@ export class Draw {
         }
         index++;
         if (element.type === ElementType.TABLE && !element.hide) {
-          const tdPaddingWidth = tdPadding[1] + tdPadding[3];
           for (let t = 0; t < element.trList!.length; t++) {
             const tr = element.trList![t];
             for (let d = 0; d < tr.tdList!.length; d++) {
               const td = tr.tdList[d];
+              const cellPadding = td.padding || tdPadding;
+              const cellPaddingWidth = cellPadding[1] + cellPadding[3];
               this.drawRow(ctx, {
                 elementList: td.value,
                 positionList: td.positionList!,
                 rowList: td.rowList!,
                 pageNo,
                 startIndex: 0,
-                innerWidth: (td.width! - tdPaddingWidth) * scale,
+                innerWidth: (td.width! - cellPaddingWidth) * scale,
                 zone,
                 isDrawLineBreak
               });

@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useEditor } from '../EditorContext';
 
 const FONTS = [
@@ -20,32 +21,35 @@ export default function FontTool() {
   const activeLabel =
     FONTS.find(f => f.family === activeFont)?.label || activeFont;
 
-  const handleFont = (family: string) => {
-    editorRef.current?.command.executeFont(family);
-  };
+  const toggle = () => optionsRef.current?.classList.toggle('visible');
+  const close = () => optionsRef.current?.classList.remove('visible');
 
   return (
-    <div
-      className="menu-item__font"
-      onClick={() => optionsRef.current?.classList.toggle('visible')}
-    >
-      <span className="select" title="Font">
+    <div className="menu-item__select-group">
+      <div className="menu-item__select-text" title="Font" onClick={toggle}>
         {activeLabel}
-      </span>
-      <div className="options" ref={optionsRef}>
-        <ul>
-          {FONTS.map(({ family, label }) => (
-            <li
-              key={family}
-              data-family={family}
-              className={activeFont === family ? 'active' : ''}
-              style={{ fontFamily: family }}
-              onClick={() => handleFont(family)}
-            >
-              {label}
-            </li>
-          ))}
-        </ul>
+      </div>
+      <div className="menu-item__select-arrow" onClick={toggle}>
+        <ChevronDown size={10} strokeWidth={2.5} />
+        <div className="options" ref={optionsRef} style={{ width: '150px' }}>
+          <ul>
+            {FONTS.map(({ family, label }) => (
+              <li
+                key={family}
+                data-family={family}
+                className={activeFont === family ? 'active' : ''}
+                style={{ fontFamily: family }}
+                onClick={e => {
+                  e.stopPropagation();
+                  editorRef.current?.command.executeFont(family);
+                  close();
+                }}
+              >
+                {label}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

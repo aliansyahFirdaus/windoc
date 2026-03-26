@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { List, ListOrdered, Indent, Outdent } from 'lucide-react';
+import { List, ListOrdered, ChevronDown, Indent, Outdent } from 'lucide-react';
 import { useEditor } from '../EditorContext';
 
 interface PresetOption {
@@ -56,11 +56,6 @@ export default function ListTool() {
 
   const close = () => optionsRef.current?.classList.remove('visible');
 
-  const handleList = (type: string | null, style?: string) => {
-    editorRef.current?.command.executeList(type, style);
-    close();
-  };
-
   const handlePreset = (type: 'ol' | 'ul', preset: string) => {
     const style = type === 'ol' ? 'decimal' : 'disc';
     editorRef.current?.command.executeListWithPreset(type, style, preset);
@@ -80,92 +75,101 @@ export default function ListTool() {
   };
 
   return (
-    <div
-      className={`menu-item__list ${isActive ? 'active' : ''}`}
-      title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}
-    >
-      <List
-        size={16}
+    <div className="menu-item__list-group">
+      <div
+        className={`menu-item__list-btn${isActive ? ' active' : ''}`}
+        title={`List(${isApple ? '⌘' : 'Ctrl'}+Shift+U)`}
+        onClick={() => handlePreset('ul', 'ulDefault')}
+      >
+        <List size={16} />
+      </div>
+      <div
+        className="menu-item__list-arrow"
         onClick={() => optionsRef.current?.classList.toggle('visible')}
-        style={{ cursor: 'pointer' }}
-      />
-      <div className="options" ref={optionsRef} style={{ width: '320px' }}>
-        <div style={{ padding: '8px' }}>
-          {/* Quick Actions */}
-          <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
-            <button
-              onClick={() => handleList('ul', 'checkbox')}
-              className="list-quick-btn"
-            >
-              Checkbox
-            </button>
-            <button
-              onClick={handleIndent}
-              className="list-quick-btn"
-              title="Indent (Tab)"
-            >
-              <Indent size={14} />
-            </button>
-            <button
-              onClick={handleOutdent}
-              className="list-quick-btn"
-              title="Outdent (Shift+Tab)"
-            >
-              <Outdent size={14} />
-            </button>
-          </div>
+      >
+        <ChevronDown size={10} strokeWidth={2.5} />
+        <div className="options" ref={optionsRef} style={{ width: '320px' }}>
+          <div style={{ padding: '8px' }}>
+            {/* Quick Actions */}
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  editorRef.current?.command.executeList('ul', 'checkbox');
+                  close();
+                }}
+                className="list-quick-btn"
+              >
+                Checkbox
+              </button>
+              <button
+                onClick={handleIndent}
+                className="list-quick-btn"
+                title="Indent (Tab)"
+              >
+                <Indent size={14} />
+              </button>
+              <button
+                onClick={handleOutdent}
+                className="list-quick-btn"
+                title="Outdent (Shift+Tab)"
+              >
+                <Outdent size={14} />
+              </button>
+            </div>
 
-          {/* Ordered List Presets */}
-          <div style={{ marginBottom: '8px' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '11px',
-                color: '#667085',
-                marginBottom: '6px',
-                fontWeight: 500
-              }}
-            >
-              <ListOrdered size={12} />
-              Ordered List
+            {/* Ordered List Presets */}
+            <div style={{ marginBottom: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11px',
+                  color: '#667085',
+                  marginBottom: '6px',
+                  fontWeight: 500
+                }}
+              >
+                <ListOrdered size={12} />
+                Ordered List
+              </div>
+              <div className="list-preset-grid">
+                {OL_PRESETS.map(option => (
+                  <PresetCell
+                    key={option.preset}
+                    option={option}
+                    onClick={() => handlePreset('ol', option.preset)}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="list-preset-grid">
-              {OL_PRESETS.map(option => (
-                <PresetCell
-                  key={option.preset}
-                  option={option}
-                  onClick={() => handlePreset('ol', option.preset)}
-                />
-              ))}
-            </div>
-          </div>
 
-          {/* Unordered List Presets */}
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '11px',
-                color: '#667085',
-                marginBottom: '6px',
-                fontWeight: 500
-              }}
-            >
-              <List size={12} />
-              Unordered List
-            </div>
-            <div className="list-preset-grid">
-              {UL_PRESETS.map(option => (
-                <PresetCell
-                  key={option.preset}
-                  option={option}
-                  onClick={() => handlePreset('ul', option.preset)}
-                />
-              ))}
+            {/* Unordered List Presets */}
+            <div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11px',
+                  color: '#667085',
+                  marginBottom: '6px',
+                  fontWeight: 500
+                }}
+              >
+                <List size={12} />
+                Unordered List
+              </div>
+              <div className="list-preset-grid">
+                {UL_PRESETS.map(option => (
+                  <PresetCell
+                    key={option.preset}
+                    option={option}
+                    onClick={() => handlePreset('ul', option.preset)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { ElementType, IElement, TableBorder, VerticalAlign } from '../../../..';
 import { ZERO } from '../../../../dataset/constant/Common';
 import { TABLE_CONTEXT_ATTR } from '../../../../dataset/constant/Element';
 import { TdBorder, TdSlash } from '../../../../dataset/enum/table/Table';
-import { DeepRequired } from '../../../../interface/Common';
+import { DeepRequired, IPadding } from '../../../../interface/Common';
 import { IEditorOption } from '../../../../interface/Editor';
 import { IColgroup } from '../../../../interface/table/Colgroup';
 import { ITd } from '../../../../interface/table/Td';
@@ -885,13 +885,62 @@ export class TableOperate {
       const row = rowCol[r];
       for (let c = 0; c < row.length; c++) {
         const col = row[c];
-        col.backgroundColor = payload;
+        col.backgroundColor = payload || undefined;
       }
     }
     const { endIndex } = this.range.getRange();
     this.range.setRange(endIndex, endIndex);
     this.draw.render({
       isCompute: false
+    });
+  }
+
+  public tableTdBorderColor(payload: string) {
+    const positionContext = this.position.getPositionContext();
+    if (!positionContext.isTable) return;
+    const { index } = positionContext;
+    const originalElementList = this.draw.getOriginalElementList();
+    const element = originalElementList[index!];
+    const rowCol = this.tableParticle.getRangeRowCol();
+    if (!rowCol) return;
+    const tdList = rowCol.flat();
+    // Count total cells (including colspan/rowspan cells)
+    const totalCells = element.trList!.reduce(
+      (sum, tr) => sum + tr.tdList.length,
+      0
+    );
+    const allSelected = tdList.length >= totalCells;
+    if (allSelected) {
+      // Update table-level border color — controls the outer border drawn by _drawOuterBorder
+      element.borderColor = payload || undefined;
+      // Clear all per-cell overrides for a clean state
+      element.trList!.forEach(tr =>
+        tr.tdList.forEach(td => {
+          delete td.borderColor;
+        })
+      );
+    } else {
+      tdList.forEach(td => {
+        td.borderColor = payload || undefined;
+      });
+    }
+    const { endIndex } = this.range.getRange();
+    this.draw.render({
+      curIndex: endIndex,
+      isCompute: false
+    });
+  }
+
+  public tableTdPadding(payload: IPadding) {
+    const rowCol = this.tableParticle.getRangeRowCol();
+    if (!rowCol) return;
+    const tdList = rowCol.flat();
+    tdList.forEach(td => {
+      td.padding = payload;
+    });
+    const { endIndex } = this.range.getRange();
+    this.draw.render({
+      curIndex: endIndex
     });
   }
 

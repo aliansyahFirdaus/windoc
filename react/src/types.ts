@@ -28,6 +28,9 @@ export type EditorInstance = {
     executeListIndent: () => void;
     executeListOutdent: () => void;
     executeInsertTable: (rows: number, cols: number) => void;
+    executeTableTdBackgroundColor: (color: string) => void;
+    executeTableTdBorderColor: (color: string) => void;
+    executeTableTdPadding: (padding: [number, number, number, number]) => void;
     executeImage: (options: {
       value: string;
       width: number;
@@ -122,7 +125,7 @@ export type EditorInstance = {
     }>;
     setControlValue: (options: object) => void;
     getRangeText: () => string;
-    getRangeContext: () => { startRowNo: number; startColNo: number } | null;
+    getRangeContext: () => { startRowNo: number; startColNo: number; isTable: boolean } | null;
     getPaperMargin: () => number[];
     getSearchNavigateInfo: () => { index: number; count: number } | null;
   };

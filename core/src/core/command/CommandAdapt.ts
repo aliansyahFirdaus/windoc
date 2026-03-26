@@ -28,7 +28,7 @@ import { TableBorder, TdBorder, TdSlash } from '../../dataset/enum/table/Table';
 import { TitleLevel } from '../../dataset/enum/Title';
 import { VerticalAlign } from '../../dataset/enum/VerticalAlign';
 import { ICatalog } from '../../interface/Catalog';
-import { DeepRequired } from '../../interface/Common';
+import { DeepRequired, IPadding } from '../../interface/Common';
 import {
   IGetControlValueOption,
   IGetControlValueResult,
@@ -1082,6 +1082,18 @@ export class CommandAdapt {
     const isReadonly = this.draw.isReadonly();
     if (isReadonly) return;
     this.tableOperate.tableTdBackgroundColor(payload);
+  }
+
+  public tableTdBorderColor(payload: string) {
+    const isReadonly = this.draw.isReadonly();
+    if (isReadonly) return;
+    this.tableOperate.tableTdBorderColor(payload);
+  }
+
+  public tableTdPadding(payload: IPadding) {
+    const isReadonly = this.draw.isReadonly();
+    if (isReadonly) return;
+    this.tableOperate.tableTdPadding(payload);
   }
 
   public tableSelectAll() {
