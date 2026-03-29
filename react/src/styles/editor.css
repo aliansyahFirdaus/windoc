@@ -178,7 +178,6 @@ ul {
 .menu-item__select-text:hover {
     background: #f2f4f7;
     border-color: #667085;
-    border-right-color: #fff;
 }
 
 .menu-item__select-arrow {

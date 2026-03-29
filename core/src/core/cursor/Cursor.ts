@@ -101,7 +101,7 @@ export class Cursor {
     if (isMobile && this.draw.isReadonly()) return;
     const agentCursorDom = this.cursorAgent.getAgentCursorDom();
     if (document.activeElement !== agentCursorDom) {
-      agentCursorDom.focus();
+      agentCursorDom.focus({ preventScroll: true });
       agentCursorDom.setSelectionRange(0, 0);
     }
   }
