@@ -1,5 +1,5 @@
 .ce-contextmenu-container {
-  z-index: 9;
+  z-index: 100;
   position: fixed;
   display: none;
   padding: 4px;

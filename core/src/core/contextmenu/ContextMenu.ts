@@ -294,7 +294,9 @@ export class ContextMenu {
     const adjustLeft =
       left + contextMenuWidth > innerWidth ? left - contextMenuWidth : left;
     contextMenuContainer.style.left = `${adjustLeft}px`;
-    const innerHeight = window.innerHeight;
+    const footerEl = document.querySelector<HTMLElement>('.ce-editor-footer');
+    const footerHeight = footerEl ? footerEl.offsetHeight : 0;
+    const innerHeight = window.innerHeight - footerHeight;
     const contextMenuHeight = contextmenuRect.height;
     const adjustTop =
       top + contextMenuHeight > innerHeight ? top - contextMenuHeight : top;

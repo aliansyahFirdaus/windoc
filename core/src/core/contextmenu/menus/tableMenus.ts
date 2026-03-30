@@ -81,8 +81,6 @@ const {
     DELETE_TABLE,
     MERGE_CELL,
     CANCEL_MERGE_CELL,
-    TD_BG_COLOR,
-    TD_BORDER_COLOR,
     TD_PADDING,
     TD_PADDING_COMPACT,
     TD_PADDING_NORMAL,
@@ -377,94 +375,6 @@ export const tableMenus: IRegisterContextMenu[] = [
     callback: (command: Command) => {
       command.executeCancelMergeTableCell();
     }
-  },
-  {
-    key: TD_BG_COLOR,
-    i18nPath: 'contextmenu.table.cellBackgroundColor',
-    icon: 'td-bg-color',
-    when: payload => {
-      return (
-        !payload.isReadonly &&
-        payload.isInTable &&
-        payload.options.mode !== EditorMode.FORM
-      );
-    },
-    childMenus: [
-      ...COLOR_PALETTE.map(c => ({
-        key: `${TD_BG_COLOR}_${c.value}`,
-        name: c.name,
-        color: c.value,
-        when: () => true,
-        callback: (command: Command) => {
-          command.executeTableTdBackgroundColor(c.value);
-        }
-      })),
-      {
-        isDivider: true
-      },
-      {
-        key: `${TD_BG_COLOR}_custom`,
-        name: 'Custom color...',
-        when: () => true,
-        callback: (command: Command) => {
-          openNativeColorPicker('#ffffff', color => {
-            command.executeTableTdBackgroundColor(color);
-          });
-        }
-      },
-      {
-        key: `${TD_BG_COLOR}_none`,
-        name: 'No fill',
-        when: () => true,
-        callback: (command: Command) => {
-          command.executeTableTdBackgroundColor('');
-        }
-      }
-    ]
-  },
-  {
-    key: TD_BORDER_COLOR,
-    i18nPath: 'contextmenu.table.tdBorderColor',
-    icon: 'td-border-color',
-    when: payload => {
-      return (
-        !payload.isReadonly &&
-        payload.isInTable &&
-        payload.options.mode !== EditorMode.FORM
-      );
-    },
-    childMenus: [
-      ...COLOR_PALETTE.map(c => ({
-        key: `${TD_BORDER_COLOR}_${c.value}`,
-        name: c.name,
-        color: c.value,
-        when: () => true,
-        callback: (command: Command) => {
-          command.executeTableTdBorderColor(c.value);
-        }
-      })),
-      {
-        isDivider: true
-      },
-      {
-        key: `${TD_BORDER_COLOR}_custom`,
-        name: 'Custom color...',
-        when: () => true,
-        callback: (command: Command) => {
-          openNativeColorPicker('#000000', color => {
-            command.executeTableTdBorderColor(color);
-          });
-        }
-      },
-      {
-        key: `${TD_BORDER_COLOR}_reset`,
-        name: 'Reset to default',
-        when: () => true,
-        callback: (command: Command) => {
-          command.executeTableTdBorderColor('');
-        }
-      }
-    ]
   },
   {
     key: TD_PADDING,
