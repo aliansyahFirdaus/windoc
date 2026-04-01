@@ -3,6 +3,18 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+- Only arrow button opens dropdown, not the label/text part
+
+- Auto-flip dropdown to left when it overflows viewport right edge
+
+- Improve zone tip styling and fix padding override
+
+- Debounce zone tip to appear on mouse stop instead of following cursor
+
+
 ## [0.3.13] — 2026-03-26
 
 ### Fixed
