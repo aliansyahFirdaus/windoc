@@ -26,7 +26,7 @@ export default function FontTool() {
 
   return (
     <div className="menu-item__select-group">
-      <div className="menu-item__select-text" title="Font" onClick={toggle}>
+      <div className="menu-item__select-text" title="Font">
         {activeLabel}
       </div>
       <div className="menu-item__select-arrow" onClick={toggle}>

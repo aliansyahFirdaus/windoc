@@ -15,7 +15,7 @@ export default function FontSizeTool() {
 
   return (
     <div className="menu-item__select-group">
-      <div className="menu-item__select-text" title="Font Size" onClick={toggle}>
+      <div className="menu-item__select-text" title="Font Size">
         {activeSize}
       </div>
       <div className="menu-item__select-arrow" onClick={toggle}>

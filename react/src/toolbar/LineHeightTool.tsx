@@ -18,7 +18,7 @@ export default function LineHeightTool() {
 
   return (
     <div className="menu-item__select-group">
-      <div className="menu-item__select-text" title="Line Height" onClick={toggle}>
+      <div className="menu-item__select-text" title="Line Height">
         {activeLabel}
       </div>
       <div className="menu-item__select-arrow" onClick={toggle}>

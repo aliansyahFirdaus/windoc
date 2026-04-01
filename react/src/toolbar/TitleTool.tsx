@@ -25,7 +25,7 @@ export default function TitleTool() {
 
   return (
     <div className="menu-item__select-group">
-      <div className="menu-item__select-text" title="Toggle Heading" onClick={toggle}>
+      <div className="menu-item__select-text" title="Toggle Heading">
         {activeLabel}
       </div>
       <div className="menu-item__select-arrow" onClick={toggle}>

@@ -23,7 +23,7 @@ export default function ColumnTool() {
 
   return (
     <div className="menu-item__select-group">
-      <div className="menu-item__select-text" title="Column Layout" onClick={toggle}>
+      <div className="menu-item__select-text" title="Column Layout">
         {currentColumns === 1 ? '1 Column' : `${currentColumns} Columns`}
       </div>
       <div className="menu-item__select-arrow" onClick={toggle}>
