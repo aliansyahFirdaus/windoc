@@ -1,6 +1,6 @@
 import { EDITOR_PREFIX } from '../../dataset/constant/Editor';
 import { EditorZone } from '../../dataset/enum/Editor';
-import { throttle } from '../../utils';
+import { debounce } from '../../utils';
 import { Draw } from '../draw/Draw';
 import { I18n } from '../i18n/I18n';
 import { Zone } from './Zone';
@@ -35,30 +35,30 @@ export class ZoneTip {
   }
 
   private _watchMouseMoveZoneChange(watchZones: EditorZone[]) {
-    this.pageContainer.addEventListener(
-      'mousemove',
-      throttle((evt: MouseEvent) => {
-        if (this.isDisableMouseMove || !this.draw.getIsPagingMode()) return;
-        if (!evt.offsetY) return;
-        if (evt.target instanceof HTMLCanvasElement) {
-          const mousemoveZone = this.zone.getZoneByY(evt.offsetY);
-          if (!watchZones.includes(mousemoveZone)) {
-            this._updateZoneTip(false);
-            return;
-          }
-          this.currentMoveZone = mousemoveZone;
-          this._updateZoneTip(
-            this.zone.getZone() === EditorZone.MAIN &&
-              (mousemoveZone === EditorZone.HEADER ||
-                mousemoveZone === EditorZone.FOOTER),
-            evt.x,
-            evt.y
-          );
-        } else {
-          this._updateZoneTip(false);
-        }
-      }, 250)
-    );
+    const showTip = debounce((evt: MouseEvent) => {
+      if (this.isDisableMouseMove || !this.draw.getIsPagingMode()) return;
+      if (!(evt.target instanceof HTMLCanvasElement)) return;
+      const mousemoveZone = this.zone.getZoneByY(evt.offsetY);
+      if (!watchZones.includes(mousemoveZone)) return;
+      this.currentMoveZone = mousemoveZone;
+      this._updateZoneTip(
+        this.zone.getZone() === EditorZone.MAIN &&
+          (mousemoveZone === EditorZone.HEADER ||
+            mousemoveZone === EditorZone.FOOTER),
+        evt.x,
+        evt.y
+      );
+    }, 300);
+
+    this.pageContainer.addEventListener('mousemove', (evt: MouseEvent) => {
+      if (this.isDisableMouseMove || !this.draw.getIsPagingMode()) return;
+      if (!evt.offsetY) return;
+      const mousemoveZone = this.zone.getZoneByY(evt.offsetY);
+      if (!watchZones.includes(mousemoveZone)) {
+        this._updateZoneTip(false);
+      }
+      showTip(evt);
+    });
     this.pageContainer.addEventListener('mouseenter', () => {
       this.isDisableMouseMove = false;
     });
@@ -83,7 +83,12 @@ export class ZoneTip {
   private _updateZoneTip(visible: boolean, left?: number, top?: number) {
     if (visible) {
       this.tipContainer.classList.add('show');
-      this.tipContainer.style.left = `${left}px`;
+      const tipWidth = this.tipContainer.offsetWidth;
+      const clampedLeft = Math.min(
+        (left ?? 0),
+        window.innerWidth - tipWidth - 10
+      );
+      this.tipContainer.style.left = `${clampedLeft}px`;
       this.tipContainer.style.top = `${top}px`;
       const options = this.draw.getOptions();
       const isHeader = this.currentMoveZone === EditorZone.HEADER;
