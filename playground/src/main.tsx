@@ -9,6 +9,7 @@ function App() {
       <Editor
         options={{
           placeholder: { data: 'Start typing...' },
+          zone: { tipDisabled: false },
         }}
       />
     </div>
