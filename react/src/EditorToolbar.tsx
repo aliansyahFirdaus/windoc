@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useEditor } from './EditorContext';
 import UndoTool from './toolbar/UndoTool';
 import RedoTool from './toolbar/RedoTool';
@@ -45,9 +46,35 @@ import PageBreakTool from './toolbar/PageBreakTool';
 
 export default function EditorToolbar() {
   const { isInTable } = useEditor();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const menu = menuRef.current;
+    if (!menu) return;
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        const target = mutation.target as HTMLElement;
+        if (!target.classList.contains('options')) return;
+        if (!target.classList.contains('visible')) {
+          target.style.left = '';
+          target.style.right = '';
+          return;
+        }
+        target.style.left = '0';
+        target.style.right = '';
+        const rect = target.getBoundingClientRect();
+        if (rect.right > window.innerWidth) {
+          target.style.left = 'auto';
+          target.style.right = '0';
+        }
+      });
+    });
+    observer.observe(menu, { subtree: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="menu" editor-component="menu">
+    <div className="menu" editor-component="menu" ref={menuRef}>
       {/* Undo/Redo */}
       <div className="menu-item">
         <UndoTool />

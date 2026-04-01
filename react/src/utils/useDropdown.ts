@@ -2,23 +2,39 @@ import { useState, useRef, useEffect, CSSProperties } from 'react';
 
 interface DropdownPosition {
   top: number;
-  left: number;
+  left?: number;
+  right?: number;
 }
 
 export function useDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<DropdownPosition>({
     top: 0,
-    left: 0
+    left: 0,
+    right: undefined
   });
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const open = () => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setPosition({ top: rect.bottom + 2, left: rect.left });
+      setPosition({ top: rect.bottom + 2, left: rect.left, right: undefined });
+      setIsOpen(true);
+      requestAnimationFrame(() => {
+        const portal = document.querySelector<HTMLElement>('.menu-item-portal');
+        if (!portal) return;
+        const portalRect = portal.getBoundingClientRect();
+        if (portalRect.right > window.innerWidth) {
+          setPosition({
+            top: rect.bottom + 2,
+            left: undefined,
+            right: window.innerWidth - rect.right
+          });
+        }
+      });
+    } else {
+      setIsOpen(true);
     }
-    setIsOpen(true);
   };
 
   const close = () => setIsOpen(false);
@@ -29,6 +45,7 @@ export function useDropdown() {
     position: 'fixed',
     top: position.top,
     left: position.left,
+    right: position.right,
     zIndex: 9999
   };
 
