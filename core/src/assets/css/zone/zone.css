@@ -105,8 +105,8 @@
   white-space: nowrap;
   position: fixed;
   background-color: #344054;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
   z-index: 100;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   outline: none;
@@ -116,7 +116,7 @@
 }
 
 .ce-zone-tip.show {
-  display: flex;
+  display: inline-flex;
 }
 
 .ce-zone-tip span {

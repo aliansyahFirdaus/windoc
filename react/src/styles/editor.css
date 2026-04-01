@@ -39,6 +39,10 @@
     padding: 0;
 }
 
+.editor .ce-zone-tip {
+    padding: 6px 14px;
+}
+
 body {
     background-color: #f2f4f7;
 }
