@@ -236,7 +236,15 @@ export class Cursor {
       this.container.getBoundingClientRect().top;
     const isUp = direction === MoveDirection.UP;
     const x = leftBottom[0];
-    const y = isUp ? leftTop[1] + prePageY : leftBottom[1] + prePageY;
+    const cursorTop =
+      leftTop[1] +
+      cursorPosition.ascent -
+      cursorPosition.metrics.boundingBoxAscent;
+    const cursorBottom =
+      cursorTop +
+      cursorPosition.metrics.boundingBoxAscent +
+      cursorPosition.metrics.boundingBoxDescent;
+    const y = isUp ? cursorTop + prePageY : cursorBottom + prePageY;
     const scrollContainer = findScrollContainer(this.container);
     const rect = {
       left: 0,

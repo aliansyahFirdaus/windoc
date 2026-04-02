@@ -157,7 +157,7 @@ function EditorInner({
       instance = new EditorClass(
         containerRef.current!,
         data,
-        (userOptions ?? {}) as any
+        ({ maskMargin: [24, 0, 24, 0], ...userOptions }) as any
       ) as unknown as EditorInstance;
 
       editorRef.current = instance;
