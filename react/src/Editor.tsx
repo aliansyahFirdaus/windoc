@@ -162,6 +162,10 @@ function EditorInner({
 
       editorRef.current = instance;
 
+      // Sync initial scale to footer
+      const initialScale = (userOptions as any)?.scale ?? 1;
+      setPageScale(Math.round(initialScale * 100));
+
       // Setup listeners
       instance.listener.rangeStyleChange = (payload: RangeStylePayload) => {
         setRangeStyle(payload);
