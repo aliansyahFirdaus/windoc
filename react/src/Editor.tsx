@@ -128,7 +128,10 @@ function EditorInner({
     setWordCount,
     setRowNo,
     setColNo,
-    setPageScale
+    setPageScale,
+    setPaperDirection,
+    setPaperWidth,
+    setPaperHeight
   } = useFooter();
 
   useEffect(() => {
@@ -162,9 +165,12 @@ function EditorInner({
 
       editorRef.current = instance;
 
-      // Sync initial scale to footer
-      const initialScale = (userOptions as any)?.scale ?? 1;
-      setPageScale(Math.round(initialScale * 100));
+      // Sync initial options to footer
+      const opts = instance.command.getOptions();
+      setPageScale(Math.round(opts.scale * 100));
+      setPaperDirection(opts.paperDirection);
+      setPaperWidth(opts.width);
+      setPaperHeight(opts.height);
 
       // Setup listeners
       instance.listener.rangeStyleChange = (payload: RangeStylePayload) => {

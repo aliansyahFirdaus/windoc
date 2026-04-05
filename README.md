@@ -15,8 +15,8 @@ Canvas-based document editor for the web. High-performance rendering via HTML5 C
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| [@windoc/core](./core) | Canvas editor engine | 0.3.17 |
-| [@windoc/react](./react) | React bindings & composable UI | 0.3.17 |
+| [@windoc/core](./core) | Canvas editor engine | 0.3.18 |
+| [@windoc/react](./react) | React bindings & composable UI | 0.3.18 |
 
 ## Getting Started
 

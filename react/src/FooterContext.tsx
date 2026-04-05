@@ -10,6 +10,9 @@ interface FooterContextValue {
   rowNo: number;
   colNo: number;
   pageScale: number;
+  paperDirection: string;
+  paperWidth: number;
+  paperHeight: number;
   setPageNoList: (v: string) => void;
   setPageNo: (v: number) => void;
   setPageSize: (v: number) => void;
@@ -17,6 +20,9 @@ interface FooterContextValue {
   setRowNo: (v: number) => void;
   setColNo: (v: number) => void;
   setPageScale: (v: number) => void;
+  setPaperDirection: (v: string) => void;
+  setPaperWidth: (v: number) => void;
+  setPaperHeight: (v: number) => void;
   handleToggleCatalogAction?: () => void;
 }
 
@@ -36,6 +42,9 @@ export function FooterProvider({
   const [rowNo, setRowNo] = useState(0);
   const [colNo, setColNo] = useState(0);
   const [pageScale, setPageScale] = useState(100);
+  const [paperDirection, setPaperDirection] = useState('vertical');
+  const [paperWidth, setPaperWidth] = useState(794);
+  const [paperHeight, setPaperHeight] = useState(1123);
 
   return (
     <FooterContext.Provider
@@ -47,6 +56,9 @@ export function FooterProvider({
         rowNo,
         colNo,
         pageScale,
+        paperDirection,
+        paperWidth,
+        paperHeight,
         setPageNoList,
         setPageNo,
         setPageSize,
@@ -54,6 +66,9 @@ export function FooterProvider({
         setRowNo,
         setColNo,
         setPageScale,
+        setPaperDirection,
+        setPaperWidth,
+        setPaperHeight,
         handleToggleCatalogAction
       }}
     >

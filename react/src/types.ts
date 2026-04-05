@@ -89,6 +89,10 @@ export type EditorInstance = {
     getOptions: () => {
       header: { disabled: boolean };
       footer: { disabled: boolean };
+      scale: number;
+      paperDirection: string;
+      width: number;
+      height: number;
       [key: string]: unknown;
     };
     executeUpdateOptions: (options: object) => void;
