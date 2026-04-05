@@ -2263,8 +2263,8 @@ export class CommandAdapt {
 
   public updateOptions(payload: IUpdateOption) {
     const newOption = mergeOption(payload);
-    Object.entries(newOption).forEach(([key, value]) => {
-      Reflect.set(this.options, key, value);
+    Object.keys(payload).forEach(key => {
+      Reflect.set(this.options, key, newOption[key as keyof typeof newOption]);
     });
     this.forceUpdate();
   }
