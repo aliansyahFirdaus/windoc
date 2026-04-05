@@ -6,6 +6,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- Use outline instead of border on canvas to fix cursor offset
+
+- Use cursor bounds for scroll visibility check and add default maskMargin
+
 - Only arrow button opens dropdown, not the label/text part
 
 - Auto-flip dropdown to left when it overflows viewport right edge
