@@ -1059,7 +1059,7 @@ ul {
 
 .ce-page-container canvas {
     box-shadow: none;
-    border: 1px solid #c4c7c5;
+    outline: 1px solid #c4c7c5;
 }
 
 .comment {
