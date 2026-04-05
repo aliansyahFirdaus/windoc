@@ -57,6 +57,15 @@ export type IPageModeChange = (payload: PageMode) => void;
 
 export type IZoneChange = (payload: EditorZone) => void;
 
+export interface IOptionsChangePayload {
+  scale: number;
+  paperDirection: string;
+  width: number;
+  height: number;
+}
+
+export type IOptionsChange = (payload: IOptionsChangePayload) => void;
+
 export type IMouseEventChange = (evt: MouseEvent) => void;
 
 export type IInputEventChange = (evt: Event) => void;

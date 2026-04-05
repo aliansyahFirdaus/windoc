@@ -2267,6 +2267,8 @@ export class CommandAdapt {
       Reflect.set(this.options, key, newOption[key as keyof typeof newOption]);
     });
     this.forceUpdate();
+    const { scale, paperDirection, width, height } = this.options;
+    this.draw.getListener().optionsChange?.({ scale, paperDirection, width, height });
   }
 
   public getControlList(): IElement[] {

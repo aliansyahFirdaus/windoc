@@ -143,6 +143,7 @@ export type EditorInstance = {
     pageModeChange: ((payload: string) => void) | null;
     contentChange: (() => void) | null;
     saved: ((payload: object) => void) | null;
+    optionsChange: ((payload: { scale: number; paperDirection: string; width: number; height: number }) => void) | null;
   };
   register: {
     contextMenuList: (items: object[]) => void;

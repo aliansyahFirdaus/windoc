@@ -200,6 +200,13 @@ function EditorInner({
         setPageScale(Math.floor(payload * 10 * 10));
       };
 
+      instance.listener.optionsChange = (payload: { scale: number; paperDirection: string; width: number; height: number }) => {
+        setPageScale(Math.round(payload.scale * 100));
+        setPaperDirection(payload.paperDirection);
+        setPaperWidth(payload.width);
+        setPaperHeight(payload.height);
+      };
+
       instance.listener.contentChange = async () => {
         const count = await instance?.command.getWordCount();
         setWordCount(count || 0);
