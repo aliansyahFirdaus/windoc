@@ -2266,7 +2266,12 @@ export class CommandAdapt {
     Object.keys(payload).forEach(key => {
       Reflect.set(this.options, key, newOption[key as keyof typeof newOption]);
     });
-    this.forceUpdate();
+    const layoutKeys = ['paperDirection', 'width', 'height'];
+    if (layoutKeys.some(k => k in payload)) {
+      this.draw.refreshPageSize();
+    } else {
+      this.forceUpdate();
+    }
     const { scale, paperDirection, width, height } = this.options;
     this.draw.getListener().optionsChange?.({ scale, paperDirection, width, height });
   }

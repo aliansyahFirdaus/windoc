@@ -1164,26 +1164,16 @@ export class Draw {
   public setPaperSize(width: number, height: number) {
     this.options.width = width;
     this.options.height = height;
-    const dpr = this.getPagePixelRatio();
-    const realWidth = this.getWidth();
-    const realHeight = this.getHeight();
-    this.container.style.width = `${realWidth}px`;
-    this.pageList.forEach((p, i) => {
-      p.width = realWidth * dpr;
-      p.height = realHeight * dpr;
-      p.style.width = `${realWidth}px`;
-      p.style.height = `${realHeight}px`;
-      this._initPageContext(this.ctxList[i]);
-    });
-    this.render({
-      isSubmitHistory: false,
-      isSetCursor: false
-    });
+    this.refreshPageSize();
   }
 
   public setPaperDirection(payload: PaperDirection) {
-    const dpr = this.getPagePixelRatio();
     this.options.paperDirection = payload;
+    this.refreshPageSize();
+  }
+
+  public refreshPageSize() {
+    const dpr = this.getPagePixelRatio();
     const width = this.getWidth();
     const height = this.getHeight();
     this.container.style.width = `${width}px`;
