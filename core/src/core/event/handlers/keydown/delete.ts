@@ -1,6 +1,7 @@
 import { ZERO } from '../../../../dataset/constant/Common';
 import { CanvasEvent } from '../../CanvasEvent';
 import { isMod } from '../../../../utils/hotkey';
+import { moveEmptySplitTdCursorToParent } from './tableSplit';
 
 function deleteHideElement(host: CanvasEvent) {
   const draw = host.getDraw();
@@ -40,6 +41,18 @@ export function del(evt: KeyboardEvent, host: CanvasEvent) {
   if (draw.isReadonly()) return;
   const rangeManager = draw.getRange();
   if (!rangeManager.getIsCanInput()) return;
+  if (rangeManager.getIsCollapsed()) {
+    const splitParentIndex = moveEmptySplitTdCursorToParent(host);
+    if (splitParentIndex !== null) {
+      draw.getGlobalEvent().setCanvasEventAbility();
+      draw.render({
+        curIndex: splitParentIndex,
+        isSubmitHistory: false
+      });
+      evt.preventDefault();
+      return;
+    }
+  }
   const { startIndex, endIndex, isCrossRowCol } = rangeManager.getRange();
   const elementList = draw.getElementList();
   const control = draw.getControl();

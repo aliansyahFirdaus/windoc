@@ -676,7 +676,12 @@ export class Control {
     const newIndex = position.isTable ? tdValueIndex! : index;
     if (position.isTable) {
       elementList =
-        elementList[index!].trList![trIndex!].tdList[tdIndex!].value;
+        this.draw.resolveTableCellContext(elementList, {
+          isTable: true,
+          index,
+          trIndex,
+          tdIndex
+        })?.td.value || [];
       element = elementList[tdValueIndex!];
     } else {
       element = elementList[index];

@@ -56,10 +56,9 @@ export class Position {
   public getTablePositionList(
     sourceElementList: IElement[]
   ): IElementPosition[] {
-    const { index, trIndex, tdIndex } = this.positionContext;
     return (
-      sourceElementList[index!].trList![trIndex!].tdList[tdIndex!]
-        .positionList || []
+      this.draw.resolveTableCellContext(sourceElementList, this.positionContext)
+        ?.td.positionList || []
     );
   }
 
@@ -828,6 +827,59 @@ export class Position {
         positionResult.tdValueIndex = newIndex;
       } else {
         positionResult.index = newIndex;
+      }
+    }
+    // When clicking on an empty continuation td (part of a split table, only
+    // has the synthetic ZERO), redirect the cursor to the root td on the
+    // original page. This mirrors normal table behaviour: clicking anywhere in
+    // an empty cell snaps the cursor to the ZERO at the top of that cell.
+    if (positionResult.isTable && positionResult.trId != null) {
+      const elementList = this.draw.getOriginalMainElementList();
+      const tableElement = elementList[positionResult.index];
+      if (tableElement?.trList) {
+        const matchedTr = tableElement.trList.find(
+          r => r.id === positionResult.trId
+        );
+        if (matchedTr?.splitRootId) {
+          const matchedTd = matchedTr.tdList[positionResult.tdIndex!];
+          if (
+            matchedTd &&
+            matchedTd.splitSyntheticLeadingZero &&
+            matchedTd.value.length === 1 &&
+            matchedTd.value[0].value === ZERO
+          ) {
+            const pagingId = tableElement.pagingId;
+            if (pagingId) {
+              for (let i = positionResult.index - 1; i >= 0; i--) {
+                const prevElement = elementList[i];
+                if (prevElement.pagingId !== pagingId) break;
+                const rootTr = prevElement.trList?.find(
+                  r => r.id === matchedTr.splitRootId
+                );
+                if (rootTr) {
+                  const rootTd = rootTr.tdList.find(
+                    t => t.colIndex === matchedTd.colIndex
+                  );
+                  const isRootTdEmpty =
+                    !!rootTd &&
+                    rootTd.value.length === 1 &&
+                    rootTd.value[0].value === ZERO;
+                  if (rootTd && isRootTdEmpty) {
+                    positionResult.index = i;
+                    positionResult.trIndex =
+                      prevElement.trList!.indexOf(rootTr);
+                    positionResult.tdIndex = rootTr.tdList.indexOf(rootTd);
+                    positionResult.trId = rootTr.id;
+                    positionResult.tdId = rootTd.id;
+                    positionResult.tableId = prevElement.id;
+                    positionResult.tdValueIndex = 0;
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        }
       }
     }
     const {

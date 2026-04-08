@@ -2,6 +2,7 @@ import { VerticalAlign } from '../../dataset/enum/VerticalAlign';
 import { TdBorder, TdSlash } from '../../dataset/enum/table/Table';
 import { IElement, IElementPosition } from '../Element';
 import { IPadding } from '../Common';
+import { IListStateSeed } from '../Draw';
 import { IRow } from '../Row';
 
 export interface ITd {
@@ -34,6 +35,8 @@ export interface ITd {
   mainHeight?: number;
   realHeight?: number;
   realMinHeight?: number;
+  splitSyntheticLeadingZero?: boolean;
+  splitListState?: IListStateSeed;
   disabled?: boolean;
   deletable?: boolean;
 }

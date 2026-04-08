@@ -18,6 +18,13 @@ interface IDrawTableBorderOption {
   isDrawFullBorder?: boolean;
 }
 
+interface IDrawHorizontalBorderOption {
+  ctx: CanvasRenderingContext2D;
+  startX: number;
+  endX: number;
+  y: number;
+}
+
 export class TableParticle {
   private draw: Draw;
   private range: RangeManager;
@@ -116,18 +123,51 @@ export class TableParticle {
     ctx.beginPath();
     const x = Math.round(startX);
     const y = Math.round(startY);
+    // Round endpoints to integers so the stroke lands on crisp pixel
+    // boundaries after the translate(0.5, 0.5) trick.
+    // Without rounding, x + width (= Math.round(startX) + tableWidth) is
+    // often a float, making the right end of the top border anti-aliased
+    // (appears lighter/dimmer) and misaligned from cell border coords
+    // which use Math.round(startX + width).
+    const rx = Math.round(startX + width);
+    const ry = Math.round(startY + height);
     ctx.translate(0.5, 0.5);
     if (isDrawFullBorder) {
-      ctx.rect(x, y, width, height);
-    } else {
-      ctx.moveTo(x, y + height);
+      ctx.rect(x, y, rx - x, ry - y);
+    } else if (borderExternalWidth) {
+      // When a distinct external border width is set, keep the L-shape
+      // (left + top) here at the external width. The cell loop cannot
+      // easily match this width for the top-border segments.
+      ctx.moveTo(x, ry);
       ctx.lineTo(x, y);
-      ctx.lineTo(x + width, y);
+      ctx.lineTo(rx, y);
+    } else {
+      // Standard case: draw only the left border here. The top border is
+      // drawn cell-by-cell in the cell loop (for rowIndex === 0 cells) to
+      // avoid double-drawing at junction points where vertical dividers
+      // meet the top horizontal line. That double-stroke made the
+      // junction pixels darker, causing the middle of the top border
+      // to appear thinner/lighter by comparison.
+      ctx.moveTo(x, ry);
+      ctx.lineTo(x, y);
     }
     ctx.stroke();
     if (borderExternalWidth) {
       ctx.lineWidth = lineWidth;
     }
+    ctx.translate(-0.5, -0.5);
+  }
+
+  private _drawHorizontalBorder(payload: IDrawHorizontalBorderOption) {
+    const { ctx, startX, endX, y } = payload;
+    const x = Math.round(startX);
+    const rx = Math.round(endX);
+    const ty = Math.round(y);
+    ctx.beginPath();
+    ctx.translate(0.5, 0.5);
+    ctx.moveTo(x, ty);
+    ctx.lineTo(rx, ty);
+    ctx.stroke();
     ctx.translate(-0.5, -0.5);
   }
 
@@ -139,17 +179,17 @@ export class TableParticle {
   ) {
     const { scale } = this.options;
     ctx.save();
-    const width = td.width! * scale;
-    const height = td.height! * scale;
-    const x = Math.round(td.x! * scale + startX);
-    const y = Math.round(td.y! * scale + startY);
+    const lx = Math.round(td.x! * scale + startX);
+    const ty = Math.round(td.y! * scale + startY);
+    const rx = Math.round((td.x! + td.width!) * scale + startX);
+    const by = Math.round((td.y! + td.height!) * scale + startY);
     if (td.slashTypes?.includes(TdSlash.FORWARD)) {
-      ctx.moveTo(x + width, y);
-      ctx.lineTo(x, y + height);
+      ctx.moveTo(rx, ty);
+      ctx.lineTo(lx, by);
     }
     if (td.slashTypes?.includes(TdSlash.BACK)) {
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + width, y + height);
+      ctx.moveTo(lx, ty);
+      ctx.lineTo(rx, by);
     }
     ctx.stroke();
     ctx.restore();
@@ -196,6 +236,8 @@ export class TableParticle {
         isDrawFullBorder: isExternalBorderType
       });
     }
+    const firstTr = trList[0];
+    const lastTr = trList[trList.length - 1];
     for (let t = 0; t < trList.length; t++) {
       const tr = trList[t];
       for (let d = 0; d < tr.tdList.length; d++) {
@@ -209,10 +251,15 @@ export class TableParticle {
         ) {
           continue;
         }
-        const width = td.width! * scale;
-        const height = td.height! * scale;
-        const x = Math.round(td.x! * scale + startX + width);
-        const y = Math.round(td.y! * scale + startY);
+        // Compute all four cell corners with independent Math.round calls so
+        // that no float arithmetic (x-width, y+height) propagates into the
+        // canvas path. This is critical when scale is non-integer (e.g. 1.2):
+        // td.width! * scale is a float, and integer ± float = float → the
+        // translate(0.5,0.5) trick only works when coordinates are integers.
+        const lx = Math.round(td.x! * scale + startX);
+        const ty = Math.round(td.y! * scale + startY);
+        const rx = Math.round((td.x! + td.width!) * scale + startX);
+        const by = Math.round((td.y! + td.height!) * scale + startY);
         if (td.borderColor) {
           ctx.save();
           ctx.strokeStyle = td.borderColor;
@@ -220,32 +267,42 @@ export class TableParticle {
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
         if (td.borderTypes?.includes(TdBorder.TOP)) {
-          ctx.moveTo(x - width, y);
-          ctx.lineTo(x, y);
+          ctx.moveTo(lx, ty);
+          ctx.lineTo(rx, ty);
           ctx.stroke();
         }
         if (td.borderTypes?.includes(TdBorder.RIGHT)) {
-          ctx.moveTo(x, y);
-          ctx.lineTo(x, y + height);
+          ctx.moveTo(rx, ty);
+          ctx.lineTo(rx, by);
           ctx.stroke();
         }
         if (td.borderTypes?.includes(TdBorder.BOTTOM)) {
-          ctx.moveTo(x, y + height);
-          ctx.lineTo(x - width, y + height);
+          ctx.moveTo(rx, by);
+          ctx.lineTo(lx, by);
           ctx.stroke();
         }
         if (td.borderTypes?.includes(TdBorder.LEFT)) {
-          ctx.moveTo(x - width, y);
-          ctx.lineTo(x - width, y + height);
+          ctx.moveTo(lx, ty);
+          ctx.lineTo(lx, by);
           ctx.stroke();
         }
         if (!isEmptyBorderType && !isExternalBorderType) {
+          // Top border: drawn per-cell for the first logical row so that
+          // cell segments never double-stroke the junction pixels where
+          // the vertical dividers start. This prevents the junctions from
+          // appearing darker than the segments between them.
+          // Skip when borderExternalWidth is set: _drawOuterBorder handles
+          // the top border there with a different line width.
+          if (td.rowIndex === 0 && !borderExternalWidth) {
+            ctx.moveTo(lx, ty);
+            ctx.lineTo(rx, ty);
+          }
           if (
             !isInternalBorderType ||
             td.colIndex! + td.colspan < colgroup.length
           ) {
-            ctx.moveTo(x, y);
-            ctx.lineTo(x, y + height);
+            ctx.moveTo(rx, ty);
+            ctx.lineTo(rx, by);
             if (
               borderExternalWidth &&
               borderExternalWidth !== borderWidth &&
@@ -262,16 +319,17 @@ export class TableParticle {
             !isInternalBorderType ||
             td.rowIndex! + td.rowspan < trList.length
           ) {
+            const isBottomEdge = td.rowIndex! + td.rowspan === trList.length;
             const isSetExternalBottomBorder =
               borderExternalWidth &&
               borderExternalWidth !== borderWidth &&
-              td.rowIndex! + td.rowspan === trList.length;
+              isBottomEdge;
             if (isSetExternalBottomBorder) {
               ctx.stroke();
               ctx.beginPath();
             }
-            ctx.moveTo(x, y + height);
-            ctx.lineTo(x - width, y + height);
+            ctx.moveTo(rx, by);
+            ctx.lineTo(lx, by);
             if (isSetExternalBottomBorder) {
               const lineWidth = ctx.lineWidth;
               ctx.lineWidth = borderExternalWidth * scale;
@@ -289,12 +347,12 @@ export class TableParticle {
           ctx.translate(0.5, 0.5);
           ctx.beginPath();
           if (td.rowIndex === 0) {
-            ctx.moveTo(x - width, y);
-            ctx.lineTo(x, y);
+            ctx.moveTo(lx, ty);
+            ctx.lineTo(rx, ty);
           }
           if (td.colIndex === 0) {
-            ctx.moveTo(x - width, y);
-            ctx.lineTo(x - width, y + height);
+            ctx.moveTo(lx, ty);
+            ctx.lineTo(lx, by);
           }
           if (td.rowIndex === 0 || td.colIndex === 0) {
             ctx.stroke();
@@ -305,6 +363,32 @@ export class TableParticle {
           ctx.restore();
         }
       }
+    }
+    if (
+      !isEmptyBorderType &&
+      !isExternalBorderType &&
+      !borderExternalWidth &&
+      firstTr?.splitBoundaryTop
+    ) {
+      this._drawHorizontalBorder({
+        ctx,
+        startX,
+        endX: startX + tableWidth,
+        y: startY
+      });
+    }
+    if (
+      !isEmptyBorderType &&
+      !isExternalBorderType &&
+      !borderExternalWidth &&
+      lastTr?.splitBoundaryBottom
+    ) {
+      this._drawHorizontalBorder({
+        ctx,
+        startX,
+        endX: startX + tableWidth,
+        y: startY + tableHeight
+      });
     }
     ctx.restore();
   }
@@ -324,12 +408,12 @@ export class TableParticle {
         const td = tr.tdList[d];
         if (!td.backgroundColor) continue;
         ctx.save();
-        const width = td.width! * scale;
-        const height = td.height! * scale;
-        const x = Math.round(td.x! * scale + startX);
-        const y = Math.round(td.y! * scale + startY);
+        const lx = Math.round(td.x! * scale + startX);
+        const ty = Math.round(td.y! * scale + startY);
+        const rx = Math.round((td.x! + td.width!) * scale + startX);
+        const by = Math.round((td.y! + td.height!) * scale + startY);
         ctx.fillStyle = td.backgroundColor;
-        ctx.fillRect(x, y, width, height);
+        ctx.fillRect(lx, ty, rx - lx, by - ty);
         ctx.restore();
       }
     }

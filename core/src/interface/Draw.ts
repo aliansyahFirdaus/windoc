@@ -74,6 +74,13 @@ export interface IGetImageOption {
   mode?: EditorMode;
 }
 
+export interface IListStateSeed {
+  listId?: string;
+  listIndex: number;
+  prevListLevel: number;
+  listLevelIndex: Record<number, number>;
+}
+
 export interface IComputeRowListPayload {
   innerWidth: number;
   elementList: IElement[];
@@ -84,4 +91,5 @@ export interface IComputeRowListPayload {
   pageHeight?: number;
   mainOuterHeight?: number;
   surroundElementList?: IElement[];
+  initialListState?: IListStateSeed;
 }

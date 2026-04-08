@@ -12,6 +12,7 @@ import {
   IGetImageOption,
   IGetOriginValueOption,
   IGetValueOption,
+  IListStateSeed,
   IPainterOption
 } from '../../interface/Draw';
 import {
@@ -116,6 +117,7 @@ import { MouseObserver } from '../observer/MouseObserver';
 import { LineNumber } from './frame/LineNumber';
 import { PageBorder } from './frame/PageBorder';
 import { ITd } from '../../interface/table/Td';
+import { ITr } from '../../interface/table/Tr';
 import { Actuator } from '../actuator/Actuator';
 import { TableOperate } from './particle/table/TableOperate';
 import { Area } from './interactive/Area';
@@ -199,6 +201,7 @@ export class Draw {
   private intersectionPageNo: number;
   private lazyRenderIntersectionObserver: IntersectionObserver | null;
   private printModeData: Required<Omit<IEditorData, 'graffiti'>> | null;
+  private pendingTableCursorIndex: number | undefined;
 
   constructor(
     rootContainer: HTMLElement,
@@ -297,6 +300,7 @@ export class Draw {
     this.intersectionPageNo = 0;
     this.lazyRenderIntersectionObserver = null;
     this.printModeData = null;
+    this.pendingTableCursorIndex = undefined;
 
     if (this.mode === EditorMode.PRINT) {
       this.setPrintData();
@@ -489,9 +493,8 @@ export class Draw {
   public getContextInnerWidth(): number {
     const positionContext = this.position.getPositionContext();
     if (positionContext.isTable) {
-      const { index, trIndex, tdIndex } = positionContext;
-      const elementList = this.getOriginalElementList();
-      const td = elementList[index!].trList![trIndex!].tdList[tdIndex!];
+      const td = this.resolveTableCellContext(this.getOriginalElementList())?.td;
+      if (!td) return this.getColumnWidth() / this.options.scale;
       const tdPadding = this.getTdPadding();
       return td!.width! - tdPadding[1] - tdPadding[3];
     }
@@ -597,6 +600,69 @@ export class Draw {
     return this.pageList[~pageNo ? pageNo : this.pageNo];
   }
 
+  public resolveTableCellContext(
+    sourceElementList: IElement[] = this.getOriginalElementList(),
+    context = this.position.getPositionContext()
+  ): {
+    index: number;
+    trIndex: number;
+    tdIndex: number;
+    element: IElement;
+    td: ITd;
+  } | null {
+    if (!context.isTable) return null;
+    const candidateIndexes: number[] = [];
+    if (
+      context.index !== undefined &&
+      sourceElementList[context.index]?.type === ElementType.TABLE
+    ) {
+      candidateIndexes.push(context.index);
+    }
+    if (context.tableId) {
+      const tableIndex = sourceElementList.findIndex(el => el.id === context.tableId);
+      if (~tableIndex && !candidateIndexes.includes(tableIndex)) {
+        candidateIndexes.push(tableIndex);
+      }
+    }
+    for (let i = 0; i < sourceElementList.length; i++) {
+      const element = sourceElementList[i];
+      if (element.type !== ElementType.TABLE || candidateIndexes.includes(i)) {
+        continue;
+      }
+      candidateIndexes.push(i);
+    }
+    for (const tableIndex of candidateIndexes) {
+      const element = sourceElementList[tableIndex];
+      const trList = element.trList;
+      if (!trList?.length) continue;
+      let resolvedTrIndex = -1;
+      if (context.trId) {
+        resolvedTrIndex = trList.findIndex(tr => tr.id === context.trId);
+      }
+      if (resolvedTrIndex < 0 && context.trIndex !== undefined && trList[context.trIndex]) {
+        resolvedTrIndex = context.trIndex;
+      }
+      if (resolvedTrIndex < 0) continue;
+      const tdList = trList[resolvedTrIndex].tdList;
+      let resolvedTdIndex = -1;
+      if (context.tdId) {
+        resolvedTdIndex = tdList.findIndex(td => td.id === context.tdId);
+      }
+      if (resolvedTdIndex < 0 && context.tdIndex !== undefined && tdList[context.tdIndex]) {
+        resolvedTdIndex = context.tdIndex;
+      }
+      if (resolvedTdIndex < 0) continue;
+      return {
+        index: tableIndex,
+        trIndex: resolvedTrIndex,
+        tdIndex: resolvedTdIndex,
+        element,
+        td: tdList[resolvedTdIndex]
+      };
+    }
+    return null;
+  }
+
   public getPageList(): HTMLCanvasElement[] {
     return this.pageList;
   }
@@ -606,10 +672,7 @@ export class Draw {
   }
 
   public getTableRowList(sourceElementList: IElement[]): IRow[] {
-    const positionContext = this.position.getPositionContext();
-    const { index, trIndex, tdIndex } = positionContext;
-    return sourceElementList[index!].trList![trIndex!].tdList[tdIndex!]
-      .rowList!;
+    return this.resolveTableCellContext(sourceElementList)?.td.rowList || [];
   }
 
   public getOriginalRowList() {
@@ -687,11 +750,7 @@ export class Draw {
   }
 
   public getTableElementList(sourceElementList: IElement[]): IElement[] {
-    const positionContext = this.position.getPositionContext();
-    const { index, trIndex, tdIndex } = positionContext;
-    return (
-      sourceElementList[index!].trList?.[trIndex!].tdList[tdIndex!].value || []
-    );
+    return this.resolveTableCellContext(sourceElementList)?.td.value || [];
   }
 
   public getElementList(): IElement[] {
@@ -729,13 +788,7 @@ export class Draw {
   }
 
   public getTd(): ITd | null {
-    const positionContext = this.position.getPositionContext();
-    const { index, trIndex, tdIndex, isTable } = positionContext;
-    if (isTable) {
-      const elementList = this.getOriginalElementList();
-      return elementList[index!].trList![trIndex!].tdList[tdIndex!];
-    }
-    return null;
+    return this.resolveTableCellContext(this.getOriginalElementList())?.td || null;
   }
 
   public insertElementList(
@@ -1372,6 +1425,81 @@ export class Draw {
     );
   }
 
+  private createListStateSeed(initialListState?: IListStateSeed) {
+    const listLevelIndex = new Map<number, number>();
+    if (initialListState?.listLevelIndex) {
+      Object.entries(initialListState.listLevelIndex).forEach(
+        ([level, index]) => {
+          listLevelIndex.set(Number(level), index);
+        }
+      );
+    }
+    return {
+      listId: initialListState?.listId,
+      listIndex: initialListState?.listIndex ?? 0,
+      prevListLevel: initialListState?.prevListLevel ?? 0,
+      listLevelIndex
+    };
+  }
+
+  private advanceListState(
+    element: IElement,
+    listState: ReturnType<Draw['createListStateSeed']>
+  ) {
+    if (element.listId) {
+      const curLevel = element.listLevel ?? 0;
+      if (element.listId !== listState.listId) {
+        listState.listIndex = 0;
+        listState.listLevelIndex = new Map();
+        listState.listLevelIndex.set(curLevel, 0);
+        listState.prevListLevel = curLevel;
+      } else if (element.value === ZERO && !element.listWrap) {
+        if (curLevel !== listState.prevListLevel) {
+          if (curLevel > listState.prevListLevel) {
+            listState.listLevelIndex.set(curLevel, 0);
+          } else {
+            for (const [lvl] of listState.listLevelIndex) {
+              if (lvl > curLevel) {
+                listState.listLevelIndex.delete(lvl);
+              }
+            }
+            listState.listLevelIndex.set(
+              curLevel,
+              (listState.listLevelIndex.get(curLevel) ?? -1) + 1
+            );
+          }
+        } else {
+          listState.listLevelIndex.set(
+            curLevel,
+            (listState.listLevelIndex.get(curLevel) ?? -1) + 1
+          );
+        }
+        listState.listIndex = listState.listLevelIndex.get(curLevel) ?? 0;
+        listState.prevListLevel = curLevel;
+      }
+    }
+    listState.listId = element.listId;
+  }
+
+  private getListStateBeforeIndex(
+    elementList: IElement[],
+    endExclusive: number
+  ): IListStateSeed | undefined {
+    const limit = Math.min(endExclusive, elementList.length);
+    if (limit <= 0) return;
+    const listState = this.createListStateSeed();
+    for (let i = 0; i < limit; i++) {
+      this.advanceListState(elementList[i], listState);
+    }
+    if (!listState.listId) return;
+    return {
+      listId: listState.listId,
+      listIndex: listState.listIndex,
+      prevListLevel: listState.prevListLevel,
+      listLevelIndex: Object.fromEntries(listState.listLevelIndex)
+    } as IListStateSeed;
+  }
+
   public computeRowList(payload: IComputeRowListPayload) {
     const {
       innerWidth,
@@ -1382,7 +1510,8 @@ export class Draw {
       startY = 0,
       pageHeight = 0,
       mainOuterHeight = 0,
-      surroundElementList = []
+      surroundElementList = [],
+      initialListState
     } = payload;
     const {
       defaultSize,
@@ -1409,10 +1538,7 @@ export class Draw {
     let x = startX;
     let y = startY;
     let pageNo = 0;
-    let listId: string | undefined;
-    let listIndex = 0;
-    let listLevelIndex: Map<number, number> = new Map();
-    let prevListLevel = 0;
+    const listState = this.createListStateSeed(initialListState);
     let controlRealWidth = 0;
     for (let i = 0; i < elementList.length; i++) {
       const curRow: IRow = rowList[rowList.length - 1];
@@ -1477,6 +1603,23 @@ export class Draw {
         }
         metrics.boundingBoxAscent = 0;
       } else if (element.type === ElementType.TABLE) {
+        let activeSplitRange:
+          | {
+              tdIndex: number;
+              mergedIndex: number;
+              trId: string;
+            }
+          | undefined;
+        let mergedSplitFallback:
+          | {
+              tdIndex: number;
+              mergedIndex: number;
+              trId: string;
+              parentTrId?: string;
+              parentTdId?: string;
+              parentTrIndex: number;
+            }
+          | undefined;
         if (element.pagingId) {
           let tableIndex = i + 1;
           let combineCount = 0;
@@ -1497,11 +1640,84 @@ export class Draw {
           if (combineCount) {
             elementList.splice(i + 1, combineCount);
           }
+          // Re-merge intra-row split trs (process end-to-start to handle chains)
+          const mergedTrList = element.trList!;
+          for (let t = mergedTrList.length - 1; t >= 0; t--) {
+            const splitTr = mergedTrList[t];
+            if (!splitTr.splitParentId) continue;
+            const parentTrIdx = mergedTrList.findIndex(
+              r => r.id === splitTr.splitParentId
+            );
+            if (!~parentTrIdx) continue;
+            const parentTr = mergedTrList[parentTrIdx];
+            const posCtx = this.position.getPositionContext();
+            const { startIndex, endIndex } = this.range.getRange();
+            if (
+              posCtx.isTable &&
+              posCtx.trId === splitTr.id &&
+              startIndex === endIndex &&
+              posCtx.tdIndex !== undefined
+            ) {
+              const splitTd = splitTr.tdList[posCtx.tdIndex];
+              const parentTd = parentTr.tdList[posCtx.tdIndex];
+              if (splitTd && parentTd) {
+                const hasSyntheticLeadingZero =
+                  !!splitTd.splitSyntheticLeadingZero &&
+                  splitTd.value[0]?.value === ZERO;
+                const mergedIndex =
+                  parentTd.value.length +
+                  startIndex -
+                  (hasSyntheticLeadingZero ? 1 : 0);
+                activeSplitRange = {
+                  tdIndex: posCtx.tdIndex,
+                  mergedIndex,
+                  trId: splitTr.id!
+                };
+                mergedSplitFallback = {
+                  tdIndex: posCtx.tdIndex,
+                  mergedIndex,
+                  trId: splitTr.id!,
+                  parentTrId: parentTr.id,
+                  parentTdId: parentTd.id,
+                  parentTrIndex: parentTrIdx
+                };
+              }
+            }
+            for (let d = 0; d < parentTr.tdList.length; d++) {
+              const parentTd = parentTr.tdList[d];
+              const splitTd = splitTr.tdList[d];
+              if (!splitTd) continue;
+              const hasSyntheticLeadingZero =
+                !!splitTd.splitSyntheticLeadingZero &&
+                splitTd.value[0]?.value === ZERO;
+              const splitValue =
+                hasSyntheticLeadingZero
+                  ? splitTd.value.slice(1)
+                  : splitTd.value;
+              // No deepClone: elements are solely owned by continuation after splice
+              parentTd.value.push(...splitValue);
+              parentTd.rowList = undefined;
+              parentTd.positionList = undefined;
+            }
+            // Fix positionContext.index only — posCtx.trId is intentionally left
+            // unchanged (it holds the stable continuation id, e.g. "abc_c1").
+            // The existing tracking code at the end of the isPagingMode block will
+            // find the new continuation (same stable id) in element B and update
+            // index/trIndex there. Changing trId to parentTr.id here was the bug
+            // that caused the cursor to always snap to element A (page 1).
+            if (posCtx.isTable && posCtx.trId === splitTr.id) {
+              posCtx.index = i;
+              this.position.setPositionContext(posCtx);
+            }
+            mergedTrList.splice(t, 1);
+          }
         }
         element.pagingIndex = element.pagingIndex ?? 0;
         const trList = element.trList!;
         for (let t = 0; t < trList.length; t++) {
           const tr = trList[t];
+          delete tr.splitBoundaryTop;
+          delete tr.splitBoundaryBottom;
           tr.height = tr.minHeight || defaultTrMinHeight;
           tr.minHeight = tr.height;
         }
@@ -1516,6 +1732,7 @@ export class Draw {
             const rowList = this.computeRowList({
               innerWidth: (td.width! - cellPaddingWidth) * scale,
               elementList: td.value,
+              initialListState: td.splitListState,
               isFromTable: true,
               isPagingMode
             });
@@ -1604,6 +1821,7 @@ export class Draw {
               const tdRowList = this.computeRowList({
                 innerWidth: (td.width! - cellPaddingWidth) * scale,
                 elementList: td.value,
+                initialListState: td.splitListState,
                 isFromTable: true,
                 isPagingMode
               });
@@ -1708,6 +1926,249 @@ export class Draw {
                 }
               }
             }
+            // Intra-row split: handle a row too tall to fit on the current page
+            if (deleteCount === 0) {
+              let overflowTrIdx = -1;
+              let preHeightScaled = 0;
+              for (let r = 0; r < trList.length; r++) {
+                const trHeight = trList[r].height * scale;
+                if (
+                  curPagePreHeight +
+                    rowMarginHeight +
+                    preHeightScaled +
+                    trHeight >
+                  height
+                ) {
+                  overflowTrIdx = r;
+                  break;
+                }
+                preHeightScaled += trHeight;
+              }
+              if (overflowTrIdx >= 0) {
+                const availableScaled =
+                  height -
+                  curPagePreHeight -
+                  rowMarginHeight -
+                  preHeightScaled;
+                const availableUnscaled = availableScaled / scale;
+                // Don't split if available space is too small — the resulting
+                // thin table slice looks visually wrong. Let the whole row fall
+                // to the next page instead.
+                if (availableUnscaled >= defaultTrMinHeight) {
+                  const overflowTr = trList[overflowTrIdx];
+                  const originalTrHeight = overflowTr.height;
+                  const {
+                    table: { tdPadding: defaultTdPadding, defaultTrMinHeight }
+                  } = this.options;
+                  // Track both the element index and the row index of the split
+                  // point per cell so we can keep the computed rowList for the
+                  // fitting portion (instead of clearing it and leaving the
+                  // renderer with nothing to draw).
+                  const splits: {
+                    elemIdx: number;
+                    rowIdx: number;
+                  }[] = [];
+                  let anySplit = false;
+                  for (let d = 0; d < overflowTr.tdList.length; d++) {
+                    const td = overflowTr.tdList[d];
+                    const cellPadding = td.padding || defaultTdPadding;
+                    const cellPaddingH = cellPadding[0] + cellPadding[2];
+                    const contentAvailableScaled =
+                      (availableUnscaled - cellPaddingH) * scale;
+                    if (!td.rowList || td.rowList.length === 0) {
+                      splits.push({
+                        elemIdx: td.value.length,
+                        rowIdx: 0
+                      });
+                      continue;
+                    }
+                    let cumHeight = 0;
+                    let elemIdx = td.value.length;
+                    let rowIdx = td.rowList.length;
+                    for (let ri = 0; ri < td.rowList.length; ri++) {
+                      const row = td.rowList[ri];
+                      if (cumHeight + row.height > contentAvailableScaled) {
+                        elemIdx = row.startIndex;
+                        rowIdx = ri;
+                        break;
+                      }
+                      cumHeight += row.height;
+                    }
+                    if (elemIdx > 0 && elemIdx < td.value.length) {
+                      anySplit = true;
+                    }
+                    splits.push({ elemIdx, rowIdx });
+                  }
+                  if (anySplit) {
+                    if (!activeSplitRange) {
+                      const posCtx = this.position.getPositionContext();
+                      const { startIndex, endIndex } = this.range.getRange();
+                      if (
+                        posCtx.isTable &&
+                        posCtx.trId === overflowTr.id &&
+                        startIndex === endIndex &&
+                        posCtx.tdIndex !== undefined
+                      ) {
+                        const splitIdx = splits[posCtx.tdIndex]?.elemIdx;
+                        if (
+                          splitIdx !== undefined &&
+                          startIndex >= splitIdx &&
+                          splitIdx < overflowTr.tdList[posCtx.tdIndex].value.length
+                        ) {
+                          activeSplitRange = {
+                            tdIndex: posCtx.tdIndex,
+                            mergedIndex: startIndex,
+                            trId: overflowTr.id!
+                          };
+                        }
+                      }
+                    }
+                    // Do not clamp with Math.max(, defaultTrMinHeight) here.
+                    // continuationTr.minHeight = defaultTrMinHeight ensures
+                    // the layout pass grows it to the right size. Clamping
+                    // would make cloneTrHeight != (originalTrHeight - availableUnscaled)
+                    // which causes element.height to diverge from td.height,
+                    // producing border height mismatches between the outer
+                    // border (driven by element.height) and cell borders
+                    // (driven by td.height).
+                    const continuationTrHeight =
+                      originalTrHeight - availableUnscaled;
+                    // Use a stable, deterministic id so that across render cycles
+                    // the continuation tr keeps the same id. This lets the existing
+                    // position-tracking code re-find the cursor in element B/C after
+                    // re-merge + re-split, preventing the cursor from always jumping
+                    // back to element A (page 1).
+                    const splitRootId =
+                      overflowTr.splitRootId || overflowTr.id!;
+                    const splitLevel = (overflowTr.splitLevel || 0) + 1;
+                    const newTrId = `${splitRootId}_c${splitLevel}`;
+                    const continuationTdList: ITd[] = overflowTr.tdList.map(
+                      (td, d) => {
+                        const splitIdx = splits[d].elemIdx;
+                        const initialListState = this.getListStateBeforeIndex(
+                          td.value,
+                          splitIdx
+                        );
+                        const overflowElements = deepClone(
+                          td.value.slice(splitIdx)
+                        );
+                        const overflowStartElement = overflowElements[0];
+                        let splitSyntheticLeadingZero = false;
+                        if (
+                          !overflowElements.length ||
+                          overflowElements[0]?.value !== ZERO
+                        ) {
+                          overflowElements.unshift({
+                            value: ZERO,
+                            type: ElementType.TEXT,
+                            listId: overflowStartElement?.listId,
+                            listType: overflowStartElement?.listType,
+                            listStyle: overflowStartElement?.listStyle,
+                            listLevel: overflowStartElement?.listLevel,
+                            listPreset: overflowStartElement?.listPreset,
+                            listWrap: !!overflowStartElement?.listId
+                          } as IElement);
+                          splitSyntheticLeadingZero = true;
+                        }
+                        // Clone td metadata only (exclude value to avoid
+                        // double-cloning the large elements array)
+                        const {
+                          value: _v,
+                          rowList: _rl,
+                          positionList: _pl,
+                          splitSyntheticLeadingZero: _slz,
+                          splitListState: _sls,
+                          ...tdMeta
+                        } = td;
+                        return {
+                          ...deepClone(tdMeta),
+                          value: overflowElements,
+                          splitSyntheticLeadingZero,
+                          splitListState: initialListState,
+                          height: continuationTrHeight,
+                          rowList: undefined,
+                          positionList: undefined,
+                          mainHeight: undefined,
+                          realHeight: undefined,
+                          realMinHeight: undefined
+                        } as ITd;
+                      }
+                    );
+                    const continuationTr: ITr = {
+                      id: newTrId,
+                      height: continuationTrHeight,
+                      minHeight: defaultTrMinHeight,
+                      tdList: continuationTdList,
+                      splitParentId: overflowTr.id,
+                      splitRootId,
+                      splitLevel
+                    };
+                    const positionContext = this.position.getPositionContext();
+                    if (
+                      activeSplitRange &&
+                      positionContext.isTable &&
+                      positionContext.trId === activeSplitRange.trId
+                    ) {
+                      const splitIdx = splits[activeSplitRange.tdIndex]?.elemIdx;
+                      const continuationTd =
+                        continuationTdList[activeSplitRange.tdIndex];
+                      if (
+                        splitIdx !== undefined &&
+                        continuationTd &&
+                        activeSplitRange.mergedIndex >= splitIdx
+                      ) {
+                        const hasPrependedZero =
+                          !!continuationTd.splitSyntheticLeadingZero &&
+                          continuationTd.value[0]?.value === ZERO;
+                        const continuationCursorIndex =
+                          activeSplitRange.mergedIndex -
+                          splitIdx +
+                          (hasPrependedZero ? 1 : 0);
+                        positionContext.index = i;
+                        positionContext.trIndex = overflowTrIdx + 1;
+                        positionContext.tdIndex = activeSplitRange.tdIndex;
+                        positionContext.tdId = continuationTd.id;
+                        positionContext.trId = continuationTr.id;
+                        positionContext.tableId = element.id;
+                        this.position.setPositionContext(positionContext);
+                        this.range.setRange(
+                          continuationCursorIndex,
+                          continuationCursorIndex
+                        );
+                        this.pendingTableCursorIndex =
+                          continuationCursorIndex;
+                      }
+                    }
+                    for (let d = 0; d < overflowTr.tdList.length; d++) {
+                      const td = overflowTr.tdList[d];
+                      const { elemIdx, rowIdx } = splits[d];
+                      td.value = td.value.slice(0, elemIdx);
+                      // Keep the fitting rows so the renderer has content to draw.
+                      // Clearing rowList here was the bug: renderer got undefined
+                      // and drew nothing, showing an empty 1-page table.
+                      td.rowList = td.rowList
+                        ? td.rowList.slice(0, rowIdx)
+                        : undefined;
+                      td.positionList = undefined;
+                      td.height = availableUnscaled;
+                      td.mainHeight = undefined;
+                      td.realHeight = undefined;
+                      td.realMinHeight = undefined;
+                    }
+                    overflowTr.height = availableUnscaled;
+                    overflowTr.minHeight = Math.min(
+                      overflowTr.minHeight || defaultTrMinHeight,
+                      availableUnscaled
+                    );
+                    overflowTr.splitBoundaryBottom = true;
+                    continuationTr.splitBoundaryTop = true;
+                    trList.splice(overflowTrIdx + 1, 0, continuationTr);
+                    deleteStart = overflowTrIdx + 1;
+                    deleteCount = trList.length - deleteStart;
+                  }
+                }
+              }
+            }
             if (deleteCount) {
               const cloneTrList = trList.splice(deleteStart, deleteCount);
               const cloneTrHeight = cloneTrList.reduce(
@@ -1757,6 +2218,27 @@ export class Draw {
                 positionContext.index = newPositionContextIndex;
                 positionContext.trIndex = newPositionContextTrIndex;
                 this.position.setPositionContext(positionContext);
+              } else if (
+                mergedSplitFallback &&
+                positionContext.trId === mergedSplitFallback.trId
+              ) {
+                const fallbackTd =
+                  element.trList?.[mergedSplitFallback.parentTrIndex]?.tdList[
+                    mergedSplitFallback.tdIndex
+                  ];
+                const fallbackCursorIndex = Math.min(
+                  mergedSplitFallback.mergedIndex,
+                  Math.max((fallbackTd?.value.length || 1) - 1, 0)
+                );
+                positionContext.index = i;
+                positionContext.trIndex = mergedSplitFallback.parentTrIndex;
+                positionContext.tdIndex = mergedSplitFallback.tdIndex;
+                positionContext.tdId = mergedSplitFallback.parentTdId;
+                positionContext.trId = mergedSplitFallback.parentTrId;
+                positionContext.tableId = element.id;
+                this.position.setPositionContext(positionContext);
+                this.range.setRange(fallbackCursorIndex, fallbackCursorIndex);
+                this.pendingTableCursorIndex = fallbackCursorIndex;
               }
             }
           }
@@ -1915,42 +2397,7 @@ export class Draw {
           curRowWidth += punctuationWidth * scale;
         }
       }
-      if (element.listId) {
-        const curLevel = element.listLevel ?? 0;
-        if (element.listId !== listId) {
-          listIndex = 0;
-          listLevelIndex = new Map();
-          listLevelIndex.set(curLevel, 0);
-          prevListLevel = curLevel;
-        } else if (element.value === ZERO && !element.listWrap) {
-          if (curLevel !== prevListLevel) {
-            // Level changed: reset counters for deeper levels
-            if (curLevel > prevListLevel) {
-              // Indent: start new counter at this level
-              listLevelIndex.set(curLevel, 0);
-            } else {
-              // Outdent: clear all deeper level counters
-              for (const [lvl] of listLevelIndex) {
-                if (lvl > curLevel) {
-                  listLevelIndex.delete(lvl);
-                }
-              }
-              listLevelIndex.set(
-                curLevel,
-                (listLevelIndex.get(curLevel) ?? -1) + 1
-              );
-            }
-          } else {
-            listLevelIndex.set(
-              curLevel,
-              (listLevelIndex.get(curLevel) ?? -1) + 1
-            );
-          }
-          listIndex = listLevelIndex.get(curLevel) ?? 0;
-          prevListLevel = curLevel;
-        }
-      }
-      listId = element.listId;
+      this.advanceListState(element, listState);
       const surroundPosition = this.position.setSurroundPosition({
         pageNo,
         rowElement,
@@ -2021,7 +2468,7 @@ export class Draw {
           const baseListOffset = listStyleMap.get(element.listId!) || 0;
           const rowListIndent = this.listParticle.getListIndentWidth(element);
           row.offsetX = baseListOffset + rowListIndent;
-          row.listIndex = listIndex;
+          row.listIndex = listState.listIndex;
         }
         row.offsetY =
           !isFromTable &&
@@ -2844,6 +3291,7 @@ export class Draw {
       isFirstRender = false
     } = payload || {};
     let { curIndex } = payload || {};
+    this.pendingTableCursorIndex = undefined;
     const innerWidth = this.getInnerWidth();
     const columnWidth = this.getColumnWidth();
     const isPagingMode = this.getIsPagingMode();
@@ -2911,6 +3359,10 @@ export class Draw {
     } else {
       this._immediateRender();
     }
+    if (this.pendingTableCursorIndex !== undefined) {
+      curIndex = this.pendingTableCursorIndex;
+      this.pendingTableCursorIndex = undefined;
+    }
     if (isSetCursor) {
       curIndex = this.setCursor(curIndex);
     } else if (this.range.getIsSelection()) {
@@ -2960,10 +3412,9 @@ export class Draw {
     const positionContext = this.position.getPositionContext();
     const positionList = this.position.getPositionList();
     if (positionContext.isTable) {
-      const { index, trIndex, tdIndex } = positionContext;
-      const elementList = this.getOriginalElementList();
       const tablePositionList =
-        elementList[index!].trList?.[trIndex!].tdList[tdIndex!].positionList;
+        this.resolveTableCellContext(this.getOriginalElementList())?.td
+          .positionList;
       if (curIndex === undefined && tablePositionList) {
         curIndex = tablePositionList.length - 1;
       }

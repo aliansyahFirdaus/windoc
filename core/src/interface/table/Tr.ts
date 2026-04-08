@@ -8,4 +8,9 @@ export interface ITr {
   tdList: ITd[];
   minHeight?: number;
   pagingRepeat?: boolean;
+  splitParentId?: string;
+  splitRootId?: string;
+  splitLevel?: number;
+  splitBoundaryTop?: boolean;
+  splitBoundaryBottom?: boolean;
 }
