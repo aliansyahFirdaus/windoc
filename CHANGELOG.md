@@ -3,6 +3,12 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.21] — 2026-04-08
+
+### Fixed
+- Stabilize split table pagination
+
+
 ## [0.3.16] — 2026-04-05
 
 ### Fixed
