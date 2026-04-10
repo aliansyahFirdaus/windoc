@@ -587,6 +587,40 @@ export function pickElementAttr(
   return element;
 }
 
+function mergeSplitTableRowsForZip(trList: ITr[]) {
+  for (let t = trList.length - 1; t >= 0; t--) {
+    const splitTr = trList[t];
+    if (!splitTr.splitParentId) continue;
+    const parentTrIdx = trList.findIndex(
+      tr => tr.id === splitTr.splitParentId
+    );
+    if (!~parentTrIdx) continue;
+    const parentTr = trList[parentTrIdx];
+    parentTr.height += splitTr.height;
+    for (let d = 0; d < parentTr.tdList.length; d++) {
+      const parentTd = parentTr.tdList[d];
+      const splitTd = splitTr.tdList[d];
+      if (!parentTd || !splitTd) continue;
+      const hasSyntheticLeadingZero =
+        !!splitTd.splitSyntheticLeadingZero &&
+        splitTd.value[0]?.value === ZERO;
+      parentTd.value.push(
+        ...(hasSyntheticLeadingZero ? splitTd.value.slice(1) : splitTd.value)
+      );
+    }
+    trList.splice(t, 1);
+  }
+  for (let t = 0; t < trList.length; t++) {
+    const tr = trList[t];
+    delete tr.id;
+    delete tr.splitParentId;
+    delete tr.splitRootId;
+    delete tr.splitLevel;
+    delete tr.splitBoundaryTop;
+    delete tr.splitBoundaryBottom;
+  }
+}
+
 interface IZipElementListOption {
   extraPickAttrs?: Array<keyof IElement>;
   isClassifyArea?: boolean;
@@ -699,8 +733,11 @@ export function zipElementList(
         while (tableIndex < elementList.length) {
           const nextElement = elementList[tableIndex];
           if (nextElement.pagingId === element.pagingId) {
+            const nextTrList = nextElement.trList!.filter(
+              tr => !tr.pagingRepeat
+            );
             element.height! += nextElement.height!;
-            element.trList!.push(...nextElement.trList!);
+            element.trList!.push(...nextTrList);
             tableIndex++;
             combineCount++;
           } else {
@@ -710,9 +747,9 @@ export function zipElementList(
         e += combineCount;
       }
       if (element.trList) {
+        mergeSplitTableRowsForZip(element.trList);
         for (let t = 0; t < element.trList.length; t++) {
           const tr = element.trList[t];
-          delete tr.id;
           for (let d = 0; d < tr.tdList.length; d++) {
             const td = tr.tdList[d];
             const zipTd: ITd = {

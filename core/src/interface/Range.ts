@@ -1,6 +1,21 @@
 import { EditorZone } from '../dataset/enum/Editor';
 import { IElement, IElementFillRect, IElementStyle } from './Element';
 
+export interface ISplitCellSelection {
+  pagingId: string;
+  rootTrId: string;
+  colIndex: number;
+}
+
+export interface ITableCellSelection {
+  tableId?: string;
+  trId?: string;
+  tdId?: string;
+  pagingId?: string;
+  rootTrId?: string;
+  colIndex?: number;
+}
+
 export interface IRange {
   startIndex: number;
   endIndex: number;
@@ -11,6 +26,8 @@ export interface IRange {
   startTrIndex?: number;
   endTrIndex?: number;
   zone?: EditorZone;
+  splitCellSelection?: ISplitCellSelection;
+  tableCellSelection?: ITableCellSelection;
 }
 
 export type RangeRowArray = Map<number, number[]>;

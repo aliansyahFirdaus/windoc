@@ -259,6 +259,46 @@ export class ListParticle {
     return level * INDENT_PER_LEVEL * scale;
   }
 
+  private _getListMarkerStyleElement(
+    elementList: IElement[],
+    startIndex = 0
+  ): IElement {
+    const startElement = elementList[startIndex];
+    for (let i = startIndex + 1; i < elementList.length; i++) {
+      const element = elementList[i];
+      if (element.value === ZERO && !element.listWrap) {
+        break;
+      }
+      if (element.type === ElementType.TAB) {
+        continue;
+      }
+      if (element.value !== ZERO || element.type) {
+        return element;
+      }
+    }
+    return startElement;
+  }
+
+  private _getListMarkerText(element: IElement, listIndex: number): string {
+    if (element.listStyle === ListStyle.CHECKBOX) {
+      return '';
+    }
+    if (element.listType === ListType.UL) {
+      if (element.listPreset) {
+        return this._getUlBulletForLevel(element);
+      }
+      return (
+        ulStyleMapping[<UlStyle>(<unknown>element.listStyle)] ||
+        ulStyleMapping[UlStyle.DISC]
+      );
+    }
+    if (element.listPreset) {
+      const olStyle = this._getOlStyleForLevel(element);
+      return formatOlNumber(listIndex, olStyle);
+    }
+    return `${listIndex + 1}${KeyMap.PERIOD}`;
+  }
+
   public computeListStyle(
     ctx: CanvasRenderingContext2D,
     elementList: IElement[]
@@ -296,28 +336,40 @@ export class ListParticle {
     listElementList: IElement[]
   ): number {
     const { scale, checkbox } = this.options;
-    const startElement = listElementList[0];
-    if (
-      startElement.listStyle &&
-      startElement.listStyle !== ListStyle.DECIMAL
-    ) {
-      if (startElement.listStyle === ListStyle.CHECKBOX) {
-        return (checkbox.width + this.LIST_GAP) * scale;
+    let maxWidth = 0;
+    let listIndex = 0;
+    for (let i = 0; i < listElementList.length; i++) {
+      const element = listElementList[i];
+      if (element.value !== ZERO || element.listWrap) continue;
+      if (element.listStyle === ListStyle.CHECKBOX) {
+        maxWidth = Math.max(maxWidth, checkbox.width + this.LIST_GAP);
+        listIndex++;
+        continue;
       }
-      return this.UN_COUNT_STYLE_WIDTH * scale;
+      const markerStyleElement = this._getListMarkerStyleElement(
+        listElementList,
+        i
+      );
+      const text = this._getListMarkerText(element, listIndex);
+      if (!text) {
+        listIndex++;
+        continue;
+      }
+      ctx.save();
+      ctx.font = this.draw.getElementFont(markerStyleElement);
+      const textMetrics = ctx.measureText(text);
+      ctx.restore();
+      maxWidth = Math.max(maxWidth, textMetrics.width + this.LIST_GAP);
+      listIndex++;
     }
-    const count = listElementList.reduce((pre, cur) => {
-      if (cur.value === ZERO) {
-        pre += 1;
-      }
-      return pre;
-    }, 0);
-    if (!count) return 0;
-    const text = `${this.MEASURE_BASE_TEXT.repeat(String(count).length)}${
-      KeyMap.PERIOD
-    }`;
-    const textMetrics = ctx.measureText(text);
-    return Math.ceil((textMetrics.width + this.LIST_GAP) * scale);
+    if (maxWidth > 0) {
+      return Math.ceil(maxWidth * scale);
+    }
+    const startElement = listElementList[0];
+    if (startElement?.listStyle === ListStyle.CHECKBOX) {
+      return (checkbox.width + this.LIST_GAP) * scale;
+    }
+    return this.UN_COUNT_STYLE_WIDTH * scale;
   }
 
   private _getOlStyleForLevel(element: IElement): string {
@@ -346,7 +398,7 @@ export class ListParticle {
     if (startElement.value !== ZERO || startElement.listWrap) return;
     // tab width
     let tabWidth = 0;
-    const { defaultTabWidth, scale, defaultFont, defaultSize } = this.options;
+    const { defaultTabWidth, scale } = this.options;
     for (let i = 1; i < elementList.length; i++) {
       const element = elementList[i];
       if (element?.type !== ElementType.TAB) break;
@@ -385,28 +437,11 @@ export class ListParticle {
         }
       });
     } else {
-      let text = '';
-      if (startElement.listType === ListType.UL) {
-        // Use preset cycling for UL if available
-        if (startElement.listPreset) {
-          text = this._getUlBulletForLevel(startElement);
-        } else {
-          text =
-            ulStyleMapping[<UlStyle>(<unknown>startElement.listStyle)] ||
-            ulStyleMapping[UlStyle.DISC];
-        }
-      } else {
-        // OL: use preset cycling if available
-        if (startElement.listPreset) {
-          const olStyle = this._getOlStyleForLevel(startElement);
-          text = formatOlNumber(listIndex!, olStyle);
-        } else {
-          text = `${listIndex! + 1}${KeyMap.PERIOD}`;
-        }
-      }
+      const text = this._getListMarkerText(startElement, listIndex!);
       if (!text) return;
+      const markerStyleElement = this._getListMarkerStyleElement(elementList);
       ctx.save();
-      ctx.font = `${defaultSize * (96 / 72) * scale}px ${defaultFont}`;
+      ctx.font = this.draw.getElementFont(markerStyleElement, scale);
       ctx.fillText(text, x, y);
       ctx.restore();
     }

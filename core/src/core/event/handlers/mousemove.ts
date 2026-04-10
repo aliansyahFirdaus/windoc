@@ -2,6 +2,7 @@ import { ImageDisplay } from '../../../dataset/enum/Common';
 import { ControlComponent } from '../../../dataset/enum/Control';
 import { ElementType } from '../../../dataset/enum/Element';
 import { CanvasEvent } from '../CanvasEvent';
+import { getSplitCellPointer, isSameSplitCellPointer } from './splitCell';
 
 export function mousemove(evt: MouseEvent, host: CanvasEvent) {
   const draw = host.getDraw();
@@ -67,10 +68,36 @@ export function mousemove(evt: MouseEvent, host: CanvasEvent) {
     isTable: startIsTable,
     tdIndex: startTdIndex,
     trIndex: startTrIndex,
-    tableId: startTableId
+    tableId: startTableId,
+    splitCellSelection: startSplitCellSelection
   } = host.mouseDownStartPosition;
   const endIndex = isTable ? tdValueIndex! : index;
   const rangeManager = draw.getRange();
+  if (startSplitCellSelection) {
+    const currentSplitCellPointer = getSplitCellPointer(draw, positionResult);
+    if (
+      currentSplitCellPointer &&
+      isSameSplitCellPointer(
+        startSplitCellSelection,
+        currentSplitCellPointer.splitCellSelection
+      )
+    ) {
+      let start = startIndex;
+      let end = currentSplitCellPointer.globalIndex;
+      if (start > end) {
+        [start, end] = [end, start];
+      }
+      if (start === end) return;
+      rangeManager.setRange(start, end);
+      rangeManager.setSplitCellSelection(startSplitCellSelection);
+      draw.render({
+        isSubmitHistory: false,
+        isSetCursor: false,
+        isCompute: false
+      });
+      return;
+    }
+  }
   if (
     isTable &&
     startIsTable &&

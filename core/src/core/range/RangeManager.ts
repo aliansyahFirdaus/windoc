@@ -12,6 +12,8 @@ import {
   IRange,
   IRangeElementStyle,
   IRangeParagraphInfo,
+  ITableCellSelection,
+  ISplitCellSelection,
   RangeRowArray,
   RangeRowMap
 } from '../../interface/Range';
@@ -52,6 +54,22 @@ export class RangeManager {
 
   public clearRange() {
     this.setRange(-1, -1);
+  }
+
+  public getSplitCellSelection(): ISplitCellSelection | undefined {
+    return this.range.splitCellSelection;
+  }
+
+  public setSplitCellSelection(payload?: ISplitCellSelection | null) {
+    this.range.splitCellSelection = payload || undefined;
+  }
+
+  public getTableCellSelection(): ITableCellSelection | undefined {
+    return this.range.tableCellSelection;
+  }
+
+  public setTableCellSelection(payload?: ITableCellSelection | null) {
+    this.range.tableCellSelection = payload || undefined;
   }
 
   public setDefaultStyle(style: IRangeElementStyle | null) {
@@ -434,6 +452,8 @@ export class RangeManager {
       );
       this.setDefaultStyle(null);
     }
+    this.range.splitCellSelection = undefined;
+    this.range.tableCellSelection = undefined;
     this.range.zone = this.draw.getZone().getZone();
     const control = this.draw.getControl();
     if (~startIndex && ~endIndex) {

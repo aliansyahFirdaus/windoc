@@ -2,6 +2,7 @@ import { ElementType, IElement, TableBorder } from '../../../..';
 import { TdBorder, TdSlash } from '../../../../dataset/enum/table/Table';
 import { DeepRequired } from '../../../../interface/Common';
 import { IEditorOption } from '../../../../interface/Editor';
+import { ITableCellSelection } from '../../../../interface/Range';
 import { ITd } from '../../../../interface/table/Td';
 import { ITr } from '../../../../interface/table/Tr';
 import { deepClone } from '../../../../utils';
@@ -605,6 +606,66 @@ export class TableParticle {
           ctx.fillStyle = rangeColor;
           ctx.fillRect(x + startX, y + startY, width, height);
         }
+      }
+    }
+    ctx.restore();
+  }
+
+  private _isSelectedCell(
+    element: IElement,
+    tr: ITr,
+    td: ITd,
+    selection: ITableCellSelection
+  ): boolean {
+    if (
+      selection.pagingId &&
+      selection.rootTrId &&
+      selection.colIndex !== undefined
+    ) {
+      return (
+        element.pagingId === selection.pagingId &&
+        (tr.id === selection.rootTrId ||
+          tr.splitRootId === selection.rootTrId) &&
+        td.colIndex === selection.colIndex
+      );
+    }
+    if (selection.tableId && element.id !== selection.tableId) {
+      return false;
+    }
+    if (selection.trId && tr.id !== selection.trId) {
+      return false;
+    }
+    if (selection.tdId) {
+      return td.id === selection.tdId;
+    }
+    return false;
+  }
+
+  public drawCellRange(
+    ctx: CanvasRenderingContext2D,
+    element: IElement,
+    startX: number,
+    startY: number,
+    selection: ITableCellSelection
+  ) {
+    const { scale, rangeAlpha, rangeColor } = this.options;
+    const { type, trList } = element;
+    if (!trList || type !== ElementType.TABLE) return;
+    ctx.save();
+    ctx.globalAlpha = rangeAlpha;
+    ctx.fillStyle = rangeColor;
+    for (let t = 0; t < trList.length; t++) {
+      const tr = trList[t];
+      for (let d = 0; d < tr.tdList.length; d++) {
+        const td = tr.tdList[d];
+        if (!this._isSelectedCell(element, tr, td, selection)) {
+          continue;
+        }
+        const x = td.x! * scale;
+        const y = td.y! * scale;
+        const width = td.width! * scale;
+        const height = td.height! * scale;
+        ctx.fillRect(x + startX, y + startY, width, height);
       }
     }
     ctx.restore();

@@ -163,6 +163,38 @@ export class CommandAdapt {
     this.tableOperate = draw.getTableOperate();
   }
 
+  private getStyleSelectionElementList(options: {
+    textLikeOnly?: boolean;
+  } = {}): IElement[] | null {
+    const selection = this.range.getSelectionElementList();
+    if (!selection?.length) return null;
+    const { textLikeOnly = false } = options;
+    const result: IElement[] = [];
+    const collect = (elementList: IElement[]) => {
+      for (let i = 0; i < elementList.length; i++) {
+        const element = elementList[i];
+        if (element.type === ElementType.TABLE && element.trList?.length) {
+          for (let t = 0; t < element.trList.length; t++) {
+            const tr = element.trList[t];
+            for (let d = 0; d < tr.tdList.length; d++) {
+              collect(tr.tdList[d].value);
+            }
+          }
+          continue;
+        }
+        result.push(element);
+      }
+    };
+    collect(selection);
+    if (!textLikeOnly) {
+      return result;
+    }
+    return result.filter(
+      element =>
+        isTextLikeElement(element) || element.type === ElementType.LABEL
+    );
+  }
+
   public mode(payload: EditorMode) {
     this.draw.setMode(payload);
   }
@@ -338,7 +370,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     let renderOption: IDrawOption = {};
     let changeElementList: IElement[] = [];
     if (selection?.length) {
@@ -368,7 +400,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (selection?.length) {
       selection.forEach(el => {
         el.font = payload;
@@ -405,7 +437,9 @@ export class CommandAdapt {
     if (payload < minSize || payload > maxSize) return;
     let renderOption: IDrawOption = {};
     let changeElementList: IElement[] = [];
-    const selection = this.range.getTextLikeSelectionElementList();
+    const selection = this.getStyleSelectionElementList({
+      textLikeOnly: true
+    });
     if (selection?.length) {
       changeElementList = selection;
       renderOption = { isSetCursor: false };
@@ -451,7 +485,9 @@ export class CommandAdapt {
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
     const { defaultSize, maxSize } = this.options;
-    const selection = this.range.getTextLikeSelectionElementList();
+    const selection = this.getStyleSelectionElementList({
+      textLikeOnly: true
+    });
     let renderOption: IDrawOption = {};
     let changeElementList: IElement[] = [];
     if (selection?.length) {
@@ -503,7 +539,9 @@ export class CommandAdapt {
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
     const { defaultSize, minSize } = this.options;
-    const selection = this.range.getTextLikeSelectionElementList();
+    const selection = this.getStyleSelectionElementList({
+      textLikeOnly: true
+    });
     let renderOption: IDrawOption = {};
     let changeElementList: IElement[] = [];
     if (selection?.length) {
@@ -554,7 +592,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (selection?.length) {
       const noBoldIndex = selection.findIndex(s => !s.bold);
       selection.forEach(el => {
@@ -589,7 +627,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (selection?.length) {
       const noItalicIndex = selection.findIndex(s => !s.italic);
       selection.forEach(el => {
@@ -629,7 +667,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (selection?.length) {
       // Reset underline when not set, current/previous missing, or text decoration inconsistent
       const isSetUnderline = selection.some(
@@ -683,7 +721,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (selection?.length) {
       const noStrikeoutIndex = selection.findIndex(s => !s.strikeout);
       selection.forEach(el => {
@@ -723,7 +761,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (!selection) return;
     const superscriptIndex = selection.findIndex(
       s => s.type === ElementType.SUPERSCRIPT
@@ -753,7 +791,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (!selection) return;
     const subscriptIndex = selection.findIndex(
       s => s.type === ElementType.SUBSCRIPT
@@ -783,7 +821,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (selection?.length) {
       selection.forEach(el => {
         if (payload) {
@@ -827,7 +865,7 @@ export class CommandAdapt {
       !isIgnoreDisabledRule &&
       (this.draw.isReadonly() || this.draw.isDisabled());
     if (isDisabled) return;
-    const selection = this.range.getSelectionElementList();
+    const selection = this.getStyleSelectionElementList();
     if (selection?.length) {
       selection.forEach(el => {
         if (payload) {
@@ -1548,31 +1586,51 @@ export class CommandAdapt {
       extraPickAttrs: ['id', 'controlComponent']
     });
     // Page info and row info
-    const rowList = this.draw.getRowList();
     const positionList = this.position.getPositionList();
     const startPosition = positionList[startIndex];
     const endPosition = positionList[endIndex];
+    if (!startPosition || !endPosition) return null;
     const startPageNo = startPosition.pageNo;
     const endPageNo = endPosition.pageNo;
     const startRowNo = startPosition.rowIndex;
     const endRowNo = endPosition.rowIndex;
-    const startRow = rowList[startRowNo];
-    const endRow = rowList[endRowNo];
+    const getRowStartPositionIndex = (targetIndex: number) => {
+      let rowStartIndex = targetIndex;
+      const targetPosition = positionList[targetIndex];
+      while (rowStartIndex > 0) {
+        const prePosition = positionList[rowStartIndex - 1];
+        if (
+          !prePosition ||
+          prePosition.pageNo !== targetPosition.pageNo ||
+          prePosition.rowNo !== targetPosition.rowNo ||
+          prePosition.columnNo !== targetPosition.columnNo
+        ) {
+          break;
+        }
+        rowStartIndex--;
+      }
+      return rowStartIndex;
+    };
+    const startRowStartIndex = getRowStartPositionIndex(startIndex);
+    const endRowStartIndex = getRowStartPositionIndex(endIndex);
+    const startRowStartsWithZero =
+      elementList[startRowStartIndex]?.value === ZERO;
+    const endRowStartsWithZero = elementList[endRowStartIndex]?.value === ZERO;
     let startColNo = 0;
     let endColNo = 0;
     if (!this.draw.getCursor().getHitLineStartIndex()) {
       startColNo =
-        startRow.elementList[0]?.value === ZERO
-          ? startPosition.index! - startRow.startIndex
-          : startPosition.index! - startRow.startIndex + 1;
+        startRowStartsWithZero
+          ? startIndex - startRowStartIndex
+          : startIndex - startRowStartIndex + 1;
     }
     if (startPosition === endPosition) {
       endColNo = startColNo;
     } else {
       endColNo =
-        endRow.elementList[0]?.value === ZERO
-          ? endPosition.index! - endRow.startIndex
-          : endPosition.index! - endRow.startIndex + 1;
+        endRowStartsWithZero
+          ? endIndex - endRowStartIndex
+          : endIndex - endRowStartIndex + 1;
     }
 
     // Coordinate info (relative to editor writing area)
@@ -1583,6 +1641,7 @@ export class CommandAdapt {
     if (selectionPositionList) {
       // Start info and x coordinate
       let currentRowNo: number | null = null;
+      let currentPageNo: number | null = null;
       let currentX = 0;
       let rangeRect: RangeRect | null = null;
       for (let p = 0; p < selectionPositionList.length; p++) {
@@ -1592,7 +1651,12 @@ export class CommandAdapt {
           coordinate: { leftTop, rightTop },
           lineHeight
         } = selectionPositionList[p];
-        if (currentRowNo === null || currentRowNo !== rowNo) {
+        if (
+          currentRowNo === null ||
+          currentPageNo === null ||
+          currentRowNo !== rowNo ||
+          currentPageNo !== pageNo
+        ) {
           if (rangeRect) {
             rangeRects.push(rangeRect);
           }
@@ -1603,6 +1667,7 @@ export class CommandAdapt {
             height: lineHeight
           };
           currentRowNo = rowNo;
+          currentPageNo = pageNo;
           currentX = leftTop[0];
         } else {
           rangeRect!.width = rightTop[0] - currentX;

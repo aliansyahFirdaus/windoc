@@ -12,6 +12,7 @@ import { RadioControl } from '../../draw/control/radio/RadioControl';
 import { CanvasEvent } from '../CanvasEvent';
 import { IElement } from '../../../interface/Element';
 import { Draw } from '../../draw/Draw';
+import { getSplitCellPointer } from './splitCell';
 
 export function setRangeCache(host: CanvasEvent) {
   const draw = host.getDraw();
@@ -105,9 +106,15 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
     tdValueIndex,
     hitLineStartIndex
   } = positionResult;
+  const splitCellPointer = getSplitCellPointer(draw, positionResult);
   host.mouseDownStartPosition = {
     ...positionResult,
-    index: isTable ? tdValueIndex! : index,
+    index: splitCellPointer
+      ? splitCellPointer.globalIndex
+      : isTable
+        ? tdValueIndex!
+        : index,
+    splitCellSelection: splitCellPointer?.splitCellSelection,
     x: evt.offsetX,
     y: evt.offsetY
   };

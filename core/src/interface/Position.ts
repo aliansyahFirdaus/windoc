@@ -1,7 +1,7 @@
 import { ImageDisplay } from '../dataset/enum/Common';
 import { EditorZone } from '../dataset/enum/Editor';
 import { IElement, IElementFillRect, IElementPosition } from './Element';
-import { IRange } from './Range';
+import { IRange, ISplitCellSelection } from './Range';
 import { IRow, IRowElement } from './Row';
 import { ITd } from './table/Td';
 
@@ -24,6 +24,7 @@ export interface ICurrentPosition {
   tableId?: string;
   zone?: EditorZone;
   hitLineStartIndex?: number;
+  splitCellSelection?: ISplitCellSelection;
 }
 
 export interface IGetPositionByXYPayload {

@@ -4,6 +4,7 @@ import { TABLE_CONTEXT_ATTR } from '../../../../dataset/constant/Element';
 import { TdBorder, TdSlash } from '../../../../dataset/enum/table/Table';
 import { DeepRequired, IPadding } from '../../../../interface/Common';
 import { IEditorOption } from '../../../../interface/Editor';
+import { ISplitCellSelection } from '../../../../interface/Range';
 import { IColgroup } from '../../../../interface/table/Colgroup';
 import { ITd } from '../../../../interface/table/Td';
 import { ITr } from '../../../../interface/table/Tr';
@@ -33,6 +34,48 @@ export class TableOperate {
     this.tableTool = draw.getTableTool();
     this.tableParticle = draw.getTableParticle();
     this.options = draw.getOptions();
+  }
+
+  private getActiveTableElements(): IElement[] {
+    const positionContext = this.position.getPositionContext();
+    if (!positionContext.isTable) return [];
+    const originalElementList = this.draw.getOriginalElementList();
+    const element = originalElementList[positionContext.index!];
+    if (!element || element.type !== ElementType.TABLE) return [];
+    if (!element.pagingId) return [element];
+    return originalElementList.filter(
+      item => item.type === ElementType.TABLE && item.pagingId === element.pagingId
+    );
+  }
+
+  private getSplitCellStyleSelection():
+    | ISplitCellSelection
+    | undefined {
+    const tableCellSelection = this.range.getTableCellSelection();
+    if (
+      tableCellSelection?.pagingId &&
+      tableCellSelection.rootTrId &&
+      tableCellSelection.colIndex !== undefined
+    ) {
+      return tableCellSelection as ISplitCellSelection;
+    }
+    return this.range.getSplitCellSelection();
+  }
+
+  private getStyleTargetRowCol(): ITd[][] | null {
+    const splitCellSelection = this.getSplitCellStyleSelection();
+    if (splitCellSelection) {
+      const splitCellContext = this.draw.getSplitCellSelectionContext(
+        this.draw.getOriginalElementList(),
+        splitCellSelection
+      );
+      if (splitCellContext) {
+        return splitCellContext.cellContextList.map(cellContext => [
+          cellContext.td
+        ]);
+      }
+    }
+    return this.tableParticle.getRangeRowCol();
   }
 
   public insertTable(row: number, col: number) {
@@ -752,7 +795,7 @@ export class TableOperate {
   }
 
   public tableTdVerticalAlign(payload: VerticalAlign) {
-    const rowCol = this.tableParticle.getRangeRowCol();
+    const rowCol = this.getStyleTargetRowCol();
     if (!rowCol) return;
     for (let r = 0; r < rowCol.length; r++) {
       const row = rowCol[r];
@@ -777,16 +820,19 @@ export class TableOperate {
   public tableBorderType(payload: TableBorder) {
     const positionContext = this.position.getPositionContext();
     if (!positionContext.isTable) return;
-    const { index } = positionContext;
-    const originalElementList = this.draw.getOriginalElementList();
-    const element = originalElementList[index!];
-    if (
-      (!element.borderType && payload === TableBorder.ALL) ||
-      element.borderType === payload
-    ) {
+    const tableElements = this.getActiveTableElements();
+    if (!tableElements.length) return;
+    const isAllSame = tableElements.every(
+      element =>
+        ((!element.borderType && payload === TableBorder.ALL) ||
+          element.borderType === payload)
+    );
+    if (isAllSame) {
       return;
     }
-    element.borderType = payload;
+    tableElements.forEach(element => {
+      element.borderType = payload;
+    });
     const { endIndex } = this.range.getRange();
     this.draw.render({
       curIndex: endIndex
@@ -796,17 +842,20 @@ export class TableOperate {
   public tableBorderColor(payload: string) {
     const positionContext = this.position.getPositionContext();
     if (!positionContext.isTable) return;
-    const { index } = positionContext;
-    const originalElementList = this.draw.getOriginalElementList();
-    const element = originalElementList[index!];
-    if (
-      (!element.borderColor &&
-        payload === this.options.table.defaultBorderColor) ||
-      element.borderColor === payload
-    ) {
+    const tableElements = this.getActiveTableElements();
+    if (!tableElements.length) return;
+    const isAllSame = tableElements.every(
+      element =>
+        ((!element.borderColor &&
+          payload === this.options.table.defaultBorderColor) ||
+          element.borderColor === payload)
+    );
+    if (isAllSame) {
       return;
     }
-    element.borderColor = payload;
+    tableElements.forEach(element => {
+      element.borderColor = payload;
+    });
     const { endIndex } = this.range.getRange();
     this.draw.render({
       curIndex: endIndex,
@@ -815,7 +864,7 @@ export class TableOperate {
   }
 
   public tableTdBorderType(payload: TdBorder) {
-    const rowCol = this.tableParticle.getRangeRowCol();
+    const rowCol = this.getStyleTargetRowCol();
     if (!rowCol) return;
     const tdList = rowCol.flat();
     const isSetBorderType = tdList.some(
@@ -848,7 +897,7 @@ export class TableOperate {
   }
 
   public tableTdSlashType(payload: TdSlash) {
-    const rowCol = this.tableParticle.getRangeRowCol();
+    const rowCol = this.getStyleTargetRowCol();
     if (!rowCol) return;
     const tdList = rowCol.flat();
     const isSetTdSlashType = tdList.some(
@@ -879,7 +928,7 @@ export class TableOperate {
   }
 
   public tableTdBackgroundColor(payload: string) {
-    const rowCol = this.tableParticle.getRangeRowCol();
+    const rowCol = this.getStyleTargetRowCol();
     if (!rowCol) return;
     for (let r = 0; r < rowCol.length; r++) {
       const row = rowCol[r];
@@ -901,7 +950,7 @@ export class TableOperate {
     const { index } = positionContext;
     const originalElementList = this.draw.getOriginalElementList();
     const element = originalElementList[index!];
-    const rowCol = this.tableParticle.getRangeRowCol();
+    const rowCol = this.getStyleTargetRowCol();
     if (!rowCol) return;
     const tdList = rowCol.flat();
     // Count total cells (including colspan/rowspan cells)
@@ -909,7 +958,10 @@ export class TableOperate {
       (sum, tr) => sum + tr.tdList.length,
       0
     );
-    const allSelected = tdList.length >= totalCells;
+    const allSelected =
+      !element.pagingId &&
+      !this.getSplitCellStyleSelection() &&
+      tdList.length >= totalCells;
     if (allSelected) {
       // Update table-level border color — controls the outer border drawn by _drawOuterBorder
       element.borderColor = payload || undefined;
@@ -932,7 +984,7 @@ export class TableOperate {
   }
 
   public tableTdPadding(payload: IPadding) {
-    const rowCol = this.tableParticle.getRangeRowCol();
+    const rowCol = this.getStyleTargetRowCol();
     if (!rowCol) return;
     const tdList = rowCol.flat();
     tdList.forEach(td => {
@@ -962,6 +1014,53 @@ export class TableOperate {
       startTrIndex: 0,
       endTrIndex
     });
+    this.draw.render({
+      isSetCursor: false,
+      isCompute: false,
+      isSubmitHistory: false
+    });
+  }
+
+  public tableTdSelectAll() {
+    const originalElementList = this.draw.getOriginalElementList();
+    const resolved = this.draw.resolveTableCellContext(originalElementList);
+    if (!resolved) return;
+    const currentTr = resolved.element.trList?.[resolved.trIndex];
+    if (!currentTr) return;
+    const currentTd = resolved.td;
+    const currentElement = resolved.element;
+    const splitCellSelection =
+      currentElement.pagingId &&
+      currentTr.id &&
+      currentTd.colIndex !== undefined
+        ? {
+            pagingId: currentElement.pagingId,
+            rootTrId: currentTr.splitRootId || currentTr.id,
+            colIndex: currentTd.colIndex
+          }
+        : undefined;
+    const splitCellSelectionContext =
+      this.draw.getSplitCellSelectionContext(
+        originalElementList,
+        splitCellSelection
+      );
+    if (splitCellSelectionContext) {
+      const endIndex = Math.max(
+        splitCellSelectionContext.positionList.length - 1,
+        0
+      );
+      this.range.setRange(0, endIndex);
+      this.range.setSplitCellSelection(splitCellSelection);
+      this.range.setTableCellSelection(splitCellSelection);
+    } else {
+      const endIndex = Math.max(currentTd.value.length - 1, 0);
+      this.range.setRange(0, endIndex);
+      this.range.setTableCellSelection({
+        tableId: currentElement.id,
+        trId: currentTr.id,
+        tdId: currentTd.id
+      });
+    }
     this.draw.render({
       isSetCursor: false,
       isCompute: false,

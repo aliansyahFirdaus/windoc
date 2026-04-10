@@ -135,7 +135,7 @@ export class CanvasEvent {
 
   public selectAll() {
     if (this.position.getPositionContext().isTable) {
-      this.draw.getTableOperate().tableSelectAll();
+      this.draw.getTableOperate().tableTdSelectAll();
     } else {
       const positionList = this.position.getPositionList();
       this.range.setRange(0, positionList.length - 1);

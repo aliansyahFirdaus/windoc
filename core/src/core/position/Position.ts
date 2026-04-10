@@ -56,6 +56,11 @@ export class Position {
   public getTablePositionList(
     sourceElementList: IElement[]
   ): IElementPosition[] {
+    const splitCellSelectionContext =
+      this.draw.getSplitCellSelectionContext(sourceElementList);
+    if (splitCellSelectionContext) {
+      return splitCellSelectionContext.positionList;
+    }
     return (
       this.draw.resolveTableCellContext(sourceElementList, this.positionContext)
         ?.td.positionList || []

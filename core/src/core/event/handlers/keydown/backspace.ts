@@ -65,7 +65,9 @@ export function backspace(evt: KeyboardEvent, host: CanvasEvent) {
   const control = draw.getControl();
   const { startIndex, endIndex, isCrossRowCol } = rangeManager.getRange();
   let curIndex: number | null;
-  if (isCrossRowCol) {
+  if (rangeManager.getSplitCellSelection() && startIndex !== endIndex) {
+    curIndex = draw.replaceSplitCellSelection([]);
+  } else if (isCrossRowCol) {
     const rowCol = draw.getTableParticle().getRangeRowCol();
     if (!rowCol) return;
     let isDeleted = false;

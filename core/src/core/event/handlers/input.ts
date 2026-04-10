@@ -84,6 +84,8 @@ export function input(data: string, host: CanvasEvent) {
     if (!isComposing) {
       control.emitControlContentChange();
     }
+  } else if (rangeManager.getSplitCellSelection()) {
+    curIndex = draw.replaceSplitCellSelection(inputData);
   } else {
     const start = startIndex + 1;
     if (startIndex !== endIndex) {

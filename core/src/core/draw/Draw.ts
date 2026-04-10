@@ -25,6 +25,7 @@ import {
   IElement,
   IElementMetrics,
   IElementFillRect,
+  IElementPosition,
   IElementStyle,
   ISpliceElementListOption,
   IInsertElementListOption
@@ -118,6 +119,7 @@ import { LineNumber } from './frame/LineNumber';
 import { PageBorder } from './frame/PageBorder';
 import { ITd } from '../../interface/table/Td';
 import { ITr } from '../../interface/table/Tr';
+import { ISplitCellSelection } from '../../interface/Range';
 import { Actuator } from '../actuator/Actuator';
 import { TableOperate } from './particle/table/TableOperate';
 import { Area } from './interactive/Area';
@@ -750,7 +752,225 @@ export class Draw {
   }
 
   public getTableElementList(sourceElementList: IElement[]): IElement[] {
+    const splitCellSelectionContext = this.getSplitCellSelectionContext(
+      sourceElementList
+    );
+    if (splitCellSelectionContext) {
+      return splitCellSelectionContext.value;
+    }
     return this.resolveTableCellContext(sourceElementList)?.td.value || [];
+  }
+
+  public getSplitCellSelectionContext(
+    sourceElementList: IElement[] = this.getOriginalElementList(),
+    splitCellSelection: ISplitCellSelection | undefined =
+      this.range.getSplitCellSelection()
+  ): {
+    value: IElement[];
+    positionList: IElementPosition[];
+    cellContextList: Array<{
+      tableIndex: number;
+      trIndex: number;
+      tdIndex: number;
+      element: IElement;
+      tr: ITr;
+      td: ITd;
+    }>;
+  } | null {
+    if (!splitCellSelection) return null;
+    const { pagingId, rootTrId, colIndex } = splitCellSelection;
+    const cellContextList: Array<{
+      tableIndex: number;
+      trIndex: number;
+      tdIndex: number;
+      element: IElement;
+      tr: ITr;
+      td: ITd;
+    }> = [];
+    for (let i = 0; i < sourceElementList.length; i++) {
+      const element = sourceElementList[i];
+      if (element.type !== ElementType.TABLE || element.pagingId !== pagingId) {
+        continue;
+      }
+      const trList = element.trList;
+      if (!trList?.length) continue;
+      for (let t = 0; t < trList.length; t++) {
+        const tr = trList[t];
+        if (tr.id !== rootTrId && tr.splitRootId !== rootTrId) continue;
+        const tdIndex = tr.tdList.findIndex(td => td.colIndex === colIndex);
+        if (tdIndex < 0) continue;
+        const td = tr.tdList[tdIndex];
+        cellContextList.push({
+          tableIndex: i,
+          trIndex: t,
+          tdIndex,
+          element,
+          tr,
+          td
+        });
+      }
+    }
+    if (cellContextList.length < 2) return null;
+    const value: IElement[] = [];
+    const positionList: IElementPosition[] = [];
+    for (let c = 0; c < cellContextList.length; c++) {
+      const { td } = cellContextList[c];
+      const skipLeadingZero =
+        !!td.splitSyntheticLeadingZero && td.value[0]?.value === ZERO ? 1 : 0;
+      value.push(...td.value.slice(skipLeadingZero));
+      if (td.positionList?.length) {
+        positionList.push(...td.positionList.slice(skipLeadingZero));
+      }
+    }
+    return {
+      value,
+      positionList,
+      cellContextList
+    };
+  }
+
+  private syncTableElementContext(
+    elementList: IElement[],
+    context: {
+      tableId: string | undefined;
+      trId: string | undefined;
+      tdId: string | undefined;
+    }
+  ) {
+    const { tableId, trId, tdId } = context;
+    for (let i = 0; i < elementList.length; i++) {
+      const element = elementList[i];
+      element.tableId = tableId;
+      element.trId = trId;
+      element.tdId = tdId;
+    }
+  }
+
+  private getCollapsedSplitTableCursorContext(element: IElement): {
+    rootTrId: string;
+    colIndex: number;
+    mergedIndex: number;
+  } | null {
+    const positionContext = this.position.getPositionContext();
+    const { startIndex, endIndex } = this.range.getRange();
+    if (
+      !element.pagingId ||
+      !positionContext.isTable ||
+      startIndex !== endIndex ||
+      positionContext.tableId !== element.id ||
+      !positionContext.trId
+    ) {
+      return null;
+    }
+    const trList = element.trList;
+    if (!trList?.length) return null;
+    const currentTr = trList.find(tr => tr.id === positionContext.trId);
+    const currentTd =
+      currentTr &&
+      (positionContext.tdId
+        ? currentTr.tdList.find(td => td.id === positionContext.tdId)
+        : currentTr.tdList[positionContext.tdIndex!]);
+    if (!currentTr?.id || !currentTd || currentTd.colIndex === undefined) {
+      return null;
+    }
+    const rootTrId = currentTr.splitRootId || currentTr.id;
+    let mergedIndex = 0;
+    for (let t = 0; t < trList.length; t++) {
+      const tr = trList[t];
+      if (tr.id !== rootTrId && tr.splitRootId !== rootTrId) {
+        continue;
+      }
+      const td = tr.tdList.find(cell => cell.colIndex === currentTd.colIndex);
+      if (!td) continue;
+      const skipLeadingZero =
+        !!td.splitSyntheticLeadingZero && td.value[0]?.value === ZERO ? 1 : 0;
+      if (tr.id === currentTr.id && td.id === currentTd.id) {
+        mergedIndex += Math.max(startIndex - skipLeadingZero, 0);
+        return {
+          rootTrId,
+          colIndex: currentTd.colIndex,
+          mergedIndex
+        };
+      }
+      mergedIndex += Math.max(td.value.length - skipLeadingZero, 0);
+    }
+    return null;
+  }
+
+  private applyCollapsedSplitTableCursor(payload: {
+    tableIndex: number;
+    tableId: string | undefined;
+    overflowTr: ITr;
+    overflowTrIdx: number;
+    continuationTr: ITr;
+    continuationTdList: ITd[];
+    logicalCursor: {
+      rootTrId: string;
+      colIndex: number;
+      mergedIndex: number;
+    };
+    splits: {
+      elemIdx: number;
+      rowIdx: number;
+    }[];
+  }) {
+    const {
+      tableIndex,
+      tableId,
+      overflowTr,
+      overflowTrIdx,
+      continuationTr,
+      continuationTdList,
+      logicalCursor,
+      splits
+    } = payload;
+    const tdIndex = overflowTr.tdList.findIndex(
+      td => td.colIndex === logicalCursor.colIndex
+    );
+    if (tdIndex < 0) return false;
+    const splitIdx = splits[tdIndex]?.elemIdx;
+    if (splitIdx === undefined) return false;
+    const positionContext = this.position.getPositionContext();
+    if (logicalCursor.mergedIndex >= splitIdx) {
+      const continuationTd = continuationTdList[tdIndex];
+      if (!continuationTd) return false;
+      const hasPrependedZero =
+        !!continuationTd.splitSyntheticLeadingZero &&
+        continuationTd.value[0]?.value === ZERO;
+      const continuationCursorIndex =
+        logicalCursor.mergedIndex -
+        splitIdx +
+        (hasPrependedZero ? 1 : 0);
+      positionContext.index = tableIndex;
+      positionContext.trIndex = overflowTrIdx + 1;
+      positionContext.tdIndex = tdIndex;
+      positionContext.tdId = continuationTd.id;
+      positionContext.trId = continuationTr.id;
+      positionContext.tableId = tableId;
+      this.position.setPositionContext(positionContext);
+      this.range.setRange(
+        continuationCursorIndex,
+        continuationCursorIndex
+      );
+      this.pendingTableCursorIndex = continuationCursorIndex;
+      return true;
+    }
+    const rootTd = overflowTr.tdList[tdIndex];
+    if (!rootTd) return false;
+    const rootCursorIndex = Math.min(
+      logicalCursor.mergedIndex,
+      Math.max(rootTd.value.length - 1, 0)
+    );
+    positionContext.index = tableIndex;
+    positionContext.trIndex = overflowTrIdx;
+    positionContext.tdIndex = tdIndex;
+    positionContext.tdId = rootTd.id;
+    positionContext.trId = overflowTr.id;
+    positionContext.tableId = tableId;
+    this.position.setPositionContext(positionContext);
+    this.range.setRange(rootCursorIndex, rootCursorIndex);
+    this.pendingTableCursorIndex = rootCursorIndex;
+    return true;
   }
 
   public getElementList(): IElement[] {
@@ -803,6 +1023,18 @@ export class Draw {
       isHandleFirstElement: false,
       editorOptions: this.options
     });
+    const splitCellSelection = this.range.getSplitCellSelection();
+    if (splitCellSelection) {
+      const curIndex = this.replaceSplitCellSelection(payload, splitCellSelection);
+      if (~curIndex) {
+        this.range.setRange(curIndex, curIndex);
+        this.render({
+          curIndex,
+          isSubmitHistory
+        });
+      }
+      return;
+    }
     let curIndex = -1;
     let activeControl = this.control.getActiveControl();
     if (!activeControl && this.control.getIsRangeWithinControl()) {
@@ -937,6 +1169,87 @@ export class Draw {
         elementList.splice(start + i, 0, items[i]);
       }
     }
+  }
+
+  public replaceSplitCellSelection(
+    payload: IElement[],
+    splitCellSelection: ISplitCellSelection = <ISplitCellSelection>(
+      this.range.getSplitCellSelection()
+    )
+  ): number {
+    const splitCellSelectionContext = this.getSplitCellSelectionContext(
+      this.getOriginalElementList(),
+      splitCellSelection
+    );
+    if (!splitCellSelectionContext) return -1;
+    const [rootCellContext, ...continuationCellContextList] =
+      splitCellSelectionContext.cellContextList;
+    const rootTd = rootCellContext.td;
+    const rootStartIndex = rootTd.value[0]?.value === ZERO ? 1 : 0;
+    if (!rootStartIndex) {
+      rootTd.value.unshift({
+        value: ZERO,
+        type: ElementType.TEXT
+      });
+      this.syncTableElementContext([rootTd.value[0]], {
+        tableId: rootCellContext.element.id,
+        trId: rootCellContext.tr.id,
+        tdId: rootTd.id
+      });
+    }
+    this.syncTableElementContext(payload, {
+      tableId: rootCellContext.element.id,
+      trId: rootCellContext.tr.id,
+      tdId: rootTd.id
+    });
+    this.spliceElementList(
+      rootTd.value,
+      1,
+      rootTd.value.length - 1,
+      payload
+    );
+    rootTd.rowList = undefined;
+    rootTd.positionList = undefined;
+    rootTd.mainHeight = undefined;
+    rootTd.realHeight = undefined;
+    rootTd.realMinHeight = undefined;
+    for (let c = 0; c < continuationCellContextList.length; c++) {
+      const continuationTd = continuationCellContextList[c].td;
+      const startIndex = continuationTd.value[0]?.value === ZERO ? 1 : 0;
+      if (!startIndex) {
+        continuationTd.value.unshift({
+          value: ZERO,
+          type: ElementType.TEXT
+        });
+        this.syncTableElementContext([continuationTd.value[0]], {
+          tableId: continuationCellContextList[c].element.id,
+          trId: continuationCellContextList[c].tr.id,
+          tdId: continuationTd.id
+        });
+      }
+      if (continuationTd.value.length > 1) {
+        this.spliceElementList(
+          continuationTd.value,
+          1,
+          continuationTd.value.length - 1
+        );
+      }
+      continuationTd.rowList = undefined;
+      continuationTd.positionList = undefined;
+      continuationTd.mainHeight = undefined;
+      continuationTd.realHeight = undefined;
+      continuationTd.realMinHeight = undefined;
+    }
+    this.position.setPositionContext({
+      isTable: true,
+      index: rootCellContext.tableIndex,
+      trIndex: rootCellContext.trIndex,
+      tdIndex: rootCellContext.tdIndex,
+      tdId: rootTd.id,
+      trId: rootCellContext.tr.id,
+      tableId: rootCellContext.element.id
+    });
+    return Math.max(rootTd.value.length - 1, 0);
   }
 
   public getCanvasEvent(): CanvasEvent {
@@ -1620,6 +1933,9 @@ export class Draw {
               parentTrIndex: number;
             }
           | undefined;
+        const logicalSplitCursor = this.getCollapsedSplitTableCursorContext(
+          element
+        );
         if (element.pagingId) {
           let tableIndex = i + 1;
           let combineCount = 0;
@@ -1694,6 +2010,11 @@ export class Draw {
                 hasSyntheticLeadingZero
                   ? splitTd.value.slice(1)
                   : splitTd.value;
+              this.syncTableElementContext(splitValue, {
+                tableId: element.id,
+                trId: parentTr.id,
+                tdId: parentTd.id
+              });
               // No deepClone: elements are solely owned by continuation after splice
               parentTd.value.push(...splitValue);
               parentTd.rowList = undefined;
@@ -2045,13 +2366,17 @@ export class Draw {
                     const continuationTdList: ITd[] = overflowTr.tdList.map(
                       (td, d) => {
                         const splitIdx = splits[d].elemIdx;
+                        const newTdId = getUUID();
                         const initialListState = this.getListStateBeforeIndex(
                           td.value,
                           splitIdx
                         );
-                        const overflowElements = deepClone(
-                          td.value.slice(splitIdx)
-                        );
+                        // Transfer ownership of the overflow tail to the
+                        // continuation td instead of deep-cloning a large
+                        // array of text elements on every render. The source
+                        // td is truncated below, so these element references
+                        // are no longer used by the current page fragment.
+                        const overflowElements = td.value.slice(splitIdx);
                         const overflowStartElement = overflowElements[0];
                         let splitSyntheticLeadingZero = false;
                         if (
@@ -2070,9 +2395,15 @@ export class Draw {
                           } as IElement);
                           splitSyntheticLeadingZero = true;
                         }
+                        this.syncTableElementContext(overflowElements, {
+                          tableId: element.id,
+                          trId: newTrId,
+                          tdId: newTdId
+                        });
                         // Clone td metadata only (exclude value to avoid
                         // double-cloning the large elements array)
                         const {
+                          id: _tdId,
                           value: _v,
                           rowList: _rl,
                           positionList: _pl,
@@ -2082,6 +2413,7 @@ export class Draw {
                         } = td;
                         return {
                           ...deepClone(tdMeta),
+                          id: newTdId,
                           value: overflowElements,
                           splitSyntheticLeadingZero,
                           splitListState: initialListState,
@@ -2103,8 +2435,26 @@ export class Draw {
                       splitRootId,
                       splitLevel
                     };
+                    let isLogicalSplitCursorHandled = false;
+                    if (
+                      logicalSplitCursor &&
+                      logicalSplitCursor.rootTrId === splitRootId
+                    ) {
+                      isLogicalSplitCursorHandled =
+                        this.applyCollapsedSplitTableCursor({
+                          tableIndex: i,
+                          tableId: element.id,
+                          overflowTr,
+                          overflowTrIdx,
+                          continuationTr,
+                          continuationTdList,
+                          logicalCursor: logicalSplitCursor,
+                          splits
+                        });
+                    }
                     const positionContext = this.position.getPositionContext();
                     if (
+                      !isLogicalSplitCursorHandled &&
                       activeSplitRange &&
                       positionContext.isTable &&
                       positionContext.trId === activeSplitRange.trId
@@ -2181,16 +2531,31 @@ export class Draw {
               element.height -= cloneTrHeight;
               metrics.height -= cloneTrRealHeight;
               metrics.boundingBoxDescent -= cloneTrRealHeight;
-              const cloneElement = deepClone(element);
-              cloneElement.pagingId = pagingId;
-              cloneElement.pagingIndex = element.pagingIndex! + 1;
+              const {
+                trList: _currentTrList,
+                id: _currentId,
+                height: _currentHeight,
+                pagingIndex: _currentPagingIndex,
+                ...cloneElementMeta
+              } = element;
+              // Clone only the lightweight table metadata. Deep-cloning the
+              // whole element here also clones the current-page trList and all
+              // td values, which is extremely expensive for very tall split
+              // tables and is discarded immediately after cloneElement.trList
+              // is replaced.
+              const cloneElement: IElement = {
+                ...deepClone(cloneElementMeta),
+                trList: cloneTrList,
+                height: cloneTrHeight,
+                pagingId,
+                pagingIndex: element.pagingIndex! + 1
+              };
               const repeatTrList = trList.filter(tr => tr.pagingRepeat);
               if (repeatTrList.length) {
                 const cloneRepeatTrList = deepClone(repeatTrList);
                 cloneRepeatTrList.forEach(tr => (tr.id = getUUID()));
                 cloneTrList.unshift(...cloneRepeatTrList);
               }
-              cloneElement.trList = cloneTrList;
               cloneElement.id = getUUID();
               this.spliceElementList(elementList, i + 1, 0, [cloneElement]);
             }
@@ -2747,6 +3112,38 @@ export class Draw {
     const isPrintMode = this.isPrintMode();
     const isGraffitiMode = this.isGraffitiMode();
     const { isCrossRowCol, tableId } = this.range.getRange();
+    const splitCellSelection = this.range.getSplitCellSelection();
+    const tableCellSelection = this.range.getTableCellSelection();
+    const splitCellRenderOffsetMap = splitCellSelection
+      ? (() => {
+          const splitCellContext = this.getSplitCellSelectionContext(
+            this.getOriginalElementList(),
+            splitCellSelection
+          );
+          if (!splitCellContext) return null;
+          const offsetMap = new Map<
+            string,
+            {
+              offset: number;
+              skipLeadingZero: number;
+            }
+          >();
+          let offset = 0;
+          for (let c = 0; c < splitCellContext.cellContextList.length; c++) {
+            const { td } = splitCellContext.cellContextList[c];
+            const skipLeadingZero =
+              !!td.splitSyntheticLeadingZero && td.value[0]?.value === ZERO
+                ? 1
+                : 0;
+            offsetMap.set(td.id!, {
+              offset,
+              skipLeadingZero
+            });
+            offset += Math.max(td.value.length - skipLeadingZero, 0);
+          }
+          return offsetMap;
+        })()
+      : null;
     let index = startIndex;
     for (let i = 0; i < rowList.length; i++) {
       const curRow = rowList[i];
@@ -2785,6 +3182,9 @@ export class Draw {
           this.textParticle.complete();
           this.laTexParticle.render(ctx, element, x, y + offsetY);
         } else if (element.type === ElementType.TABLE) {
+          if (tableCellSelection) {
+            tableRangeElement = element;
+          }
           if (isCrossRowCol) {
             rangeRecord.x = x;
             rangeRecord.y = y;
@@ -2973,19 +3373,32 @@ export class Draw {
           startIndex,
           endIndex
         } = this.range.getRange();
+        const splitCellOffset = element.tdId
+          ? splitCellRenderOffsetMap?.get(element.tdId)
+          : undefined;
+        const splitCellIndex = splitCellOffset
+          ? index - splitCellOffset.skipLeadingZero + splitCellOffset.offset
+          : index;
+        const isSplitCellElement =
+          !!splitCellOffset && index >= splitCellOffset.skipLeadingZero;
         if (
           currentZone === zone &&
           startIndex !== endIndex &&
-          startIndex <= index &&
-          index <= endIndex
+          startIndex <= splitCellIndex &&
+          splitCellIndex <= endIndex
         ) {
           const positionContext = this.position.getPositionContext();
           if (
-            (!positionContext.isTable && !element.tdId) ||
-            positionContext.tdId === element.tdId
+            (splitCellRenderOffsetMap && isSplitCellElement) ||
+            (!splitCellRenderOffsetMap &&
+              ((!positionContext.isTable && !element.tdId) ||
+                positionContext.tdId === element.tdId))
           ) {
-            if (startIndex === index) {
-              const nextElement = elementList[startIndex + 1];
+            if (startIndex === splitCellIndex) {
+              const nextElement =
+                splitCellRenderOffsetMap && isSplitCellElement
+                  ? this.getElementList()[startIndex + 1]
+                  : elementList[startIndex + 1];
               if (nextElement && nextElement.value === ZERO) {
                 rangeRecord.x = x + metrics.width;
                 rangeRecord.y = y - (curRow.spaceAbove || 0);
@@ -3056,7 +3469,7 @@ export class Draw {
       this.strikeout.render(ctx);
       this.group.render(ctx);
       if (!isPrintMode && !isGraffitiMode) {
-        if (rangeRecord.width && rangeRecord.height) {
+        if (!tableCellSelection && rangeRecord.width && rangeRecord.height) {
           const { x, y, width, height } = rangeRecord;
           this.range.render(ctx, x, y, width, height);
         }
@@ -3071,6 +3484,20 @@ export class Draw {
             }
           } = positionList[curRow.startIndex];
           this.tableParticle.drawRange(ctx, tableRangeElement, x, y);
+        }
+        if (tableCellSelection && tableRangeElement) {
+          const {
+            coordinate: {
+              leftTop: [x, y]
+            }
+          } = positionList[curRow.startIndex];
+          this.tableParticle.drawCellRange(
+            ctx,
+            tableRangeElement,
+            x,
+            y,
+            tableCellSelection
+          );
         }
       }
     }

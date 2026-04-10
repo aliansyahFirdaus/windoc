@@ -60,7 +60,9 @@ export function del(evt: KeyboardEvent, host: CanvasEvent) {
     deleteHideElement(host);
   }
   let curIndex: number | null;
-  if (isCrossRowCol) {
+  if (rangeManager.getSplitCellSelection() && startIndex !== endIndex) {
+    curIndex = draw.replaceSplitCellSelection([]);
+  } else if (isCrossRowCol) {
     const rowCol = draw.getTableParticle().getRangeRowCol();
     if (!rowCol) return;
     let isDeleted = false;
