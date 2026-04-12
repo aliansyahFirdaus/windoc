@@ -1,7 +1,6 @@
 const nextTick = (fn: () => void) => Promise.resolve().then(fn);
 import { EDITOR_PREFIX } from '../../dataset/constant/Editor';
 import { ElementType } from '../../dataset/enum/Element';
-import { MoveDirection } from '../../dataset/enum/Observer';
 import { DeepRequired } from '../../interface/Common';
 import { ICursorOption } from '../../interface/Cursor';
 import { IEditorOption } from '../../interface/Editor';
@@ -21,7 +20,6 @@ export type IDrawCursorOption = ICursorOption & {
 };
 
 export interface IMoveCursorToVisibleOption {
-  direction: MoveDirection;
   cursorPosition: IElementPosition;
 }
 
@@ -102,7 +100,12 @@ export class Cursor {
     const agentCursorDom = this.cursorAgent.getAgentCursorDom();
     if (document.activeElement !== agentCursorDom) {
       agentCursorDom.focus({ preventScroll: true });
+      // setSelectionRange dapat memicu browser-native scroll ke posisi textarea,
+      // simpan dan restore scroll position supaya tidak mengganggu moveCursorToVisible
+      const scrollContainer = findScrollContainer(this.container);
+      const { scrollLeft, scrollTop } = scrollContainer;
       agentCursorDom.setSelectionRange(0, 0);
+      scrollContainer.scroll(scrollLeft, scrollTop);
     }
   }
 
@@ -197,7 +200,6 @@ export class Cursor {
       this.recoveryCursor();
       return;
     }
-    const oldTop = this.cursorDom.style.top;
     const isReadonly = this.draw.isReadonly();
     this.cursorDom.style.width = `${width * scale}px`;
     this.cursorDom.style.backgroundColor = color;
@@ -211,11 +213,7 @@ export class Cursor {
       this._clearBlinkTimeout();
     }
     nextTick(() => {
-      this.moveCursorToVisible({
-        cursorPosition: cursorPosition!,
-        direction:
-          parseInt(oldTop) > cursorTop ? MoveDirection.UP : MoveDirection.DOWN
-      });
+      this.moveCursorToVisible({ cursorPosition: cursorPosition! });
     });
   }
 
@@ -225,54 +223,52 @@ export class Cursor {
   }
 
   public moveCursorToVisible(payload: IMoveCursorToVisibleOption) {
-    const { cursorPosition, direction } = payload;
-    if (!cursorPosition || !direction) return;
+    const { cursorPosition } = payload;
+    if (!cursorPosition) return;
     const {
       pageNo,
-      coordinate: { leftTop, leftBottom }
+      coordinate: { leftTop },
+      ascent,
+      metrics: { boundingBoxAscent, boundingBoxDescent }
     } = cursorPosition;
-    const prePageY =
-      pageNo * (this.draw.getHeight() + this.draw.getPageGap()) +
-      this.container.getBoundingClientRect().top;
-    const isUp = direction === MoveDirection.UP;
-    const x = leftBottom[0];
-    const cursorTop =
-      leftTop[1] +
-      cursorPosition.ascent -
-      cursorPosition.metrics.boundingBoxAscent;
-    const cursorBottom =
-      cursorTop +
-      cursorPosition.metrics.boundingBoxAscent +
-      cursorPosition.metrics.boundingBoxDescent;
-    const y = isUp ? cursorTop + prePageY : cursorBottom + prePageY;
+    const containerRect = this.container.getBoundingClientRect();
+    const pageOffset = pageNo * (this.draw.getHeight() + this.draw.getPageGap());
+    // Cursor top and bottom in viewport coordinates
+    const cursorTopViewport =
+      containerRect.top + pageOffset + leftTop[1] + ascent - boundingBoxAscent;
+    const cursorBottomViewport = cursorTopViewport + boundingBoxAscent + boundingBoxDescent;
     const scrollContainer = findScrollContainer(this.container);
-    const rect = {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0
-    };
+    let visibleTop: number;
+    let visibleBottom: number;
     if (scrollContainer === document.documentElement) {
-      rect.right = window.innerWidth;
-      rect.bottom = window.innerHeight;
+      visibleTop = 0;
+      visibleBottom = window.innerHeight;
     } else {
-      const { left, right, top, bottom } =
-        scrollContainer.getBoundingClientRect();
-      rect.left = left;
-      rect.right = right;
-      rect.top = top;
-      rect.bottom = bottom;
+      const scrollRect = scrollContainer.getBoundingClientRect();
+      visibleTop = scrollRect.top;
+      visibleBottom = scrollRect.bottom;
     }
-    const { maskMargin } = this.options;
-    rect.top += maskMargin[0];
-    rect.bottom -= maskMargin[2];
-    if (
-      !(x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
-    ) {
-      const { scrollLeft, scrollTop } = scrollContainer;
-      isUp
-        ? scrollContainer.scroll(scrollLeft, scrollTop - (rect.top - y))
-        : scrollContainer.scroll(scrollLeft, scrollTop + y - rect.bottom);
+    // Cursor already visible — do not scroll
+    if (cursorTopViewport >= visibleTop && cursorBottomViewport <= visibleBottom) {
+      return;
+    }
+    // Extra breathing room so cursor doesn't land flush against the edge,
+    // same value for top and bottom (one line of context)
+    const scrollPadding =
+      (boundingBoxAscent + boundingBoxDescent) * this.options.scrollPaddingLines;
+    const { scrollLeft, scrollTop } = scrollContainer;
+    if (cursorTopViewport < visibleTop) {
+      // Cursor above viewport — scroll up, land with padding below top edge
+      scrollContainer.scroll(
+        scrollLeft,
+        scrollTop - (visibleTop - cursorTopViewport) - scrollPadding
+      );
+    } else {
+      // Cursor below viewport — scroll down, land with padding above bottom edge
+      scrollContainer.scroll(
+        scrollLeft,
+        scrollTop + (cursorBottomViewport - visibleBottom) + scrollPadding
+      );
     }
   }
 }

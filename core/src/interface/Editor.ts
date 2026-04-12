@@ -84,6 +84,7 @@ export interface IEditorOption {
   historyMaxRecordCount?: number;
   printPixelRatio?: number;
   maskMargin?: IMargin;
+  scrollPaddingLines?: number;
   letterClass?: string[];
   contextMenuDisableKeys?: string[];
   shortcutDisableKeys?: string[];

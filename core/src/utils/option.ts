@@ -211,6 +211,7 @@ export function mergeOption(
     wordBreak: WordBreak.BREAK_WORD,
     printPixelRatio: 3,
     maskMargin: [0, 0, 0, 0],
+    scrollPaddingLines: 3,
     letterClass: [LETTER_CLASS.ENGLISH],
     contextMenuDisableKeys: [],
     shortcutDisableKeys: [],

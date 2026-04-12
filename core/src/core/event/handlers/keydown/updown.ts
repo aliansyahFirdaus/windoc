@@ -1,6 +1,5 @@
 import { ElementType } from '../../../../dataset/enum/Element';
 import { KeyMap } from '../../../../dataset/enum/KeyMap';
-import { MoveDirection } from '../../../../dataset/enum/Observer';
 import { IElementPosition } from '../../../../interface/Element';
 import { CanvasEvent } from '../../CanvasEvent';
 
@@ -313,8 +312,7 @@ export function updown(evt: KeyboardEvent, host: CanvasEvent) {
   });
   if (!isCollapsed) {
     draw.getCursor().moveCursorToVisible({
-      cursorPosition: positionList[isUp ? anchorStartIndex : anchorEndIndex],
-      direction: isUp ? MoveDirection.UP : MoveDirection.DOWN
+      cursorPosition: positionList[isUp ? anchorStartIndex : anchorEndIndex]
     });
   }
 }
