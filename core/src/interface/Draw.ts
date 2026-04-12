@@ -13,6 +13,7 @@ export interface IDrawOption {
   isInit?: boolean;
   isSourceHistory?: boolean;
   isFirstRender?: boolean;
+  dirtyStartIndex?: number;
 }
 
 export interface IForceUpdateOption {
@@ -92,4 +93,9 @@ export interface IComputeRowListPayload {
   mainOuterHeight?: number;
   surroundElementList?: IElement[];
   initialListState?: IListStateSeed;
+  hasListElement?: boolean;
+  fromIndex?: number;
+  initialY?: number;
+  initialPageNo?: number;
+  initialRowIndex?: number;
 }

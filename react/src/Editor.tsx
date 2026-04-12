@@ -1,11 +1,103 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { startTransition, useEffect, useRef, useState } from 'react';
 import type { EditorInstance, RangeStylePayload } from './types';
 import { EditorProvider } from './EditorContext';
 import { FooterProvider, useFooter } from './FooterContext';
 import EditorToolbar from './EditorToolbar';
 import EditorFooter from './EditorFooter';
+
+type DeferredHandle = number;
+
+type DeferredDeadline = {
+  didTimeout: boolean;
+  timeRemaining: () => number;
+};
+
+type DeferredWindow = Window & {
+  requestIdleCallback?: (
+    callback: (deadline: DeferredDeadline) => void,
+    options?: { timeout: number }
+  ) => DeferredHandle;
+  cancelIdleCallback?: (handle: DeferredHandle) => void;
+};
+
+const CONTENT_SYNC_TIMEOUT = 300;
+
+function scheduleDeferredTask(callback: () => void): DeferredHandle {
+  const deferredWindow = window as DeferredWindow;
+  if (deferredWindow.requestIdleCallback) {
+    return deferredWindow.requestIdleCallback(
+      () => {
+        callback();
+      },
+      { timeout: CONTENT_SYNC_TIMEOUT }
+    );
+  }
+  return window.setTimeout(callback, 0);
+}
+
+function cancelDeferredTask(handle: DeferredHandle | null) {
+  if (handle === null) return;
+  const deferredWindow = window as DeferredWindow;
+  if (deferredWindow.cancelIdleCallback) {
+    deferredWindow.cancelIdleCallback(handle);
+    return;
+  }
+  window.clearTimeout(handle);
+}
+
+function isSameNumberArray(
+  left: number[] | undefined,
+  right: number[] | undefined
+) {
+  if (left === right) return true;
+  if (!left || !right || left.length !== right.length) return false;
+  for (let i = 0; i < left.length; i++) {
+    if (left[i] !== right[i]) return false;
+  }
+  return true;
+}
+
+function isSameStringArray(
+  left: string[] | undefined,
+  right: string[] | undefined
+) {
+  if (left === right) return true;
+  if (!left || !right || left.length !== right.length) return false;
+  for (let i = 0; i < left.length; i++) {
+    if (left[i] !== right[i]) return false;
+  }
+  return true;
+}
+
+function isSameRangeStyle(
+  left: RangeStylePayload | null,
+  right: RangeStylePayload | null
+) {
+  if (left === right) return true;
+  if (!left || !right) return false;
+  return (
+    left.type === right.type &&
+    left.font === right.font &&
+    left.size === right.size &&
+    left.bold === right.bold &&
+    left.italic === right.italic &&
+    left.underline === right.underline &&
+    left.strikeout === right.strikeout &&
+    left.color === right.color &&
+    left.highlight === right.highlight &&
+    left.rowFlex === right.rowFlex &&
+    left.rowMargin === right.rowMargin &&
+    left.undo === right.undo &&
+    left.redo === right.redo &&
+    left.painter === right.painter &&
+    left.level === right.level &&
+    left.listType === right.listType &&
+    isSameNumberArray(left.dashArray, right.dashArray) &&
+    isSameStringArray(left.groupIds, right.groupIds)
+  );
+}
 
 interface EditorOptions {
   margins?: number[];
@@ -120,6 +212,9 @@ function EditorInner({
   const editorRef = useRef<EditorInstance | null>(null);
   const [rangeStyle, setRangeStyle] = useState<RangeStylePayload | null>(null);
   const [isInTable, setIsInTable] = useState(false);
+  const lastRangeStyleRef = useRef<RangeStylePayload | null>(null);
+  const deferredContentSyncRef = useRef<DeferredHandle | null>(null);
+  const contentSyncVersionRef = useRef(0);
 
   const {
     setPageNoList,
@@ -157,11 +252,10 @@ function EditorInner({
 
       const data = (defaultValue ?? { main: [] }) as any;
 
-      instance = new EditorClass(
-        containerRef.current!,
-        data,
-        ({ maskMargin: [24, 0, 24, 0], ...userOptions }) as any
-      ) as unknown as EditorInstance;
+      instance = new EditorClass(containerRef.current!, data, {
+        maskMargin: [24, 0, 24, 0],
+        ...userOptions
+      } as any) as unknown as EditorInstance;
 
       editorRef.current = instance;
 
@@ -174,46 +268,82 @@ function EditorInner({
 
       // Setup listeners
       instance.listener.rangeStyleChange = (payload: RangeStylePayload) => {
-        setRangeStyle(payload);
+        if (!isSameRangeStyle(lastRangeStyleRef.current, payload)) {
+          lastRangeStyleRef.current = payload;
+          startTransition(() => {
+            setRangeStyle(payload);
+          });
+        }
         onRangeStyleChange?.(payload);
         const rangeContext = instance?.command.getRangeContext();
-        setIsInTable(rangeContext?.isTable === true);
-        if (rangeContext) {
-          setRowNo(rangeContext.startRowNo + 1);
-          setColNo(rangeContext.startColNo + 1);
-        }
+        startTransition(() => {
+          setIsInTable(rangeContext?.isTable === true);
+          if (rangeContext) {
+            setRowNo(rangeContext.startRowNo + 1);
+            setColNo(rangeContext.startColNo + 1);
+          }
+        });
       };
 
       instance.listener.visiblePageNoListChange = (payload: number[]) => {
-        setPageNoList(payload.map(i => i + 1).join(', '));
+        startTransition(() => {
+          setPageNoList(payload.map(i => i + 1).join(', '));
+        });
       };
 
       instance.listener.pageSizeChange = (payload: number) => {
-        setPageSize(payload);
+        startTransition(() => {
+          setPageSize(payload);
+        });
       };
 
       instance.listener.intersectionPageNoChange = (payload: number) => {
-        setPageNo(payload + 1);
+        startTransition(() => {
+          setPageNo(payload + 1);
+        });
       };
 
       instance.listener.pageScaleChange = (payload: number) => {
-        setPageScale(Math.floor(payload * 10 * 10));
+        startTransition(() => {
+          setPageScale(Math.floor(payload * 10 * 10));
+        });
       };
 
-      instance.listener.optionsChange = (payload: { scale: number; paperDirection: string; width: number; height: number }) => {
-        setPageScale(Math.round(payload.scale * 100));
-        setPaperDirection(payload.paperDirection);
-        setPaperWidth(payload.width);
-        setPaperHeight(payload.height);
+      instance.listener.optionsChange = (payload: {
+        scale: number;
+        paperDirection: string;
+        width: number;
+        height: number;
+      }) => {
+        startTransition(() => {
+          setPageScale(Math.round(payload.scale * 100));
+          setPaperDirection(payload.paperDirection);
+          setPaperWidth(payload.width);
+          setPaperHeight(payload.height);
+        });
       };
 
-      instance.listener.contentChange = async () => {
-        const count = await instance?.command.getWordCount();
-        setWordCount(count || 0);
-        if (onChange) {
-          const value = instance?.command.getValue();
-          if (value) onChange(value);
-        }
+      instance.listener.contentChange = () => {
+        const currentVersion = ++contentSyncVersionRef.current;
+        cancelDeferredTask(deferredContentSyncRef.current);
+        deferredContentSyncRef.current = scheduleDeferredTask(async () => {
+          if (cancelled || !instance) return;
+          const count = await instance.command.getWordCount();
+          if (cancelled || contentSyncVersionRef.current !== currentVersion) {
+            return;
+          }
+          startTransition(() => {
+            setWordCount(count || 0);
+          });
+          if (onChange) {
+            const value = instance.command.getValue();
+            if (cancelled || contentSyncVersionRef.current !== currentVersion) {
+              return;
+            }
+            onChange(value);
+          }
+          deferredContentSyncRef.current = null;
+        });
       };
 
       // Register shortcuts
@@ -302,7 +432,9 @@ function EditorInner({
 
       // Initial content change
       const count = await instance.command.getWordCount();
-      setWordCount(count || 0);
+      startTransition(() => {
+        setWordCount(count || 0);
+      });
 
       // Notify consumer
       onReady?.(instance);
@@ -312,6 +444,8 @@ function EditorInner({
 
     return () => {
       cancelled = true;
+      cancelDeferredTask(deferredContentSyncRef.current);
+      deferredContentSyncRef.current = null;
       instance?.destroy();
       editorRef.current = null;
       if (closeDropdowns) {
@@ -335,7 +469,11 @@ function EditorInner({
   };
 
   return (
-    <EditorProvider editorRef={editorRef} rangeStyle={rangeStyle} isInTable={isInTable}>
+    <EditorProvider
+      editorRef={editorRef}
+      rangeStyle={rangeStyle}
+      isInTable={isInTable}
+    >
       {toolbar && !renderToolbar && <EditorToolbar />}
       {renderToolbar}
       {children}

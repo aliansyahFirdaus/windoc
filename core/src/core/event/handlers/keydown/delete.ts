@@ -158,7 +158,8 @@ export function del(evt: KeyboardEvent, host: CanvasEvent) {
   } else {
     rangeManager.setRange(curIndex, curIndex);
     draw.render({
-      curIndex
+      curIndex,
+      dirtyStartIndex: curIndex + 1
     });
   }
 }

@@ -31,7 +31,7 @@ import {
   IInsertElementListOption
 } from '../../interface/Element';
 import { IRow, IRowElement } from '../../interface/Row';
-import { deepClone, getUUID, nextTick } from '../../utils';
+import { deepClone, getUUID, isArrayEqual, nextTick } from '../../utils';
 import { Cursor } from '../cursor/Cursor';
 import { CanvasEvent } from '../event/CanvasEvent';
 import { GlobalEvent } from '../event/GlobalEvent';
@@ -75,8 +75,8 @@ import { Control } from './control/Control';
 import {
   deleteSurroundElementList,
   getIsBlockElement,
+  inflateElementList,
   getSlimCloneElementList,
-  pickSurroundElementList,
   zipElementList
 } from '../../utils/element';
 import { CheckboxParticle } from './particle/CheckboxParticle';
@@ -131,6 +131,7 @@ export class Draw {
   private pageContainer: HTMLDivElement;
   private pageList: HTMLCanvasElement[];
   private ctxList: CanvasRenderingContext2D[];
+  private measureCtx: CanvasRenderingContext2D;
   private pageNo: number;
   private renderCount: number;
   private pagePixelRatio: number | null;
@@ -197,6 +198,28 @@ export class Draw {
   private WORD_LIKE_REG: RegExp;
   private rowList: IRow[];
   private pageRowList: IRow[][];
+  private pageRenderVersionList: number[];
+  private elementFontCache: WeakMap<
+    IElement,
+    {
+      scale: number;
+      font: string;
+      size: number;
+      actualSize?: number;
+      bold?: boolean;
+      italic?: boolean;
+      style: string;
+    }
+  >;
+  private elementRowMarginCache: WeakMap<
+    IElement,
+    {
+      scale: number;
+      size: number;
+      rowMargin?: number;
+      value: number;
+    }
+  >;
   private painterStyle: IElementStyle | null;
   private painterOptions: IPainterOption | null;
   private visiblePageNoList: number[];
@@ -216,6 +239,7 @@ export class Draw {
     this.container = this._wrapContainer(rootContainer);
     this.pageList = [];
     this.ctxList = [];
+    this.pageRenderVersionList = [];
     this.pageNo = 0;
     this.renderCount = 0;
     this.pagePixelRatio = null;
@@ -229,6 +253,7 @@ export class Draw {
     this._formatContainer();
     this.pageContainer = this._createPageContainer();
     this._createPage(0);
+    this.measureCtx = this._createMeasureContext();
 
     this.i18n = new I18n(options.locale);
     this.historyManager = new HistoryManager(this);
@@ -298,6 +323,8 @@ export class Draw {
     this.pageRowList = [];
     this.painterStyle = null;
     this.painterOptions = null;
+    this.elementFontCache = new WeakMap();
+    this.elementRowMarginCache = new WeakMap();
     this.visiblePageNoList = [];
     this.intersectionPageNo = 0;
     this.lazyRenderIntersectionObserver = null;
@@ -495,7 +522,9 @@ export class Draw {
   public getContextInnerWidth(): number {
     const positionContext = this.position.getPositionContext();
     if (positionContext.isTable) {
-      const td = this.resolveTableCellContext(this.getOriginalElementList())?.td;
+      const td = this.resolveTableCellContext(
+        this.getOriginalElementList()
+      )?.td;
       if (!td) return this.getColumnWidth() / this.options.scale;
       const tdPadding = this.getTdPadding();
       return td!.width! - tdPadding[1] - tdPadding[3];
@@ -563,6 +592,7 @@ export class Draw {
   }
 
   public setVisiblePageNoList(payload: number[]) {
+    if (isArrayEqual(this.visiblePageNoList, payload)) return;
     this.visiblePageNoList = payload;
     if (this.listener.visiblePageNoListChange) {
       this.listener.visiblePageNoListChange(this.visiblePageNoList);
@@ -577,6 +607,7 @@ export class Draw {
   }
 
   public setIntersectionPageNo(payload: number) {
+    if (this.intersectionPageNo === payload) return;
     this.intersectionPageNo = payload;
     if (this.listener.intersectionPageNoChange) {
       this.listener.intersectionPageNoChange(this.intersectionPageNo);
@@ -621,7 +652,9 @@ export class Draw {
       candidateIndexes.push(context.index);
     }
     if (context.tableId) {
-      const tableIndex = sourceElementList.findIndex(el => el.id === context.tableId);
+      const tableIndex = sourceElementList.findIndex(
+        el => el.id === context.tableId
+      );
       if (~tableIndex && !candidateIndexes.includes(tableIndex)) {
         candidateIndexes.push(tableIndex);
       }
@@ -641,7 +674,11 @@ export class Draw {
       if (context.trId) {
         resolvedTrIndex = trList.findIndex(tr => tr.id === context.trId);
       }
-      if (resolvedTrIndex < 0 && context.trIndex !== undefined && trList[context.trIndex]) {
+      if (
+        resolvedTrIndex < 0 &&
+        context.trIndex !== undefined &&
+        trList[context.trIndex]
+      ) {
         resolvedTrIndex = context.trIndex;
       }
       if (resolvedTrIndex < 0) continue;
@@ -650,7 +687,11 @@ export class Draw {
       if (context.tdId) {
         resolvedTdIndex = tdList.findIndex(td => td.id === context.tdId);
       }
-      if (resolvedTdIndex < 0 && context.tdIndex !== undefined && tdList[context.tdIndex]) {
+      if (
+        resolvedTdIndex < 0 &&
+        context.tdIndex !== undefined &&
+        tdList[context.tdIndex]
+      ) {
         resolvedTdIndex = context.tdIndex;
       }
       if (resolvedTdIndex < 0) continue;
@@ -752,9 +793,8 @@ export class Draw {
   }
 
   public getTableElementList(sourceElementList: IElement[]): IElement[] {
-    const splitCellSelectionContext = this.getSplitCellSelectionContext(
-      sourceElementList
-    );
+    const splitCellSelectionContext =
+      this.getSplitCellSelectionContext(sourceElementList);
     if (splitCellSelectionContext) {
       return splitCellSelectionContext.value;
     }
@@ -763,8 +803,9 @@ export class Draw {
 
   public getSplitCellSelectionContext(
     sourceElementList: IElement[] = this.getOriginalElementList(),
-    splitCellSelection: ISplitCellSelection | undefined =
-      this.range.getSplitCellSelection()
+    splitCellSelection:
+      | ISplitCellSelection
+      | undefined = this.range.getSplitCellSelection()
   ): {
     value: IElement[];
     positionList: IElementPosition[];
@@ -938,9 +979,7 @@ export class Draw {
         !!continuationTd.splitSyntheticLeadingZero &&
         continuationTd.value[0]?.value === ZERO;
       const continuationCursorIndex =
-        logicalCursor.mergedIndex -
-        splitIdx +
-        (hasPrependedZero ? 1 : 0);
+        logicalCursor.mergedIndex - splitIdx + (hasPrependedZero ? 1 : 0);
       positionContext.index = tableIndex;
       positionContext.trIndex = overflowTrIdx + 1;
       positionContext.tdIndex = tdIndex;
@@ -948,10 +987,7 @@ export class Draw {
       positionContext.trId = continuationTr.id;
       positionContext.tableId = tableId;
       this.position.setPositionContext(positionContext);
-      this.range.setRange(
-        continuationCursorIndex,
-        continuationCursorIndex
-      );
+      this.range.setRange(continuationCursorIndex, continuationCursorIndex);
       this.pendingTableCursorIndex = continuationCursorIndex;
       return true;
     }
@@ -1008,7 +1044,9 @@ export class Draw {
   }
 
   public getTd(): ITd | null {
-    return this.resolveTableCellContext(this.getOriginalElementList())?.td || null;
+    return (
+      this.resolveTableCellContext(this.getOriginalElementList())?.td || null
+    );
   }
 
   public insertElementList(
@@ -1025,7 +1063,10 @@ export class Draw {
     });
     const splitCellSelection = this.range.getSplitCellSelection();
     if (splitCellSelection) {
-      const curIndex = this.replaceSplitCellSelection(payload, splitCellSelection);
+      const curIndex = this.replaceSplitCellSelection(
+        payload,
+        splitCellSelection
+      );
       if (~curIndex) {
         this.range.setRange(curIndex, curIndex);
         this.render({
@@ -1202,12 +1243,7 @@ export class Draw {
       trId: rootCellContext.tr.id,
       tdId: rootTd.id
     });
-    this.spliceElementList(
-      rootTd.value,
-      1,
-      rootTd.value.length - 1,
-      payload
-    );
+    this.spliceElementList(rootTd.value, 1, rootTd.value.length - 1, payload);
     rootTd.rowList = undefined;
     rootTd.positionList = undefined;
     rootTd.mainHeight = undefined;
@@ -1694,6 +1730,16 @@ export class Draw {
     this._initPageContext(ctx);
     this.pageList.push(canvas);
     this.ctxList.push(ctx);
+    this.pageRenderVersionList.push(0);
+  }
+
+  private _createMeasureContext() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    ctx.letterSpacing = '0px';
+    ctx.wordSpacing = '0px';
+    ctx.direction = 'ltr';
+    return ctx;
   }
 
   private _initPageContext(ctx: CanvasRenderingContext2D) {
@@ -1708,8 +1754,30 @@ export class Draw {
     const { defaultSize, defaultFont } = this.options;
     const font = el.font || defaultFont;
     const size = el.actualSize || el.size || defaultSize;
+    const cache = this.elementFontCache.get(el);
+    if (
+      cache &&
+      cache.scale === scale &&
+      cache.font === font &&
+      cache.size === size &&
+      cache.actualSize === el.actualSize &&
+      cache.bold === el.bold &&
+      cache.italic === el.italic
+    ) {
+      return cache.style;
+    }
     const sizePx = size * (96 / 72) * scale;
-    return `${el.italic ? 'italic ' : ''}${el.bold ? 'bold ' : ''}${sizePx}px ${font}`;
+    const style = `${el.italic ? 'italic ' : ''}${el.bold ? 'bold ' : ''}${sizePx}px ${font}`;
+    this.elementFontCache.set(el, {
+      scale,
+      font,
+      size,
+      actualSize: el.actualSize,
+      bold: el.bold,
+      italic: el.italic,
+      style
+    });
+    return style;
   }
 
   public getElementSize(el: IElement) {
@@ -1724,18 +1792,34 @@ export class Draw {
       scale
     } = this.options;
     const fontSize = el.size || defaultSize;
+    const rowMarginValue = el.rowMargin ?? defaultRowMargin;
+    const cache = this.elementRowMarginCache.get(el);
+    if (
+      cache &&
+      cache.scale === scale &&
+      cache.size === fontSize &&
+      cache.rowMargin === rowMarginValue
+    ) {
+      return cache.value;
+    }
     let ratio = 1;
     if (fontSize < 12) {
       ratio = fontSize / 12;
     } else if (fontSize > 30) {
       ratio = 1 + (fontSize - 30) / 30;
     }
-    return (
+    const value =
       defaultBasicRowMarginHeight *
       ratio *
-      (el.rowMargin ?? defaultRowMargin) *
-      scale
-    );
+      rowMarginValue *
+      scale;
+    this.elementRowMarginCache.set(el, {
+      scale,
+      size: fontSize,
+      rowMargin: rowMarginValue,
+      value
+    });
+    return value;
   }
 
   private createListStateSeed(initialListState?: IListStateSeed) {
@@ -1824,7 +1908,12 @@ export class Draw {
       pageHeight = 0,
       mainOuterHeight = 0,
       surroundElementList = [],
-      initialListState
+      initialListState,
+      hasListElement = true,
+      fromIndex = 0,
+      initialY = startY,
+      initialPageNo = 0,
+      initialRowIndex = 0
     } = payload;
     const {
       defaultSize,
@@ -1833,27 +1922,75 @@ export class Draw {
       defaultTabWidth
     } = this.options;
     const defaultBasicRowMarginHeight = this.getDefaultBasicRowMarginHeight();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    const listStyleMap = this.listParticle.computeListStyle(ctx, elementList);
+    const ctx = this.measureCtx;
+    ctx.save();
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
+    const listStyleMap = hasListElement
+      ? this.listParticle.computeListStyle(ctx, elementList)
+      : new Map<string, number>();
+    const wordMeasureCache = new Map<
+      number,
+      {
+        width: number;
+        endElement: IElement | null;
+      }
+    >();
+    const getWordMeasure = (curIndex: number, elementFont: string) => {
+      const cache = wordMeasureCache.get(curIndex);
+      if (cache) return cache;
+      let endIndex = curIndex;
+      while (endIndex < elementList.length) {
+        const measureElement = elementList[endIndex];
+        if (
+          (measureElement.type && measureElement.type !== ElementType.TEXT) ||
+          !this.LETTER_REG.test(measureElement.value)
+        ) {
+          break;
+        }
+        if (this.getElementFont(measureElement) !== elementFont) {
+          const fallbackWord = this.textParticle.measureWord(
+            ctx,
+            elementList,
+            curIndex
+          );
+          wordMeasureCache.set(curIndex, fallbackWord);
+          return fallbackWord;
+        }
+        endIndex++;
+      }
+      const endElement = elementList[endIndex] || null;
+      let suffixWidth = 0;
+      for (let i = endIndex - 1; i >= curIndex; i--) {
+        suffixWidth += this.textParticle.measureText(ctx, elementList[i]).width;
+        wordMeasureCache.set(i, {
+          width: suffixWidth,
+          endElement
+        });
+      }
+      return wordMeasureCache.get(curIndex)!;
+    };
     const rowList: IRow[] = [];
-    if (elementList.length) {
+    if (elementList.length && fromIndex < elementList.length) {
       rowList.push({
         width: 0,
         height: 0,
         ascent: 0,
         elementList: [],
-        startIndex: 0,
-        rowIndex: 0,
-        rowFlex: elementList?.[0]?.rowFlex || elementList?.[1]?.rowFlex
+        startIndex: fromIndex,
+        rowIndex: initialRowIndex,
+        rowFlex:
+          elementList?.[fromIndex]?.rowFlex ||
+          elementList?.[fromIndex + 1]?.rowFlex
       });
     }
     let x = startX;
-    let y = startY;
-    let pageNo = 0;
+    let y = initialY;
+    let pageNo = initialPageNo;
     const listState = this.createListStateSeed(initialListState);
     let controlRealWidth = 0;
-    for (let i = 0; i < elementList.length; i++) {
+    for (let i = fromIndex; i < elementList.length; i++) {
       const curRow: IRow = rowList[rowList.length - 1];
       const element = elementList[i];
       const rowMargin = this.getElementRowMargin(element);
@@ -1933,9 +2070,8 @@ export class Draw {
               parentTrIndex: number;
             }
           | undefined;
-        const logicalSplitCursor = this.getCollapsedSplitTableCursorContext(
-          element
-        );
+        const logicalSplitCursor =
+          this.getCollapsedSplitTableCursorContext(element);
         if (element.pagingId) {
           let tableIndex = i + 1;
           let combineCount = 0;
@@ -2006,10 +2142,9 @@ export class Draw {
               const hasSyntheticLeadingZero =
                 !!splitTd.splitSyntheticLeadingZero &&
                 splitTd.value[0]?.value === ZERO;
-              const splitValue =
-                hasSyntheticLeadingZero
-                  ? splitTd.value.slice(1)
-                  : splitTd.value;
+              const splitValue = hasSyntheticLeadingZero
+                ? splitTd.value.slice(1)
+                : splitTd.value;
               this.syncTableElementContext(splitValue, {
                 tableId: element.id,
                 trId: parentTr.id,
@@ -2267,10 +2402,7 @@ export class Draw {
               }
               if (overflowTrIdx >= 0) {
                 const availableScaled =
-                  height -
-                  curPagePreHeight -
-                  rowMarginHeight -
-                  preHeightScaled;
+                  height - curPagePreHeight - rowMarginHeight - preHeightScaled;
                 const availableUnscaled = availableScaled / scale;
                 // Don't split if available space is too small — the resulting
                 // thin table slice looks visually wrong. Let the whole row fall
@@ -2334,7 +2466,8 @@ export class Draw {
                         if (
                           splitIdx !== undefined &&
                           startIndex >= splitIdx &&
-                          splitIdx < overflowTr.tdList[posCtx.tdIndex].value.length
+                          splitIdx <
+                            overflowTr.tdList[posCtx.tdIndex].value.length
                         ) {
                           activeSplitRange = {
                             tdIndex: posCtx.tdIndex,
@@ -2459,7 +2592,8 @@ export class Draw {
                       positionContext.isTable &&
                       positionContext.trId === activeSplitRange.trId
                     ) {
-                      const splitIdx = splits[activeSplitRange.tdIndex]?.elemIdx;
+                      const splitIdx =
+                        splits[activeSplitRange.tdIndex]?.elemIdx;
                       const continuationTd =
                         continuationTdList[activeSplitRange.tdIndex];
                       if (
@@ -2485,8 +2619,7 @@ export class Draw {
                           continuationCursorIndex,
                           continuationCursorIndex
                         );
-                        this.pendingTableCursorIndex =
-                          continuationCursorIndex;
+                        this.pendingTableCursorIndex = continuationCursorIndex;
                       }
                     }
                     for (let d = 0; d < overflowTr.tdList.length; d++) {
@@ -2684,16 +2817,14 @@ export class Draw {
           element.actualSize = Math.ceil(size * 0.6);
         }
         metrics.height = (element.actualSize || size) * scale;
-        ctx.font = this.getElementFont(element);
+        const elementFont = this.getElementFont(element);
+        ctx.font = elementFont;
         const fontMetrics = this.textParticle.measureText(ctx, element);
         metrics.width = fontMetrics.width * scale;
         if (element.letterSpacing) {
           metrics.width += element.letterSpacing * scale;
         }
-        const basisMetrics = this.textParticle.measureBasisWord(
-          ctx,
-          element.font!
-        );
+        const basisMetrics = this.textParticle.measureBasisWord(ctx, elementFont);
         metrics.boundingBoxAscent = basisMetrics.fontBoundingBoxAscent * scale;
         metrics.boundingBoxDescent =
           basisMetrics.fontBoundingBoxDescent * scale;
@@ -2744,11 +2875,7 @@ export class Draw {
         ) {
           const word = `${preElement?.value || ''}${element.value}`;
           if (this.WORD_LIKE_REG.test(word)) {
-            const { width, endElement } = this.textParticle.measureWord(
-              ctx,
-              elementList,
-              i
-            );
+            const { width, endElement } = getWordMeasure(i, ctx.font);
             const wordWidth = width * scale;
             if (endElement && wordWidth <= availableWidth) {
               curRowWidth += wordWidth;
@@ -2925,6 +3052,7 @@ export class Draw {
         x += metrics.width;
       }
     }
+    ctx.restore();
     return rowList;
   }
 
@@ -3663,32 +3791,12 @@ export class Draw {
     if (this.isGraffitiMode()) {
       this.graffiti.render(ctx, pageNo);
     }
+    this.pageRenderVersionList[pageNo] = this.renderCount;
   }
 
   private _disconnectLazyRender() {
     this.lazyRenderIntersectionObserver?.disconnect();
-  }
-
-  private _lazyRender() {
-    const positionList = this.position.getOriginalMainPositionList();
-    const elementList = this.getOriginalMainElementList();
-    this._disconnectLazyRender();
-    this.lazyRenderIntersectionObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const index = Number((<HTMLCanvasElement>entry.target).dataset.index);
-          this._drawPage({
-            elementList,
-            positionList,
-            rowList: this.pageRowList[index],
-            pageNo: index
-          });
-        }
-      });
-    });
-    this.pageList.forEach(el => {
-      this.lazyRenderIntersectionObserver!.observe(el);
-    });
+    this.lazyRenderIntersectionObserver = null;
   }
 
   private _immediateRender() {
@@ -3704,6 +3812,132 @@ export class Draw {
     }
   }
 
+  private _collectMainRenderMeta() {
+    const surroundElementList: IElement[] = [];
+    let hasAreaElement = false;
+    let hasListElement = false;
+    let hasStructuralElement = false;
+    for (let i = 0; i < this.elementList.length; i++) {
+      const element = this.elementList[i];
+      if (!hasAreaElement && element.areaId) {
+        hasAreaElement = true;
+      }
+      if (!hasListElement && element.listId) {
+        hasListElement = true;
+      }
+      if (
+        !hasStructuralElement &&
+        (element.type === ElementType.TABLE ||
+          element.type === ElementType.BLOCK ||
+          element.type === ElementType.PAGE_BREAK ||
+          element.type === ElementType.COLUMN_BREAK ||
+          element.type === ElementType.IMAGE ||
+          element.type === ElementType.LATEX ||
+          element.type === ElementType.SEPARATOR)
+      ) {
+        hasStructuralElement = true;
+      }
+      if (element.imgDisplay === ImageDisplay.SURROUND) {
+        surroundElementList.push(element);
+      }
+    }
+    return {
+      hasAreaElement,
+      hasListElement,
+      hasStructuralElement,
+      surroundElementList
+    };
+  }
+
+  private _getIncrementalRestartState(
+    dirtyStartIndex: number,
+    rowList: IRow[],
+    pageRowList: IRow[][],
+    startY: number
+  ):
+    | {
+        fromIndex: number;
+        initialY: number;
+        initialPageNo: number;
+        initialRowIndex: number;
+        initialListState?: IListStateSeed;
+        prefixRows: IRow[];
+      }
+    | null {
+    if (!rowList.length || !pageRowList.length) return null;
+    const searchIndex = Math.max(dirtyStartIndex - 1, 0);
+    let restartRowIndex = -1;
+    for (let i = 0; i < rowList.length; i++) {
+      if (rowList[i].startIndex <= searchIndex) {
+        restartRowIndex = i;
+      } else {
+        break;
+      }
+    }
+    if (restartRowIndex < 0) return null;
+    const restartRow = rowList[restartRowIndex];
+    const fromIndex = Math.min(restartRow.startIndex, this.elementList.length);
+    let initialPageNo = 0;
+    let initialY = startY;
+    let absoluteRowIndex = 0;
+    let isFound = false;
+    for (let pageNo = 0; pageNo < pageRowList.length; pageNo++) {
+      const rows = pageRowList[pageNo];
+      let y = startY;
+      for (let rowNo = 0; rowNo < rows.length; rowNo++) {
+        if (absoluteRowIndex === restartRowIndex) {
+          initialPageNo = pageNo;
+          initialY = y;
+          isFound = true;
+          break;
+        }
+        const row = rows[rowNo];
+        y +=
+          (row.offsetY || 0) +
+          (row.spaceAbove || 0) +
+          row.height +
+          (row.spaceBelow || 0);
+        absoluteRowIndex++;
+      }
+      if (isFound) break;
+    }
+    if (!isFound) return null;
+    return {
+      fromIndex,
+      initialY,
+      initialPageNo,
+      initialRowIndex: restartRow.rowIndex,
+      initialListState: this.getListStateBeforeIndex(this.elementList, fromIndex),
+      prefixRows: rowList.slice(0, restartRowIndex)
+    };
+  }
+
+  public renderVisiblePages(pageNoList?: number[]) {
+    const positionList = this.position.getOriginalMainPositionList();
+    const elementList = this.getOriginalMainElementList();
+    const targetPageNoList = pageNoList ?? this.visiblePageNoList;
+    if (!targetPageNoList?.length) return;
+    const renderedPageNoSet = new Set<number>();
+    for (let i = 0; i < targetPageNoList.length; i++) {
+      const pageNo = targetPageNoList[i];
+      if (
+        renderedPageNoSet.has(pageNo) ||
+        pageNo < 0 ||
+        pageNo >= this.pageRowList.length ||
+        this.pageRenderVersionList[pageNo] === this.renderCount
+      ) {
+        continue;
+      }
+      renderedPageNoSet.add(pageNo);
+      this._drawPage({
+        elementList,
+        positionList,
+        rowList: this.pageRowList[pageNo],
+        pageNo
+      });
+    }
+  }
+
   public render(payload?: IDrawOption) {
     this.renderCount++;
     const { header, footer } = this.options;
@@ -3715,15 +3949,19 @@ export class Draw {
       isLazy = true,
       isInit = false,
       isSourceHistory = false,
-      isFirstRender = false
+      isFirstRender = false,
+      dirtyStartIndex
     } = payload || {};
     let { curIndex } = payload || {};
     this.pendingTableCursorIndex = undefined;
     const innerWidth = this.getInnerWidth();
     const columnWidth = this.getColumnWidth();
     const isPagingMode = this.getIsPagingMode();
+    const columnCount = this.getColumnCount();
     const oldPageSize = this.pageRowList.length;
     if (isCompute) {
+      const oldRowList = this.rowList;
+      const oldPageRowList = this.pageRowList;
       this.position.setFloatPositionList([]);
       if (isPagingMode) {
         if (!header.disabled) {
@@ -3739,8 +3977,14 @@ export class Draw {
       const mainOuterHeight = this.getMainOuterHeight();
       const startX = margins[3];
       const startY = margins[0] + extraHeight;
-      const surroundElementList = pickSurroundElementList(this.elementList);
-      this.rowList = this.computeRowList({
+      const {
+        hasAreaElement,
+        hasListElement,
+        hasStructuralElement,
+        surroundElementList
+      } =
+        this._collectMainRenderMeta();
+      const rowListPayload = {
         startX,
         startY,
         pageHeight,
@@ -3748,12 +3992,52 @@ export class Draw {
         isPagingMode,
         innerWidth: columnWidth,
         surroundElementList,
+        hasListElement,
         elementList: this.elementList
-      });
+      };
+      const canUseIncrementalMainRows =
+        dirtyStartIndex !== undefined &&
+        dirtyStartIndex >= 0 &&
+        !isInit &&
+        !isSourceHistory &&
+        isPagingMode &&
+        columnCount === 1 &&
+        !hasAreaElement &&
+        !hasStructuralElement &&
+        surroundElementList.length === 0 &&
+        oldRowList.length > 0 &&
+        oldPageRowList.length > 0;
+      if (canUseIncrementalMainRows) {
+        const restartState = this._getIncrementalRestartState(
+          dirtyStartIndex,
+          oldRowList,
+          oldPageRowList,
+          startY
+        );
+        if (restartState) {
+          const suffixRows = this.computeRowList({
+            ...rowListPayload,
+            fromIndex: restartState.fromIndex,
+            initialY: restartState.initialY,
+            initialPageNo: restartState.initialPageNo,
+            initialRowIndex: restartState.initialRowIndex,
+            initialListState: restartState.initialListState
+          });
+          this.rowList = restartState.prefixRows.concat(suffixRows);
+        } else {
+          this.rowList = this.computeRowList(rowListPayload);
+        }
+      } else {
+        this.rowList = this.computeRowList(rowListPayload);
+      }
       this._applyRowSpacing();
       this.pageRowList = this._computePageList();
       this.position.computePositionList();
-      this.area.compute();
+      if (hasAreaElement) {
+        this.area.compute();
+      } else {
+        this.area.clear();
+      }
       if (!this.isPrintMode()) {
         const searchKeyword = this.search.getSearchKeyword();
         if (searchKeyword) {
@@ -3777,12 +4061,34 @@ export class Draw {
     if (prePageCount > curPageCount) {
       const deleteCount = prePageCount - curPageCount;
       this.ctxList.splice(curPageCount, deleteCount);
+      this.pageRenderVersionList.splice(curPageCount, deleteCount);
       this.pageList
         .splice(curPageCount, deleteCount)
         .forEach(page => page.remove());
     }
     if (isLazy && isPagingMode) {
-      this._lazyRender();
+      let visiblePageNoList = this.visiblePageNoList.filter(
+        pageNo => pageNo >= 0 && pageNo < curPageCount
+      );
+      let intersectionPageNo = Math.min(
+        this.intersectionPageNo,
+        Math.max(curPageCount - 1, 0)
+      );
+      if (
+        !visiblePageNoList.length ||
+        oldPageSize !== curPageCount ||
+        intersectionPageNo >= curPageCount
+      ) {
+        const visibleInfo = this.scrollObserver.getPageVisibleInfo();
+        intersectionPageNo = visibleInfo.intersectionPageNo;
+        visiblePageNoList = visibleInfo.visiblePageNoList;
+        this.setIntersectionPageNo(intersectionPageNo);
+        this.setVisiblePageNoList(visiblePageNoList);
+      }
+      const renderPageNoList = visiblePageNoList.length
+        ? visiblePageNoList
+        : [intersectionPageNo];
+      this.renderVisiblePages(renderPageNoList);
     } else {
       this._immediateRender();
     }
@@ -3839,9 +4145,9 @@ export class Draw {
     const positionContext = this.position.getPositionContext();
     const positionList = this.position.getPositionList();
     if (positionContext.isTable) {
-      const tablePositionList =
-        this.resolveTableCellContext(this.getOriginalElementList())?.td
-          .positionList;
+      const tablePositionList = this.resolveTableCellContext(
+        this.getOriginalElementList()
+      )?.td.positionList;
       if (curIndex === undefined && tablePositionList) {
         curIndex = tablePositionList.length - 1;
       }
@@ -3873,36 +4179,70 @@ export class Draw {
   }
 
   public submitHistory(curIndex: number | undefined, isInput = false) {
-    const positionContext = this.position.getPositionContext();
-    const oldElementList = getSlimCloneElementList(this.elementList);
-    const oldHeaderElementList = getSlimCloneElementList(
-      this.header.getElementList()
-    );
-    const oldFooterElementList = getSlimCloneElementList(
-      this.footer.getElementList()
-    );
-    const oldRange = deepClone(this.range.getRange());
-    const pageNo = this.pageNo;
-    const oldPositionContext = deepClone(positionContext);
-    const zone = this.zone.getZone();
-    const fn = () => {
-      this.zone.setZone(zone);
-      this.setPageNo(pageNo);
-      this.position.setPositionContext(deepClone(oldPositionContext));
-      this.header.setElementList(deepClone(oldHeaderElementList));
-      this.footer.setElementList(deepClone(oldFooterElementList));
-      this.elementList = deepClone(oldElementList);
-      this.range.replaceRange(deepClone(oldRange));
-      this.render({
-        curIndex,
-        isSubmitHistory: false,
-        isSourceHistory: true
-      });
+    let snapshot:
+      | {
+          elementList: IElement[];
+          headerElementList: IElement[];
+          footerElementList: IElement[];
+          range: ReturnType<RangeManager['getRange']>;
+          pageNo: number;
+          positionContext: ReturnType<Position['getPositionContext']>;
+          zone: ReturnType<Zone['getZone']>;
+        }
+      | null = null;
+    const ensureSnapshot = () => {
+      if (snapshot) return snapshot;
+      snapshot = {
+        elementList: getSlimCloneElementList(this.elementList),
+        headerElementList: getSlimCloneElementList(this.header.getElementList()),
+        footerElementList: getSlimCloneElementList(this.footer.getElementList()),
+        range: deepClone(this.range.getRange()),
+        pageNo: this.pageNo,
+        positionContext: deepClone(this.position.getPositionContext()),
+        zone: this.zone.getZone()
+      };
+      return snapshot;
+    };
+    const entry = {
+      isLive: true,
+      freeze: () => {
+        ensureSnapshot();
+      },
+      restore: () => {
+        const {
+          elementList,
+          headerElementList,
+          footerElementList,
+          range,
+          pageNo,
+          positionContext,
+          zone
+        } = ensureSnapshot();
+        const restoredHeaderElementList = inflateElementList(
+          deepClone(headerElementList)
+        );
+        const restoredFooterElementList = inflateElementList(
+          deepClone(footerElementList)
+        );
+        const restoredMainElementList = inflateElementList(deepClone(elementList));
+        this.zone.setZone(zone);
+        this.setPageNo(pageNo);
+        this.position.setPositionContext(deepClone(positionContext));
+        this.header.setElementList(restoredHeaderElementList);
+        this.footer.setElementList(restoredFooterElementList);
+        this.elementList = restoredMainElementList;
+        this.range.replaceRange(deepClone(range));
+        this.render({
+          curIndex,
+          isSubmitHistory: false,
+          isSourceHistory: true
+        });
+      }
     };
     if (isInput && this.historyManager.isInputGroupable()) {
-      this.historyManager.replaceLatest(fn);
+      this.historyManager.replaceLatest(entry);
     } else {
-      this.historyManager.execute(fn);
+      this.historyManager.execute(entry);
     }
     if (isInput) {
       this.historyManager.recordInputTime();

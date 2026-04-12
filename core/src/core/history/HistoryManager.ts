@@ -2,9 +2,15 @@ import { Draw } from '../draw/Draw';
 
 const INPUT_GROUP_INTERVAL = 1000;
 
+interface IHistoryEntry {
+  restore: Function;
+  freeze?: () => void;
+  isLive?: boolean;
+}
+
 export class HistoryManager {
-  private undoStack: Array<Function> = [];
-  private redoStack: Array<Function> = [];
+  private undoStack: IHistoryEntry[] = [];
+  private redoStack: IHistoryEntry[] = [];
   private maxRecordCount: number;
   private lastInputTime: number = 0;
 
@@ -14,24 +20,27 @@ export class HistoryManager {
 
   public undo() {
     if (this.undoStack.length > 1) {
+      this._freezeEntry(this.undoStack[this.undoStack.length - 1]);
       const pop = this.undoStack.pop()!;
       this.redoStack.push(pop);
       if (this.undoStack.length) {
-        this.undoStack[this.undoStack.length - 1]();
+        this.undoStack[this.undoStack.length - 1].restore();
       }
     }
   }
 
   public redo() {
     if (this.redoStack.length) {
+      this._freezeEntry(this.redoStack[this.redoStack.length - 1]);
       const pop = this.redoStack.pop()!;
       this.undoStack.push(pop);
-      pop();
+      pop.restore();
     }
   }
 
-  public execute(fn: Function) {
-    this.undoStack.push(fn);
+  public execute(entry: IHistoryEntry | Function) {
+    this._freezeEntry(this.undoStack[this.undoStack.length - 1]);
+    this.undoStack.push(this._normalizeEntry(entry));
     if (this.redoStack.length) {
       this.redoStack = [];
     }
@@ -40,11 +49,12 @@ export class HistoryManager {
     }
   }
 
-  public replaceLatest(fn: Function) {
+  public replaceLatest(entry: IHistoryEntry | Function) {
+    const normalizedEntry = this._normalizeEntry(entry);
     if (this.undoStack.length > 0) {
-      this.undoStack[this.undoStack.length - 1] = fn;
+      this.undoStack[this.undoStack.length - 1] = normalizedEntry;
     } else {
-      this.execute(fn);
+      this.execute(normalizedEntry);
     }
     if (this.redoStack.length) {
       this.redoStack = [];
@@ -82,5 +92,21 @@ export class HistoryManager {
 
   public popUndo() {
     return this.undoStack.pop();
+  }
+
+  private _normalizeEntry(entry: IHistoryEntry | Function): IHistoryEntry {
+    if (typeof entry === 'function') {
+      return {
+        restore: entry
+      };
+    }
+    return entry;
+  }
+
+  private _freezeEntry(entry?: IHistoryEntry) {
+    if (!entry?.freeze) return;
+    entry.freeze();
+    delete entry.freeze;
+    entry.isLive = false;
   }
 }

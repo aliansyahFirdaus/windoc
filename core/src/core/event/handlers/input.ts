@@ -100,10 +100,12 @@ export function input(data: string, host: CanvasEvent) {
   if (~curIndex) {
     rangeManager.setRange(curIndex, curIndex);
     const isWordBoundary = !isComposing && /[\s\p{P}]/u.test(data);
+    const dirtyStartIndex = startIndex + 1;
     draw.render({
       curIndex,
       isSubmitHistory: !isComposing,
-      isInputHistory: !isComposing && !isWordBoundary
+      isInputHistory: !isComposing && !isWordBoundary,
+      dirtyStartIndex
     });
   }
   if (isComposing && ~curIndex) {

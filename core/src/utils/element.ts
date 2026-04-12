@@ -1,7 +1,6 @@
 import {
   cloneProperty,
   deepClone,
-  deepCloneOmitKeys,
   deleteProperty,
   getUUID,
   isArrayEqual,
@@ -49,7 +48,6 @@ import { DeepRequired } from '../interface/Common';
 import { IControlSelect } from '../interface/Control';
 import { IEditorOption } from '../interface/Editor';
 import { IElement } from '../interface/Element';
-import { IRowElement } from '../interface/Row';
 import { ITd } from '../interface/table/Td';
 import { ITr } from '../interface/table/Tr';
 import { mergeOption } from './option';
@@ -591,9 +589,7 @@ function mergeSplitTableRowsForZip(trList: ITr[]) {
   for (let t = trList.length - 1; t >= 0; t--) {
     const splitTr = trList[t];
     if (!splitTr.splitParentId) continue;
-    const parentTrIdx = trList.findIndex(
-      tr => tr.id === splitTr.splitParentId
-    );
+    const parentTrIdx = trList.findIndex(tr => tr.id === splitTr.splitParentId);
     if (!~parentTrIdx) continue;
     const parentTr = trList[parentTrIdx];
     parentTr.height += splitTr.height;
@@ -602,8 +598,7 @@ function mergeSplitTableRowsForZip(trList: ITr[]) {
       const splitTd = splitTr.tdList[d];
       if (!parentTd || !splitTd) continue;
       const hasSyntheticLeadingZero =
-        !!splitTd.splitSyntheticLeadingZero &&
-        splitTd.value[0]?.value === ZERO;
+        !!splitTd.splitSyntheticLeadingZero && splitTd.value[0]?.value === ZERO;
       parentTd.value.push(
         ...(hasSyntheticLeadingZero ? splitTd.value.slice(1) : splitTd.value)
       );
@@ -1790,10 +1785,218 @@ export function getTextFromElementList(elementList: IElement[]) {
 }
 
 export function getSlimCloneElementList(elementList: IElement[]) {
-  return deepCloneOmitKeys<IElement[], IRowElement>(elementList, [
-    'metrics',
-    'style'
-  ]);
+  const snapshotElementList: IElement[] = [];
+  let preSourceElement: IElement | null = null;
+  let preSnapshotElement: IElement | null = null;
+  for (let i = 0; i < elementList.length; i++) {
+    const element = elementList[i];
+    if (
+      preSourceElement &&
+      preSnapshotElement &&
+      isHistoryTextSnapshotMergeable(preSourceElement, element)
+    ) {
+      preSnapshotElement.value += element.value;
+      preSourceElement = element;
+      continue;
+    }
+    const snapshotElement = cloneHistorySnapshotElement(element);
+    snapshotElementList.push(snapshotElement);
+    preSourceElement = element;
+    preSnapshotElement = snapshotElement;
+  }
+  return snapshotElementList;
+}
+
+const HISTORY_SNAPSHOT_OMIT_ATTR = new Set<string>([
+  'metrics',
+  'style',
+  'rowList',
+  'positionList',
+  'x',
+  'y',
+  'trIndex',
+  'tdIndex',
+  'isLastRowTd',
+  'isLastColTd',
+  'isLastTd',
+  'rowIndex',
+  'colIndex',
+  'mainHeight',
+  'realHeight',
+  'realMinHeight',
+  'splitBoundaryTop',
+  'splitBoundaryBottom',
+  'actualSize'
+]);
+
+function cloneHistorySnapshotValue<T>(payload: T): T {
+  if (!payload || typeof payload !== 'object') {
+    return payload;
+  }
+  if (Array.isArray(payload)) {
+    return payload.map(item => cloneHistorySnapshotValue(item)) as T;
+  }
+  const snapshot = {} as T;
+  for (const key of Object.keys(payload) as (keyof T)[]) {
+    if (HISTORY_SNAPSHOT_OMIT_ATTR.has(String(key))) continue;
+    (snapshot as Record<string, unknown>)[String(key)] = cloneHistorySnapshotValue(
+      payload[key]
+    );
+  }
+  return snapshot;
+}
+
+function cloneHistorySnapshotTd(td: ITd): ITd {
+  const snapshot = {} as ITd;
+  for (const key of Object.keys(td) as (keyof ITd)[]) {
+    if (HISTORY_SNAPSHOT_OMIT_ATTR.has(String(key))) continue;
+    const value = td[key];
+    if (key === 'value') {
+      snapshot.value = getSlimCloneElementList(value as IElement[]);
+      continue;
+    }
+    ((snapshot as unknown) as Record<string, unknown>)[String(key)] =
+      cloneHistorySnapshotValue(value);
+  }
+  return snapshot;
+}
+
+function cloneHistorySnapshotTr(tr: ITr): ITr {
+  const snapshot = {} as ITr;
+  for (const key of Object.keys(tr) as (keyof ITr)[]) {
+    if (HISTORY_SNAPSHOT_OMIT_ATTR.has(String(key))) continue;
+    const value = tr[key];
+    if (key === 'tdList') {
+      snapshot.tdList = (value as ITd[]).map(td => cloneHistorySnapshotTd(td));
+      continue;
+    }
+    ((snapshot as unknown) as Record<string, unknown>)[String(key)] =
+      cloneHistorySnapshotValue(value);
+  }
+  return snapshot;
+}
+
+function cloneHistorySnapshotElement(element: IElement): IElement {
+  const snapshot = {} as IElement;
+  for (const key of Object.keys(element) as (keyof IElement)[]) {
+    if (HISTORY_SNAPSHOT_OMIT_ATTR.has(String(key))) continue;
+    const value = element[key];
+    if (key === 'trList' && Array.isArray(value)) {
+      snapshot.trList = value.map(tr => cloneHistorySnapshotTr(tr));
+      continue;
+    }
+    if (key === 'valueList' && Array.isArray(value)) {
+      snapshot.valueList = getSlimCloneElementList(value);
+      continue;
+    }
+    if (key === 'control' && value && typeof value === 'object') {
+      snapshot.control = cloneHistorySnapshotControl(
+        value as NonNullable<IElement['control']>
+      );
+      continue;
+    }
+    ((snapshot as unknown) as Record<string, unknown>)[String(key)] =
+      cloneHistorySnapshotValue(value);
+  }
+  return snapshot;
+}
+
+function cloneHistorySnapshotControl(
+  control: NonNullable<IElement['control']>
+): NonNullable<IElement['control']> {
+  const snapshot = {} as NonNullable<IElement['control']>;
+  for (const key of Object.keys(control) as (keyof typeof control)[]) {
+    const value = control[key];
+    if (key === 'value' && Array.isArray(value)) {
+      snapshot.value = getSlimCloneElementList(value);
+      continue;
+    }
+    ((snapshot as unknown) as Record<string, unknown>)[String(key)] =
+      cloneHistorySnapshotValue(value);
+  }
+  return snapshot;
+}
+
+function isHistoryTextSnapshotElement(element: IElement): boolean {
+  return !element.type || TEXTLIKE_ELEMENT_TYPE.includes(element.type);
+}
+
+function isHistoryTextSnapshotMergeable(
+  source: IElement,
+  target: IElement
+): boolean {
+  if (
+    !isHistoryTextSnapshotElement(source) ||
+    !isHistoryTextSnapshotElement(target)
+  ) {
+    return false;
+  }
+  return isSameHistoryElementExceptValue(source, target);
+}
+
+function isSameHistoryElementExceptValue(
+  source: IElement,
+  target: IElement
+): boolean {
+  const sourceKeys = Object.keys(source).filter(
+    key => !HISTORY_SNAPSHOT_OMIT_ATTR.has(key)
+  );
+  const targetKeys = Object.keys(target).filter(
+    key => !HISTORY_SNAPSHOT_OMIT_ATTR.has(key)
+  );
+  if (sourceKeys.length !== targetKeys.length) return false;
+  for (let s = 0; s < sourceKeys.length; s++) {
+    const key = sourceKeys[s] as keyof IElement;
+    if (key === 'value') continue;
+    if (
+      key === 'groupIds' &&
+      Array.isArray(source[key]) &&
+      Array.isArray(target[key]) &&
+      isArrayEqual(source[key], target[key])
+    ) {
+      continue;
+    }
+    if (source[key] !== target[key]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function inflateElementList(elementList: IElement[]) {
+  let i = 0;
+  while (i < elementList.length) {
+    const element = elementList[i];
+    if (element.trList?.length) {
+      for (let t = 0; t < element.trList.length; t++) {
+        const tr = element.trList[t];
+        for (let d = 0; d < tr.tdList.length; d++) {
+          inflateElementList(tr.tdList[d].value);
+        }
+      }
+    }
+    if (element.valueList?.length) {
+      inflateElementList(element.valueList);
+    }
+    if (element.control?.value?.length) {
+      inflateElementList(element.control.value);
+    }
+    if (isHistoryTextSnapshotElement(element) && element.value?.length > 1) {
+      const textList = splitText(element.value);
+      elementList.splice(
+        i,
+        1,
+        ...textList.map(value => ({
+          ...element,
+          value
+        }))
+      );
+      i += textList.length;
+      continue;
+    }
+    i++;
+  }
+  return elementList;
 }
 
 export function getIsBlockElement(element?: IElement) {

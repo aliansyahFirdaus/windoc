@@ -45,6 +45,10 @@ export class Area {
     return this.areaInfoMap;
   }
 
+  public clear() {
+    this.areaInfoMap.clear();
+  }
+
   public getActiveAreaId(): string | null {
     if (!this.areaInfoMap.size) return null;
     const { startIndex } = this.range.getRange();
