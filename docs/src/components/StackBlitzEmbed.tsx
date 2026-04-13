@@ -12,8 +12,8 @@ const BASE_FILES = {
       type: 'module',
       scripts: { dev: 'vite', build: 'tsc && vite build' },
       dependencies: {
-        '@windoc/core': '0.3.23',
-        '@windoc/react': '0.3.23',
+        '@windoc/core': '0.3.24',
+        '@windoc/react': '0.3.24',
         'lucide-react': '^0.563.0',
         react: '^19.0.0',
         'react-dom': '^19.0.0',

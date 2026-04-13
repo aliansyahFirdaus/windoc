@@ -3,6 +3,16 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.24] — 2026-04-13
+
+### Fixed
+- Preserve history and change flow correctness
+
+
+### Performance
+- Optimize typing in large documents
+
+
 ## [0.3.21] — 2026-04-08
 
 ### Fixed
@@ -133,6 +143,5 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Replace orhun/git-cliff-action with npx git-cliff
 
 - Portal all toolbar dropdowns to escape overflow container
-
 
 
