@@ -4,8 +4,6 @@ const INPUT_GROUP_INTERVAL = 1000;
 
 interface IHistoryEntry {
   restore: Function;
-  freeze?: () => void;
-  isLive?: boolean;
 }
 
 export class HistoryManager {
@@ -20,7 +18,6 @@ export class HistoryManager {
 
   public undo() {
     if (this.undoStack.length > 1) {
-      this._freezeEntry(this.undoStack[this.undoStack.length - 1]);
       const pop = this.undoStack.pop()!;
       this.redoStack.push(pop);
       if (this.undoStack.length) {
@@ -31,7 +28,6 @@ export class HistoryManager {
 
   public redo() {
     if (this.redoStack.length) {
-      this._freezeEntry(this.redoStack[this.redoStack.length - 1]);
       const pop = this.redoStack.pop()!;
       this.undoStack.push(pop);
       pop.restore();
@@ -39,7 +35,6 @@ export class HistoryManager {
   }
 
   public execute(entry: IHistoryEntry | Function) {
-    this._freezeEntry(this.undoStack[this.undoStack.length - 1]);
     this.undoStack.push(this._normalizeEntry(entry));
     if (this.redoStack.length) {
       this.redoStack = [];
@@ -101,12 +96,5 @@ export class HistoryManager {
       };
     }
     return entry;
-  }
-
-  private _freezeEntry(entry?: IHistoryEntry) {
-    if (!entry?.freeze) return;
-    entry.freeze();
-    delete entry.freeze;
-    entry.isLive = false;
   }
 }

@@ -3875,6 +3875,13 @@ export class Draw {
       }
     }
     if (restartRowIndex < 0) return null;
+    if (
+      restartRowIndex > 0 &&
+      this.elementList[rowList[restartRowIndex].startIndex]?.value === ZERO &&
+      !this.elementList[rowList[restartRowIndex].startIndex]?.listWrap
+    ) {
+      restartRowIndex -= 1;
+    }
     const restartRow = rowList[restartRowIndex];
     const fromIndex = Math.min(restartRow.startIndex, this.elementList.length);
     let initialPageNo = 0;
@@ -4179,35 +4186,16 @@ export class Draw {
   }
 
   public submitHistory(curIndex: number | undefined, isInput = false) {
-    let snapshot:
-      | {
-          elementList: IElement[];
-          headerElementList: IElement[];
-          footerElementList: IElement[];
-          range: ReturnType<RangeManager['getRange']>;
-          pageNo: number;
-          positionContext: ReturnType<Position['getPositionContext']>;
-          zone: ReturnType<Zone['getZone']>;
-        }
-      | null = null;
-    const ensureSnapshot = () => {
-      if (snapshot) return snapshot;
-      snapshot = {
-        elementList: getSlimCloneElementList(this.elementList),
-        headerElementList: getSlimCloneElementList(this.header.getElementList()),
-        footerElementList: getSlimCloneElementList(this.footer.getElementList()),
-        range: deepClone(this.range.getRange()),
-        pageNo: this.pageNo,
-        positionContext: deepClone(this.position.getPositionContext()),
-        zone: this.zone.getZone()
-      };
-      return snapshot;
+    const snapshot = {
+      elementList: getSlimCloneElementList(this.elementList),
+      headerElementList: getSlimCloneElementList(this.header.getElementList()),
+      footerElementList: getSlimCloneElementList(this.footer.getElementList()),
+      range: deepClone(this.range.getRange()),
+      pageNo: this.pageNo,
+      positionContext: deepClone(this.position.getPositionContext()),
+      zone: this.zone.getZone()
     };
     const entry = {
-      isLive: true,
-      freeze: () => {
-        ensureSnapshot();
-      },
       restore: () => {
         const {
           elementList,
@@ -4217,7 +4205,7 @@ export class Draw {
           pageNo,
           positionContext,
           zone
-        } = ensureSnapshot();
+        } = snapshot;
         const restoredHeaderElementList = inflateElementList(
           deepClone(headerElementList)
         );

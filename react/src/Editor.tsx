@@ -326,6 +326,9 @@ function EditorInner({
       instance.listener.contentChange = () => {
         const currentVersion = ++contentSyncVersionRef.current;
         cancelDeferredTask(deferredContentSyncRef.current);
+        if (onChange && instance) {
+          onChange(instance.command.getValue());
+        }
         deferredContentSyncRef.current = scheduleDeferredTask(async () => {
           if (cancelled || !instance) return;
           const count = await instance.command.getWordCount();
@@ -335,13 +338,6 @@ function EditorInner({
           startTransition(() => {
             setWordCount(count || 0);
           });
-          if (onChange) {
-            const value = instance.command.getValue();
-            if (cancelled || contentSyncVersionRef.current !== currentVersion) {
-              return;
-            }
-            onChange(value);
-          }
           deferredContentSyncRef.current = null;
         });
       };
