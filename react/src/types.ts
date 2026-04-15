@@ -65,6 +65,7 @@ export type EditorInstance = {
     executeSearchNavigatePre: () => void;
     executeSearchNavigateNext: () => void;
     executePrint: () => void;
+    executeExportDocx: (options?: { fileName?: string }) => Promise<void>;
     executePageMode: (mode: string) => void;
     executeColumnCount: (count: number) => void;
     executeColumnBreak: () => void;

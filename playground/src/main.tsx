@@ -2,15 +2,16 @@ import { createRoot } from 'react-dom/client';
 import { Editor } from '@windoc/react';
 import '@windoc/core/style.css';
 import '@windoc/react/style.css';
+import { data, options } from '../../core/src/mock';
 
 function App() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Editor
+        defaultValue={{ main: data }}
         options={{
-          placeholder: { data: 'Start typing...' },
-          zone: { tipDisabled: false },
-          scale: 1.2,
+          ...options,
+          scale: 1.2
         }}
       />
     </div>

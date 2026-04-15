@@ -150,6 +150,14 @@ export function downloadFile(href: string, fileName: string) {
   a.click();
 }
 
+export function downloadBlob(blob: Blob, fileName: string) {
+  const href = URL.createObjectURL(blob);
+  downloadFile(href, fileName);
+  window.setTimeout(() => {
+    URL.revokeObjectURL(href);
+  }, 0);
+}
+
 export function threeClick(dom: HTMLElement, fn: (evt: MouseEvent) => void) {
   nClickEvent(3, dom, fn);
 }

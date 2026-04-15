@@ -41,5 +41,8 @@
     "@types/node": "^25.3.5",
     "tsup": "^8.0.0",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "docx": "^9.6.1"
   }
 }

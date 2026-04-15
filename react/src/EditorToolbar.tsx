@@ -30,6 +30,7 @@ import JustifyTool from './toolbar/JustifyTool';
 // import RowMarginTool from "./toolbar/RowMarginTool";
 import ListTool from './toolbar/ListTool';
 import ImageTool from './toolbar/ImageTool';
+import ExportDocxTool from './toolbar/ExportDocxTool';
 // import HyperlinkTool from "./toolbar/HyperlinkTool";
 import SeparatorTool from './toolbar/SeparatorTool';
 import InsertElementTool from './toolbar/WatermarkTool';
@@ -150,6 +151,7 @@ export default function EditorToolbar() {
       {/* Media */}
       <div className="menu-item">
         <ImageTool />
+        <ExportDocxTool />
       </div>
       <div className="menu-item">
         <InsertElementTool />

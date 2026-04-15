@@ -124,6 +124,10 @@ export interface IEditorResult {
   options: IEditorOption;
 }
 
+export interface IExportDocxOption {
+  fileName?: string;
+}
+
 export interface IEditorHTML {
   header: string;
   main: string;

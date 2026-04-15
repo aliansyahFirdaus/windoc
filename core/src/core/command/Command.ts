@@ -71,6 +71,7 @@ export class Command {
   public executeSearchNavigateNext: CommandAdapt['searchNavigateNext'];
   public executeReplace: CommandAdapt['replace'];
   public executePrint: CommandAdapt['print'];
+  public executeExportDocx: CommandAdapt['exportDocx'];
   public executeReplaceImageElement: CommandAdapt['replaceImageElement'];
   public executeSaveAsImageElement: CommandAdapt['saveAsImageElement'];
   public executeSetImageCrop: CommandAdapt['setImageCrop'];
@@ -223,6 +224,7 @@ export class Command {
     this.executeSearchNavigateNext = adapt.searchNavigateNext.bind(adapt);
     this.executeReplace = adapt.replace.bind(adapt);
     this.executePrint = adapt.print.bind(adapt);
+    this.executeExportDocx = adapt.exportDocx.bind(adapt);
     this.executeReplaceImageElement = adapt.replaceImageElement.bind(adapt);
     this.executeSaveAsImageElement = adapt.saveAsImageElement.bind(adapt);
     this.executeSetImageCrop = adapt.setImageCrop.bind(adapt);

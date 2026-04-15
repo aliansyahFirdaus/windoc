@@ -52,6 +52,7 @@ import {
   IEditorData,
   IEditorHTML,
   IEditorOption,
+  IExportDocxOption,
   IEditorResult,
   IEditorText,
   IFocusOption,
@@ -92,11 +93,13 @@ import { IWatermark } from '../../interface/Watermark';
 import {
   cloneProperty,
   deepClone,
+  downloadBlob,
   downloadFile,
   getUUID,
   isNumber,
   isObjectEqual
 } from '../../utils';
+import { exportEditorDataToDocx } from '../../utils/docx';
 import {
   createDomFromElementList,
   formatElementContext,
@@ -1443,6 +1446,12 @@ export class CommandAdapt {
     if (scale !== 1) {
       this.draw.setPageScale(scale);
     }
+  }
+
+  public async exportDocx(payload: IExportDocxOption = {}) {
+    const result = this.draw.getValue();
+    const { blob, fileName } = await exportEditorDataToDocx(result, payload);
+    downloadBlob(blob, fileName);
   }
 
   public replaceImageElement(payload: string) {

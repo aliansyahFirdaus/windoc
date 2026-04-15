@@ -31,6 +31,7 @@ export { default as TableTool } from './toolbar/TableTool';
 export { default as TableCellBgColorTool } from './toolbar/TableCellBgColorTool';
 export { default as TableCellBorderColorTool } from './toolbar/TableCellBorderColorTool';
 export { default as ImageTool } from './toolbar/ImageTool';
+export { default as ExportDocxTool } from './toolbar/ExportDocxTool';
 export { default as ColumnTool } from './toolbar/ColumnTool';
 export { default as SeparatorTool } from './toolbar/SeparatorTool';
 export { default as PageBreakTool } from './toolbar/PageBreakTool';
