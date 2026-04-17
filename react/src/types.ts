@@ -66,6 +66,7 @@ export type EditorInstance = {
     executeSearchNavigateNext: () => void;
     executePrint: () => void;
     executeExportDocx: (options?: { fileName?: string }) => Promise<void>;
+    executeExportPdf: (options?: { fileName?: string }) => Promise<void>;
     executePageMode: (mode: string) => void;
     executeColumnCount: (count: number) => void;
     executeColumnBreak: () => void;
@@ -121,16 +122,18 @@ export type EditorInstance = {
       pixelRatio?: number;
       mode?: string;
     }) => Promise<string[]>;
-    getControlValue: (
-      options?: object
-    ) => Array<{
+    getControlValue: (options?: object) => Array<{
       conceptId?: string;
       value: string | null;
       extension?: unknown;
     }>;
     setControlValue: (options: object) => void;
     getRangeText: () => string;
-    getRangeContext: () => { startRowNo: number; startColNo: number; isTable: boolean } | null;
+    getRangeContext: () => {
+      startRowNo: number;
+      startColNo: number;
+      isTable: boolean;
+    } | null;
     getPaperMargin: () => number[];
     getSearchNavigateInfo: () => { index: number; count: number } | null;
   };
@@ -144,7 +147,14 @@ export type EditorInstance = {
     pageModeChange: ((payload: string) => void) | null;
     contentChange: (() => void) | null;
     saved: ((payload: object) => void) | null;
-    optionsChange: ((payload: { scale: number; paperDirection: string; width: number; height: number }) => void) | null;
+    optionsChange:
+      | ((payload: {
+          scale: number;
+          paperDirection: string;
+          width: number;
+          height: number;
+        }) => void)
+      | null;
   };
   register: {
     contextMenuList: (items: object[]) => void;

@@ -572,6 +572,17 @@ ul {
     background-image: url("./images/image.svg");
 }
 
+.menu-item__export .options li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-item__export .options li span {
+    width: auto;
+    height: auto;
+}
+
 .menu-item__image input {
     display: none;
 }

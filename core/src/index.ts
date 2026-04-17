@@ -4,7 +4,8 @@ import {
   IEditorData,
   IEditorOption,
   IEditorResult,
-  IExportDocxOption
+  IExportDocxOption,
+  IExportPdfOption
 } from './interface/Editor';
 import { IElement } from './interface/Element';
 import { Draw } from './core/draw/Draw';
@@ -247,6 +248,7 @@ export type {
   IEditorOption,
   IEditorResult,
   IExportDocxOption,
+  IExportPdfOption,
   IContextMenuContext,
   IRegisterContextMenu,
   IWatermark,

@@ -128,6 +128,10 @@ export interface IExportDocxOption {
   fileName?: string;
 }
 
+export interface IExportPdfOption {
+  fileName?: string;
+}
+
 export interface IEditorHTML {
   header: string;
   main: string;

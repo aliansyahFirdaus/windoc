@@ -46,10 +46,7 @@ import { TextDecorationStyle } from '../dataset/enum/Text';
 import { TitleLevel } from '../dataset/enum/Title';
 import { VerticalAlign } from '../dataset/enum/VerticalAlign';
 import { IControl, IValueSet } from '../interface/Control';
-import {
-  DeepRequired,
-  IPadding
-} from '../interface/Common';
+import { DeepRequired, IPadding } from '../interface/Common';
 import {
   IEditorOption,
   IEditorResult,
@@ -60,7 +57,11 @@ import { IPageNumber } from '../interface/PageNumber';
 import { IColgroup } from '../interface/table/Colgroup';
 import { ITd } from '../interface/table/Td';
 import { ITr } from '../interface/table/Tr';
-import { getTextFromElementList, splitListElement, zipElementList } from './element';
+import {
+  getTextFromElementList,
+  splitListElement,
+  zipElementList
+} from './element';
 
 type FileChild = Paragraph | Table;
 
@@ -112,7 +113,10 @@ const docxBulletCharMap: Record<string, string> = {
   [UlStyle.CHECKBOX]: '☑'
 };
 
-const titleHeadingMap: Record<TitleLevel, (typeof HeadingLevel)[keyof typeof HeadingLevel]> = {
+const titleHeadingMap: Record<
+  TitleLevel,
+  (typeof HeadingLevel)[keyof typeof HeadingLevel]
+> = {
   [TitleLevel.FIRST]: HeadingLevel.HEADING_1,
   [TitleLevel.SECOND]: HeadingLevel.HEADING_2,
   [TitleLevel.THIRD]: HeadingLevel.HEADING_3,
@@ -121,7 +125,10 @@ const titleHeadingMap: Record<TitleLevel, (typeof HeadingLevel)[keyof typeof Hea
   [TitleLevel.SIXTH]: HeadingLevel.HEADING_6
 };
 
-const orderedStyleFormatMap: Record<string, (typeof LevelFormat)[keyof typeof LevelFormat]> = {
+const orderedStyleFormatMap: Record<
+  string,
+  (typeof LevelFormat)[keyof typeof LevelFormat]
+> = {
   [OlStyle.DECIMAL]: LevelFormat.DECIMAL,
   [OlStyle.LOWER_ALPHA]: LevelFormat.LOWER_LETTER,
   [OlStyle.UPPER_ALPHA]: LevelFormat.UPPER_LETTER,
@@ -157,7 +164,9 @@ async function createDocxDocument(payload: IEditorResult) {
   const footerChildren = editorOptions.footer.disabled
     ? []
     : await serializeElementList(data.footer || [], editorOptions, context);
-  const pageNumberParagraph = createPageNumberParagraph(editorOptions.pageNumber);
+  const pageNumberParagraph = createPageNumberParagraph(
+    editorOptions.pageNumber
+  );
   if (pageNumberParagraph) {
     footerChildren.push(pageNumberParagraph);
   }
@@ -168,7 +177,8 @@ async function createDocxDocument(payload: IEditorResult) {
     context
   );
   const { width, height, paperDirection } = editorOptions;
-  const pageWidth = paperDirection === PaperDirection.HORIZONTAL ? height : width;
+  const pageWidth =
+    paperDirection === PaperDirection.HORIZONTAL ? height : width;
   const pageHeight =
     paperDirection === PaperDirection.HORIZONTAL ? width : height;
 
@@ -189,7 +199,7 @@ async function createDocxDocument(payload: IEditorResult) {
               orientation:
                 paperDirection === PaperDirection.HORIZONTAL
                   ? PageOrientation.LANDSCAPE
-                  : PageOrientation.PORTRAIT,
+                  : PageOrientation.PORTRAIT
             },
             margin: {
               top: pxToTwips(editorOptions.margins[0]),
@@ -240,7 +250,9 @@ async function serializeElementList(
 
   const flushInlineBuffer = async () => {
     if (!inlineBuffer.length) return;
-    blocks.push(...(await serializeInlineElements(inlineBuffer, options, context)));
+    blocks.push(
+      ...(await serializeInlineElements(inlineBuffer, options, context))
+    );
     inlineBuffer = [];
   };
 
@@ -349,7 +361,11 @@ async function serializeInlineElements(
       return;
     }
     paragraphs.push(
-      createParagraph(current.children, current.context, options.defaultRowMargin)
+      createParagraph(
+        current.children,
+        current.context,
+        options.defaultRowMargin
+      )
     );
     current = null;
   };
@@ -364,9 +380,15 @@ async function serializeInlineElements(
     return current;
   };
 
-  const appendText = (element: IElement, text: string, childFactory: (segment: string) => ParagraphChild) => {
+  const appendText = (
+    element: IElement,
+    text: string,
+    childFactory: (segment: string) => ParagraphChild,
+    preserveTrailingBreak = false
+  ) => {
     const normalized = normalizeText(text);
     const parts = normalized.split('\n');
+    let lastSeparatorFlushedContent = false;
     for (let i = 0; i < parts.length; i++) {
       const segment = parts[i];
       if (segment) {
@@ -375,12 +397,31 @@ async function serializeInlineElements(
       if (i < parts.length - 1) {
         if (!current) {
           paragraphs.push(
-            createParagraph([], getParagraphContext(element), options.defaultRowMargin)
+            createParagraph(
+              [],
+              getParagraphContext(element),
+              options.defaultRowMargin
+            )
           );
+          lastSeparatorFlushedContent = false;
         } else {
           flushParagraph();
+          lastSeparatorFlushedContent = true;
         }
       }
+    }
+    if (
+      preserveTrailingBreak &&
+      normalized.endsWith('\n') &&
+      lastSeparatorFlushedContent
+    ) {
+      paragraphs.push(
+        createParagraph(
+          [],
+          getParagraphContext(element),
+          options.defaultRowMargin
+        )
+      );
     }
   };
 
@@ -398,8 +439,17 @@ async function serializeInlineElements(
     if (element.type === ElementType.IMAGE) {
       const imageChild = await createImageChild(element);
       if (!imageChild) {
-        appendText(element, '[Image unavailable]', segment =>
-          createTextRun(segment, element, options.defaultSize, options.defaultFont)
+        appendText(
+          element,
+          '[Image unavailable]',
+          segment =>
+            createTextRun(
+              segment,
+              element,
+              options.defaultSize,
+              options.defaultFont
+            ),
+          i === elementList.length - 1
         );
         continue;
       }
@@ -413,8 +463,17 @@ async function serializeInlineElements(
     }
 
     if (element.type === ElementType.TAB) {
-      appendText(element, '\t', segment =>
-        createTextRun(segment, element, options.defaultSize, options.defaultFont)
+      appendText(
+        element,
+        '\t',
+        segment =>
+          createTextRun(
+            segment,
+            element,
+            options.defaultSize,
+            options.defaultFont
+          ),
+        i === elementList.length - 1
       );
       continue;
     }
@@ -423,8 +482,17 @@ async function serializeInlineElements(
     if (!textValue) {
       continue;
     }
-    appendText(element, textValue, segment =>
-      createTextRun(segment, element, options.defaultSize, options.defaultFont)
+    appendText(
+      element,
+      textValue,
+      segment =>
+        createTextRun(
+          segment,
+          element,
+          options.defaultSize,
+          options.defaultFont
+        ),
+      i === elementList.length - 1
     );
   }
 
@@ -432,7 +500,9 @@ async function serializeInlineElements(
     flushParagraph();
   }
 
-  return paragraphs.length ? paragraphs : [createParagraph([], overrides, options.defaultRowMargin)];
+  return paragraphs.length
+    ? paragraphs
+    : [createParagraph([], overrides, options.defaultRowMargin)];
 }
 
 async function serializeListElement(
@@ -467,7 +537,9 @@ async function serializeTableElement(
   const trList = element.trList || [];
   const tableContext = createTableSerializeContext(element);
   for (let i = 0; i < trList.length; i++) {
-    rows.push(await serializeTableRow(trList[i], options, context, tableContext));
+    rows.push(
+      await serializeTableRow(trList[i], options, context, tableContext)
+    );
   }
   const tableWidth = getTableWidthFromColgroup(element.colgroup);
   return new Table({
@@ -552,7 +624,9 @@ function createParagraph(
     numbering: context.numbering,
     alignment: context.alignment,
     spacing: {
-      line: Math.round(240 * (context.rowMargin || defaultRowMargin || DEFAULT_LINE_HEIGHT)),
+      line: Math.round(
+        240 * (context.rowMargin || defaultRowMargin || DEFAULT_LINE_HEIGHT)
+      ),
       lineRule: LineRuleType.AUTO
     }
   });
@@ -632,9 +706,7 @@ async function createHyperlinkRuns(
   for (let i = 0; i < valueList.length; i++) {
     const element = valueList[i];
     if (element.type === ElementType.TAB) {
-      children.push(
-        createTextRun('\t', element, defaultSize, defaultFont)
-      );
+      children.push(createTextRun('\t', element, defaultSize, defaultFont));
       continue;
     }
     const text = normalizeText(getInlineElementText(element)).replace(
@@ -652,7 +724,10 @@ async function createImageChild(element: IElement) {
   try {
     const image = await loadImagePayload(element.value);
     const width = Math.max(1, Math.round(element.width || DEFAULT_IMAGE_WIDTH));
-    const height = Math.max(1, Math.round(element.height || DEFAULT_IMAGE_HEIGHT));
+    const height = Math.max(
+      1,
+      Math.round(element.height || DEFAULT_IMAGE_HEIGHT)
+    );
     if (image.type === 'svg' && image.fallbackPng) {
       return new ImageRun({
         type: 'svg',
@@ -780,9 +855,7 @@ function createPageNumberParagraph(pageNumber: IPageNumber) {
   }
   const children: ParagraphChild[] = [];
   const format = pageNumber.format || FORMAT_PLACEHOLDER.PAGE_NO;
-  const tokens = format.split(
-    /(\{pageNo\}|\{pageCount\})/
-  );
+  const tokens = format.split(/(\{pageNo\}|\{pageCount\})/);
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (!token) continue;
@@ -942,7 +1015,11 @@ function createBulletReference(reference: string, bullets: string[]) {
 function getOrderedLevelText(style: string, level: number) {
   const placeholder = `%${level + 1}`;
   if (style === 'outline') {
-    return Array.from({ length: level + 1 }, (_, index) => `%${index + 1}`).join('.') + '.';
+    return (
+      Array.from({ length: level + 1 }, (_, index) => `%${index + 1}`).join(
+        '.'
+      ) + '.'
+    );
   }
   if (style.endsWith('Paren') || style === OlStyle.DECIMAL_PAREN) {
     return `${placeholder})`;
@@ -958,10 +1035,7 @@ function createCycleList(source: string[] = [], size: number) {
   return result;
 }
 
-function getListNumbering(
-  element: IElement,
-  instance?: number
-) {
+function getListNumbering(element: IElement, instance?: number) {
   const level = Math.max(0, Math.min(element.listLevel || 0, 8));
   if (element.listType === ListType.UL) {
     const reference = element.listPreset
@@ -1243,7 +1317,8 @@ function getControlText(control?: IControl | null) {
     const isRadio = control.type === ControlType.RADIO;
     return (control.valueSets || [])
       .map(valueSet => {
-        const checked = control.code?.split(',').includes(valueSet.code) || false;
+        const checked =
+          control.code?.split(',').includes(valueSet.code) || false;
         return `${checked ? (isRadio ? '◉' : '☑') : isRadio ? '○' : '☐'} ${valueSet.value}`;
       })
       .join('  ');
@@ -1251,11 +1326,17 @@ function getControlText(control?: IControl | null) {
   return '';
 }
 
-function getSelectedControlLabels(code: string | null | undefined, valueSets?: IValueSet[]) {
+function getSelectedControlLabels(
+  code: string | null | undefined,
+  valueSets?: IValueSet[]
+) {
   if (!code || !valueSets?.length) return [];
   return code
     .split(',')
-    .map(selectCode => valueSets.find(valueSet => valueSet.code === selectCode)?.value)
+    .map(
+      selectCode =>
+        valueSets.find(valueSet => valueSet.code === selectCode)?.value
+    )
     .filter((value): value is string => !!value);
 }
 
@@ -1299,7 +1380,9 @@ function createListInstance(context: ISerializeContext) {
   return context.nextListInstance++;
 }
 
-function createTableSerializeContext(element: IElement): ITableSerializeContext {
+function createTableSerializeContext(
+  element: IElement
+): ITableSerializeContext {
   return {
     cellLayoutMap: computeTableCellLayout(
       element.trList || [],
@@ -1362,9 +1445,7 @@ function normalizeHexColor(color: string, fallback?: string) {
   if (normalized) {
     return normalized;
   }
-  return fallback
-    ? normalizeHexLiteral(fallback) || undefined
-    : undefined;
+  return fallback ? normalizeHexLiteral(fallback) || undefined : undefined;
 }
 
 function normalizeHexLiteral(color: string) {
@@ -1411,8 +1492,7 @@ function normalizeRgbColor(color: string) {
   if (red === null || green === null || blue === null) {
     return undefined;
   }
-  const alpha =
-    parts[3] !== undefined ? parseAlphaChannel(parts[3]) : 1;
+  const alpha = parts[3] !== undefined ? parseAlphaChannel(parts[3]) : 1;
   if (alpha === null || alpha <= 0) {
     return undefined;
   }
@@ -1505,9 +1585,7 @@ function normalizeDocxFileName(fileName?: string) {
   if (!trimmed) {
     return DEFAULT_DOCX_FILE_NAME;
   }
-  return trimmed.toLowerCase().endsWith('.docx')
-    ? trimmed
-    : `${trimmed}.docx`;
+  return trimmed.toLowerCase().endsWith('.docx') ? trimmed : `${trimmed}.docx`;
 }
 
 function pxToTwips(px: number) {

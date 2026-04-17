@@ -53,6 +53,7 @@ import {
   IEditorHTML,
   IEditorOption,
   IExportDocxOption,
+  IExportPdfOption,
   IEditorResult,
   IEditorText,
   IFocusOption,
@@ -100,6 +101,7 @@ import {
   isObjectEqual
 } from '../../utils';
 import { exportEditorDataToDocx } from '../../utils/docx';
+import { exportEditorDataToPdf } from '../../utils/pdf';
 import {
   createDomFromElementList,
   formatElementContext,
@@ -166,9 +168,11 @@ export class CommandAdapt {
     this.tableOperate = draw.getTableOperate();
   }
 
-  private getStyleSelectionElementList(options: {
-    textLikeOnly?: boolean;
-  } = {}): IElement[] | null {
+  private getStyleSelectionElementList(
+    options: {
+      textLikeOnly?: boolean;
+    } = {}
+  ): IElement[] | null {
     const selection = this.range.getSelectionElementList();
     if (!selection?.length) return null;
     const { textLikeOnly = false } = options;
@@ -1454,6 +1458,12 @@ export class CommandAdapt {
     downloadBlob(blob, fileName);
   }
 
+  public async exportPdf(payload: IExportPdfOption = {}) {
+    const result = this.draw.getValue();
+    const { blob, fileName } = await exportEditorDataToPdf(result, payload);
+    downloadBlob(blob, fileName);
+  }
+
   public replaceImageElement(payload: string) {
     const { startIndex } = this.range.getRange();
     const elementList = this.draw.getElementList();
@@ -1628,18 +1638,16 @@ export class CommandAdapt {
     let startColNo = 0;
     let endColNo = 0;
     if (!this.draw.getCursor().getHitLineStartIndex()) {
-      startColNo =
-        startRowStartsWithZero
-          ? startIndex - startRowStartIndex
-          : startIndex - startRowStartIndex + 1;
+      startColNo = startRowStartsWithZero
+        ? startIndex - startRowStartIndex
+        : startIndex - startRowStartIndex + 1;
     }
     if (startPosition === endPosition) {
       endColNo = startColNo;
     } else {
-      endColNo =
-        endRowStartsWithZero
-          ? endIndex - endRowStartIndex
-          : endIndex - endRowStartIndex + 1;
+      endColNo = endRowStartsWithZero
+        ? endIndex - endRowStartIndex
+        : endIndex - endRowStartIndex + 1;
     }
 
     // Coordinate info (relative to editor writing area)
@@ -2347,7 +2355,9 @@ export class CommandAdapt {
       this.forceUpdate();
     }
     const { scale, paperDirection, width, height } = this.options;
-    this.draw.getListener().optionsChange?.({ scale, paperDirection, width, height });
+    this.draw
+      .getListener()
+      .optionsChange?.({ scale, paperDirection, width, height });
   }
 
   public getControlList(): IElement[] {

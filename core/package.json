@@ -1,6 +1,6 @@
 {
   "name": "@windoc/core",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "description": "Canvas-based document editor engine",
   "homepage": "https://aliansyahfirdaus.github.io/windoc/",
   "repository": {
@@ -43,6 +43,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "docx": "^9.6.1"
+    "docx": "^9.6.1",
+    "pdf-lib": "^1.17.1"
   }
 }

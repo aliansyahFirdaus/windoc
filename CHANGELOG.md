@@ -3,6 +3,18 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.25] — 2026-04-17
+
+### Added
+- Add semantic PDF export support
+
+### Changed
+- Add a single export dropdown in the toolbar for PDF and DOCX
+
+### Fixed
+- Preserve trailing line breaks in DOCX export
+
+
 ## [0.3.24] — 2026-04-13
 
 ### Fixed
