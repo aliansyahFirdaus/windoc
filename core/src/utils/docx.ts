@@ -62,6 +62,7 @@ import {
   splitListElement,
   zipElementList
 } from './element';
+import { deepClone } from './index';
 
 type FileChild = Paragraph | Table;
 
@@ -105,6 +106,7 @@ const DEFAULT_DOCX_FILE_NAME = 'document.docx';
 const DEFAULT_IMAGE_WIDTH = 320;
 const DEFAULT_IMAGE_HEIGHT = 180;
 const DEFAULT_LINE_HEIGHT = 1.15;
+const DOCX_FOOTER_TEXT_COLOR = '#000000';
 
 const docxBulletCharMap: Record<string, string> = {
   [UlStyle.DISC]: '•',
@@ -161,11 +163,19 @@ async function createDocxDocument(payload: IEditorResult) {
   const headerChildren = editorOptions.header.disabled
     ? []
     : await serializeElementList(data.header || [], editorOptions, context);
+  const docxFooterElementList = forceDocxFooterTextColor(data.footer || []);
   const footerChildren = editorOptions.footer.disabled
     ? []
-    : await serializeElementList(data.footer || [], editorOptions, context);
+    : await serializeElementList(
+        docxFooterElementList,
+        editorOptions,
+        context
+      );
   const pageNumberParagraph = createPageNumberParagraph(
-    editorOptions.pageNumber
+    {
+      ...editorOptions.pageNumber,
+      color: DOCX_FOOTER_TEXT_COLOR
+    }
   );
   if (pageNumberParagraph) {
     footerChildren.push(pageNumberParagraph);
@@ -879,6 +889,32 @@ function createPageNumberParagraph(pageNumber: IPageNumber) {
     children,
     alignment: mapRowFlexToAlignment(pageNumber.rowFlex)
   });
+}
+
+function forceDocxFooterTextColor(elementList: IElement[]) {
+  const footerElementList = deepClone(elementList);
+  forceColorValue(footerElementList);
+  return footerElementList;
+}
+
+function forceColorValue(value: unknown) {
+  if (!value || typeof value !== 'object') {
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      forceColorValue(value[i]);
+    }
+    return;
+  }
+  const record = value as Record<string, unknown>;
+  if ('color' in record) {
+    record.color = DOCX_FOOTER_TEXT_COLOR;
+  }
+  const keys = Object.keys(record);
+  for (let i = 0; i < keys.length; i++) {
+    forceColorValue(record[keys[i]]);
+  }
 }
 
 function createNumberingConfig() {

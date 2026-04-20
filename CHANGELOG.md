@@ -3,6 +3,12 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.26] — 2026-04-20
+
+### Fixed
+- Force footer and page number text to black in DOCX export for better Google Docs compatibility
+
+
 ## [0.3.25] — 2026-04-17
 
 ### Added
@@ -155,6 +161,5 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Replace orhun/git-cliff-action with npx git-cliff
 
 - Portal all toolbar dropdowns to escape overflow container
-
 
 
