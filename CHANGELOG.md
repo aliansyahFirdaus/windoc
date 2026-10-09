@@ -6,14 +6,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.3.27] — 2026-10-09
 
 ### Fixed
-- Match DOCX export to the canvas layout: same line breaks, page breaks, list markers, table padding/borders, colored footer band and live page numbers
-- Consume split tokens in PDF paragraph layout so oversized tokens no longer stall it
+- Consume split tokens in pdf paragraph layout
 
-
-## [0.3.26] — 2026-04-20
-
-### Fixed
-- Force footer and page number text to black in DOCX export for better Google Docs compatibility
+- Match docx export to canvas layout
 
 
 ## [0.3.25] — 2026-04-17
@@ -162,5 +157,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Replace orhun/git-cliff-action with npx git-cliff
 
 - Portal all toolbar dropdowns to escape overflow container
+
 
 
