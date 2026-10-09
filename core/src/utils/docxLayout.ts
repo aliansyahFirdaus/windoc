@@ -1,11 +1,14 @@
 import {
+  AlignmentType,
   BorderStyle,
   Document,
   ExternalHyperlink,
   Footer,
   Header,
   HeightRule,
+  HorizontalPositionRelativeFrom,
   ImageRun,
+  LevelFormat,
   LineRuleType,
   Packer,
   type IRunOptions,
@@ -20,15 +23,19 @@ import {
   TableLayoutType,
   TableRow,
   TextRun,
+  TextWrappingType,
   VerticalAlign as DocxVerticalAlign,
+  VerticalPositionRelativeFrom,
   WidthType,
   XmlAttributeComponent,
   XmlComponent
 } from 'docx';
 import { ZERO } from '../dataset/constant/Common';
+import { olPresetCycles } from '../dataset/constant/List';
 import { FORMAT_PLACEHOLDER } from '../dataset/constant/PageNumber';
 import { PaperDirection } from '../dataset/enum/Editor';
 import { ElementType } from '../dataset/enum/Element';
+import { ListType } from '../dataset/enum/List';
 import { RowFlex } from '../dataset/enum/Row';
 import { TableBorder, TdBorder } from '../dataset/enum/table/Table';
 import { VerticalAlign } from '../dataset/enum/VerticalAlign';
@@ -79,10 +86,20 @@ interface IRowOptions {
   rowY?: number;
 }
 
+interface IListPlan {
+  reference: string;
+  native: boolean;
+  // Word numbering levels, from windoc's marker style per level
+  levels: Map<number, { format: ILevelFormat; text: string }>;
+}
+
+type ILevelFormat = (typeof LevelFormat)[keyof typeof LevelFormat];
+
 interface IExportContext {
   draw: Draw;
   scale: number;
   measureCtx: CanvasRenderingContext2D;
+  lists: Map<string, IListPlan>;
 }
 
 const tw = (ctx: IExportContext, layoutPx: number) =>
@@ -98,7 +115,8 @@ export async function exportDrawToDocx(
   const ctx: IExportContext = {
     draw,
     scale: draw.getOptions().scale,
-    measureCtx
+    measureCtx,
+    lists: new Map()
   };
   const file = await createDocument(ctx);
   const blob = await Packer.toBlob(file);
@@ -118,6 +136,7 @@ async function createDocument(ctx: IExportContext) {
   const footerExtra = footer.getExtraHeight() / scale;
   const layoutMargins = draw.getMargins();
 
+  planLists(ctx);
   const body = await serializeMain(ctx, layoutMargins[3]);
   const headerChildren = opts.header.disabled
     ? []
@@ -126,15 +145,17 @@ async function createDocument(ctx: IExportContext) {
         width: draw.getInnerWidth(),
         positionList: header.getPositionList()
       });
-  const footerChildren = opts.footer.disabled
-    ? []
+  const footerResult = opts.footer.disabled
+    ? { children: [], distance: footer.getFooterBottom() / scale }
     : await serializeFooter(ctx, width, height, margins);
+  const footerChildren = footerResult.children;
 
   const { pageNumber } = draw.getOptions();
   endWithParagraph(headerChildren);
   endWithParagraph(footerChildren);
   return new Document({
     compatabilityModeVersion: 15,
+    numbering: { config: createNumberingConfig(ctx) },
     // LibreOffice formats PAGE/NUMPAGES results from the paragraph style
     styles: {
       paragraphStyles: [
@@ -164,7 +185,7 @@ async function createDocument(ctx: IExportContext) {
               bottom: pxTw(margins[2] + footerExtra),
               left: pxTw(margins[3]),
               header: pxTw(headerTop),
-              footer: pxTw(footer.getFooterBottom() / scale),
+              footer: pxTw(footerResult.distance),
               gutter: 0
             }
           }
@@ -200,6 +221,14 @@ async function serializeMain(ctx: IExportContext, startX: number) {
   return children;
 }
 
+// A unit is what becomes one block in the DOCX: a table, a single row, or
+// every row of one list item (a numbered paragraph with line breaks, so Enter
+// in Word continues the numbering)
+type IUnit =
+  | { kind: 'table'; row: IRow; table: IRowElement }
+  | { kind: 'row'; row: IRow }
+  | { kind: 'list'; rows: IRow[] };
+
 async function serializeRows(
   ctx: IExportContext,
   rowList: IRow[],
@@ -207,13 +236,14 @@ async function serializeRows(
   options: IRowOptions = {}
 ): Promise<FileChild[]> {
   const { pageBreakBefore = false, padTop = 0, padBottom = 0 } = options;
+  const units = groupUnits(ctx, rowList, zone);
   const children: FileChild[] = [];
-  for (let r = 0; r < rowList.length; r++) {
-    const row = rowList[r];
-    const isFirst = r === 0;
-    const isLast = r === rowList.length - 1;
-    const table = row.elementList.find(el => el.type === ElementType.TABLE);
-    if (table) {
+  for (let u = 0; u < units.length; u++) {
+    const unit = units[u];
+    const isFirst = u === 0;
+    const isLast = u === units.length - 1;
+    if (unit.kind === 'table') {
+      const { row, table } = unit;
       // a table carries neither pageBreakBefore nor spacing: use a spacer
       if ((isFirst && (pageBreakBefore || padTop)) || row.offsetY) {
         children.push(
@@ -236,40 +266,212 @@ async function serializeRows(
       }
       continue;
     }
+    const first = unitFirstRow(unit);
     const rowOptions: IRowOptions = {
       pageBreakBefore: isFirst && pageBreakBefore,
       padTop: isFirst ? padTop : 0,
-      padBottom: isLast ? padBottom : 0
+      padBottom: isLast ? padBottom : 0,
+      rowY: rowY(zone, first)
     };
     // LibreOffice collapses one paragraph's spacing after with the next one's
-    // spacing before (Word adds them), so a row's lead rides on the previous
-    // row's spacing after and the two never meet
-    if (!isFirst && isTextRow(rowList[r - 1])) rowOptions.skipLead = true;
-    rowOptions.rowY = rowY(zone, row);
-    if (!isLast && isTextRow(rowList[r + 1])) {
-      rowOptions.extraAfter = rowLead(ctx, rowList[r + 1], {
-        rowY: rowY(zone, rowList[r + 1])
-      });
+    // spacing before (Word adds them), so a unit's lead rides on the previous
+    // unit's spacing after and the two never meet
+    if (!isFirst && units[u - 1].kind !== 'table') rowOptions.skipLead = true;
+    const next = units[u + 1];
+    if (next && next.kind !== 'table') {
+      rowOptions.extraAfter = unitLead(ctx, next, zone, {});
     }
     // spacing before is dropped right after a page break, so a page that
     // starts with spacing gets it from a spacer that carries the break
-    const lead = rowOptions.pageBreakBefore ? rowLead(ctx, row, rowOptions) : 0;
+    const lead = rowOptions.pageBreakBefore
+      ? unitLead(ctx, unit, zone, rowOptions)
+      : 0;
     if (lead) {
       children.push(createSpacerParagraph(true, lead / PX_TO_TWIP));
       rowOptions.pageBreakBefore = false;
       rowOptions.skipLead = true;
     }
-    children.push(await serializeRow(ctx, row, zone, rowOptions));
+    children.push(
+      unit.kind === 'list'
+        ? await serializeListItem(ctx, unit.rows, zone, rowOptions)
+        : await serializeRow(ctx, unit.row, zone, rowOptions)
+    );
   }
   return children;
+}
+
+function unitFirstRow(unit: IUnit) {
+  return unit.kind === 'list' ? unit.rows[0] : unit.row;
+}
+
+function unitLead(
+  ctx: IExportContext,
+  unit: IUnit,
+  zone: IZone,
+  options: IRowOptions
+) {
+  if (unit.kind === 'list') return listLead(ctx, unit.rows[0], options);
+  const row = unitFirstRow(unit);
+  return rowLead(ctx, row, { ...options, rowY: rowY(zone, row) });
+}
+
+function groupUnits(ctx: IExportContext, rowList: IRow[], zone: IZone) {
+  const units: IUnit[] = [];
+  for (let r = 0; r < rowList.length; r++) {
+    const row = rowList[r];
+    const table = row.elementList.find(el => el.type === ElementType.TABLE);
+    if (table) {
+      units.push({ kind: 'table', row, table });
+      continue;
+    }
+    if (isNativeListStart(ctx, row, zone)) {
+      const rows = [row];
+      while (
+        r + 1 < rowList.length &&
+        isListContinuation(row, rowList[r + 1])
+      ) {
+        rows.push(rowList[++r]);
+      }
+      units.push({ kind: 'list', rows });
+      continue;
+    }
+    units.push({ kind: 'row', row });
+  }
+  return units;
 }
 
 function rowY(zone: IZone, row: IRow) {
   return zone.positionList[row.startIndex]?.coordinate.leftTop[1];
 }
 
-function isTextRow(row: IRow) {
-  return !row.elementList.some(el => el.type === ElementType.TABLE);
+interface ILine {
+  children: ParagraphChild[];
+  tabStops: number[];
+  // unscaled px from the zone's left edge, where Word's pen currently is
+  pen: number;
+  started: boolean;
+  indent: number;
+  // w:position for every text run (half-points as string), list items only
+  position?: `${number}pt`;
+}
+
+// Emit one windoc row's content into a paragraph line. Runs follow Word's
+// natural advance; wherever windoc placed something elsewhere (tabs, labels,
+// list text) a left tab stop re-anchors the pen on windoc's x.
+async function appendRowRuns(
+  ctx: IExportContext,
+  row: IRow,
+  zone: IZone,
+  line: ILine
+) {
+  const { draw, scale } = ctx;
+  const positions = zone.positionList;
+  const anchorTo = (layoutX: number) => {
+    const target = (layoutX - zone.startX) / scale;
+    if (!line.started) {
+      line.indent = target;
+      line.pen = target;
+      line.started = true;
+      return;
+    }
+    if (target - line.pen > ANCHOR_EPS) {
+      line.tabStops.push(pxTw(target));
+      line.children.push(new TextRun({ children: [new Tab()] }));
+      line.pen = target;
+    }
+  };
+
+  let run: { text: string; element: IRowElement } | null = null;
+  const flush = () => {
+    if (!run) return;
+    line.children.push(
+      createTextRun(
+        ctx,
+        run.text,
+        run.element,
+        undefined,
+        undefined,
+        line.position
+      )
+    );
+    run = null;
+  };
+
+  for (let j = 0; j < row.elementList.length; j++) {
+    const element = row.elementList[j];
+    const position = positions[row.startIndex + j];
+    if (!position) continue;
+    if (element.hide || element.control?.hide || element.area?.hide) continue;
+    if (
+      element.value === ZERO ||
+      element.type === ElementType.TAB ||
+      element.type === ElementType.PAGE_BREAK ||
+      element.type === ElementType.COLUMN_BREAK ||
+      element.type === ElementType.SEPARATOR
+    ) {
+      continue;
+    }
+    const x = position.coordinate.leftTop[0];
+    const layoutWidth = element.metrics.width / scale;
+    if (element.type === ElementType.IMAGE) {
+      flush();
+      anchorTo(x);
+      const image = await createImageRun(element);
+      if (image) line.children.push(image);
+      line.pen += layoutWidth;
+      continue;
+    }
+    if (element.type === ElementType.LABEL) {
+      flush();
+      const padding =
+        element.label?.padding || draw.getOptions().label.defaultPadding;
+      anchorTo(x + padding[3] * scale);
+      line.children.push(
+        createTextRun(
+          ctx,
+          element.value,
+          element,
+          labelShading(ctx, element),
+          undefined,
+          line.position
+        )
+      );
+      line.pen += measure(ctx, element.value, element);
+      continue;
+    }
+    const text = getElementText(element);
+    if (!text) continue;
+    const natural = measure(ctx, text, element);
+    const target = (x - zone.startX) / scale;
+    const isDrift = !line.started || target - line.pen > ANCHOR_EPS;
+    // windoc widens spaces when justifying; mirror it with char spacing
+    const extra = layoutWidth - natural;
+    const needsSpacing = Math.abs(extra) * PX_TO_TWIP >= 1;
+    const canJoin =
+      run && !isDrift && !needsSpacing && isSameRunStyle(run.element, element);
+    if (canJoin) {
+      run!.text += text;
+    } else {
+      flush();
+      anchorTo(x);
+      if (needsSpacing) {
+        line.children.push(
+          createTextRun(
+            ctx,
+            text,
+            element,
+            undefined,
+            pxTw(extra),
+            line.position
+          )
+        );
+      } else {
+        run = { text, element };
+      }
+    }
+    line.pen = target + layoutWidth;
+  }
+  flush();
 }
 
 async function serializeRow(
@@ -282,142 +484,72 @@ async function serializeRow(
     tabType: (typeof TabStopType)[keyof typeof TabStopType];
     children: ParagraphChild[];
     style?: string;
-  }
+  },
+  // floating drawing anchored in this paragraph (footer band)
+  anchor?: ParagraphChild
 ) {
   const { pageBreakBefore = false } = options;
   const { draw, scale } = ctx;
-  const positions = zone.positionList;
-  const children: ParagraphChild[] = [];
-  const tabStops: number[] = [];
-  const firstPosition = positions[row.startIndex];
-  // pen: unscaled px from the zone's left edge, as Word will lay it out
-  let pen = 0;
-  let indent = firstPosition
-    ? (firstPosition.coordinate.leftTop[0] - zone.startX) / scale
-    : 0;
-  let started = false;
-
-  const anchorTo = (layoutX: number) => {
-    const target = (layoutX - zone.startX) / scale;
-    if (!started) {
-      indent = target;
-      pen = target;
-      started = true;
-      return;
-    }
-    if (target - pen > ANCHOR_EPS) {
-      tabStops.push(pxTw(target));
-      children.push(new TextRun({ children: [new Tab()] }));
-      pen = target;
-    }
-  };
-
-  // list marker is drawn by ListParticle, not part of the element list
-  if (row.isList && firstPosition) {
-    const listParticle = draw.getListParticle();
-    const markerX = listParticle.getListMarkerX(row, firstPosition);
-    const marker = markerX === null ? null : listParticle.getListMarker(row);
-    if (markerX !== null && marker) {
-      anchorTo(markerX);
-      children.push(createTextRun(ctx, marker.text, marker.styleElement));
-      pen += measure(ctx, marker.text, marker.styleElement);
-    }
-  }
-
-  let run: { text: string; element: IRowElement } | null = null;
-  const flush = () => {
-    if (!run) return;
-    children.push(createTextRun(ctx, run.text, run.element));
-    run = null;
-  };
-
-  for (let j = 0; j < row.elementList.length; j++) {
-    const element = row.elementList[j];
-    const position = positions[row.startIndex + j];
-    if (!position) continue;
-    if (element.hide || element.control?.hide || element.area?.hide) continue;
-    if (element.type === ElementType.SEPARATOR) {
-      flush();
+  const firstPosition = zone.positionList[row.startIndex];
+  const separatorIndex = row.elementList.findIndex(
+    el => el.type === ElementType.SEPARATOR
+  );
+  if (separatorIndex >= 0) {
+    const position = zone.positionList[row.startIndex + separatorIndex];
+    if (position) {
       return createSeparatorParagraph(
         ctx,
         row,
-        element,
+        row.elementList[separatorIndex],
         position.coordinate.leftTop[0],
         position.coordinate.leftTop[1],
         zone,
         options
       );
     }
-    if (
-      element.value === ZERO ||
-      element.type === ElementType.TAB ||
-      element.type === ElementType.PAGE_BREAK ||
-      element.type === ElementType.COLUMN_BREAK
-    ) {
-      continue;
-    }
-    const x = position.coordinate.leftTop[0];
-    const layoutWidth = element.metrics.width / scale;
-    if (element.type === ElementType.IMAGE) {
-      flush();
-      anchorTo(x);
-      const image = await createImageRun(element);
-      if (image) children.push(image);
-      pen += layoutWidth;
-      continue;
-    }
-    if (element.type === ElementType.LABEL) {
-      flush();
-      const padding =
-        element.label?.padding || draw.getOptions().label.defaultPadding;
-      anchorTo(x + padding[3] * scale);
-      children.push(
-        createTextRun(ctx, element.value, element, labelShading(ctx, element))
-      );
-      pen += measure(ctx, element.value, element);
-      continue;
-    }
-    const text = getElementText(element);
-    if (!text) continue;
-    const natural = measure(ctx, text, element);
-    const target = (x - zone.startX) / scale;
-    const isDrift = !started || target - pen > ANCHOR_EPS;
-    // windoc widens spaces when justifying; mirror it with char spacing
-    const extra = layoutWidth - natural;
-    const needsSpacing = Math.abs(extra) * PX_TO_TWIP >= 1;
-    const canJoin =
-      run && !isDrift && !needsSpacing && isSameRunStyle(run.element, element);
-    if (canJoin) {
-      run!.text += text;
-    } else {
-      flush();
-      anchorTo(x);
-      if (needsSpacing) {
-        children.push(
-          createTextRun(ctx, text, element, undefined, pxTw(extra))
-        );
-      } else {
-        run = { text, element };
-      }
-    }
-    pen = target + layoutWidth;
   }
-  flush();
+  const line: ILine = {
+    children: [],
+    tabStops: [],
+    pen: 0,
+    started: false,
+    indent: firstPosition
+      ? (firstPosition.coordinate.leftTop[0] - zone.startX) / scale
+      : 0
+  };
+
+  // literal list marker (lists that cannot map onto Word numbering)
+  if (row.isList && firstPosition) {
+    const listParticle = draw.getListParticle();
+    const markerX = listParticle.getListMarkerX(row, firstPosition);
+    const marker = markerX === null ? null : listParticle.getListMarker(row);
+    if (markerX !== null && marker) {
+      line.indent = (markerX - zone.startX) / scale;
+      line.pen = line.indent;
+      line.started = true;
+      line.children.push(createTextRun(ctx, marker.text, marker.styleElement));
+      line.pen += measure(ctx, marker.text, marker.styleElement);
+    }
+  }
+
+  await appendRowRuns(ctx, row, zone, line);
+  const { children } = line;
+  if (anchor) children.unshift(anchor);
 
   // a row without content only holds space; LibreOffice drops spacing on an
   // empty paragraph at the top of a page, so give it all as line height
-  if (!children.length && !suffix) {
+  if (!line.started && !suffix) {
     const total =
       (options.skipLead ? 0 : rowLead(ctx, row, options)) +
       rowLine(ctx, row).lineTw +
       rowSpacing(ctx, row, options).after;
-    return createSpacerParagraph(pageBreakBefore, total / PX_TO_TWIP);
+    return createSpacerParagraph(pageBreakBefore, total / PX_TO_TWIP, anchor);
   }
 
   const stops: {
     type: (typeof TabStopType)[keyof typeof TabStopType];
     position: number;
-  }[] = tabStops.map(position => ({ type: TabStopType.LEFT, position }));
+  }[] = line.tabStops.map(position => ({ type: TabStopType.LEFT, position }));
   if (suffix) {
     stops.push({ type: suffix.tabType, position: suffix.tabStop });
     children.push(new TextRun({ children: [new Tab()] }), ...suffix.children);
@@ -429,8 +561,244 @@ async function serializeRow(
     pageBreakBefore,
     widowControl: false,
     tabStops: stops,
-    indent: { left: pxTw(indent), right: RIGHT_SLACK_TWIP },
+    indent: { left: pxTw(line.indent), right: RIGHT_SLACK_TWIP },
     spacing: rowSpacing(ctx, row, options)
+  });
+}
+
+// ---- native lists --------------------------------------------------------
+// A list maps onto Word numbering when every item's windoc marker equals what
+// Word's counters would print; otherwise it keeps literal marker text.
+
+const olStyleFormat: Record<string, { format: ILevelFormat; suffix: string }> =
+  {
+    decimal: { format: LevelFormat.DECIMAL, suffix: '.' },
+    decimalParen: { format: LevelFormat.DECIMAL, suffix: ')' },
+    decimalZero: { format: LevelFormat.DECIMAL_ZERO, suffix: '.' },
+    lowerAlpha: { format: LevelFormat.LOWER_LETTER, suffix: '.' },
+    lowerAlphaParen: { format: LevelFormat.LOWER_LETTER, suffix: ')' },
+    upperAlpha: { format: LevelFormat.UPPER_LETTER, suffix: '.' },
+    lowerRoman: { format: LevelFormat.LOWER_ROMAN, suffix: '.' },
+    lowerRomanParen: { format: LevelFormat.LOWER_ROMAN, suffix: ')' },
+    upperRoman: { format: LevelFormat.UPPER_ROMAN, suffix: '.' },
+    outline: { format: LevelFormat.DECIMAL, suffix: '.' }
+  };
+
+function isListItemStart(row: IRow) {
+  const first = row.elementList[0];
+  return !!row.isList && first?.value === ZERO && !first.listWrap;
+}
+
+function rowListId(row: IRow) {
+  return row.elementList.find(el => el.listId)?.listId;
+}
+
+// mirrors ListParticle._getListMarkerText
+function levelSpec(element: IElement, markerText: string) {
+  const level = Math.min(element.listLevel ?? 0, 8);
+  if (element.listType === ListType.UL) {
+    return { level, format: LevelFormat.BULLET, text: markerText };
+  }
+  const cycle = element.listPreset
+    ? olPresetCycles[element.listPreset]
+    : undefined;
+  const style = cycle ? cycle[level % cycle.length] : 'decimal';
+  const spec = olStyleFormat[style] || olStyleFormat.decimal;
+  return { level, format: spec.format, text: `%${level + 1}${spec.suffix}` };
+}
+
+function planLists(ctx: IExportContext) {
+  const listParticle = ctx.draw.getListParticle();
+  const counters = new Map<string, number[]>();
+  const visit = (rowList: IRow[]) => {
+    for (const row of rowList) {
+      const table = row.elementList.find(el => el.type === ElementType.TABLE);
+      if (table) {
+        for (const tr of table.trList || []) {
+          for (const td of tr.tdList) visit(td.rowList || []);
+        }
+        continue;
+      }
+      if (!isListItemStart(row)) continue;
+      const listId = rowListId(row);
+      if (!listId) continue;
+      let plan = ctx.lists.get(listId);
+      if (!plan) {
+        plan = {
+          reference: `windoc-list-${ctx.lists.size + 1}`,
+          native: true,
+          levels: new Map()
+        };
+        ctx.lists.set(listId, plan);
+      }
+      const marker = listParticle.getListMarker(row);
+      if (!marker || hasInlineImage(row)) {
+        plan.native = false;
+        continue;
+      }
+      const spec = levelSpec(row.elementList[0], marker.text);
+      const known = plan.levels.get(spec.level);
+      if (known && (known.format !== spec.format || known.text !== spec.text)) {
+        plan.native = false;
+      }
+      plan.levels.set(spec.level, spec);
+      // Word counts per level and restarts deeper levels; windoc must agree
+      const count = counters.get(listId) || [];
+      counters.set(listId, count);
+      count[spec.level] = (count[spec.level] || 0) + 1;
+      count.length = spec.level + 1;
+      if (
+        spec.format !== LevelFormat.BULLET &&
+        count[spec.level] !== (row.listIndex ?? 0) + 1
+      ) {
+        plan.native = false;
+      }
+    }
+  };
+  ctx.draw.getPageRowList().forEach(visit);
+}
+
+function createNumberingConfig(ctx: IExportContext) {
+  return [...ctx.lists.values()]
+    .filter(plan => plan.native)
+    .map(plan => ({
+      reference: plan.reference,
+      levels: Array.from({ length: 9 }, (_, level) => {
+        const spec = plan.levels.get(level) || {
+          format: LevelFormat.DECIMAL,
+          text: `%${level + 1}.`
+        };
+        return {
+          level,
+          format: spec.format,
+          text: spec.text,
+          alignment: AlignmentType.LEFT
+        };
+      })
+    }));
+}
+
+function listMarkerGeometry(ctx: IExportContext, row: IRow, zone: IZone) {
+  const listParticle = ctx.draw.getListParticle();
+  const firstPosition = zone.positionList[row.startIndex];
+  if (!firstPosition) return null;
+  const markerX = listParticle.getListMarkerX(row, firstPosition);
+  const marker = listParticle.getListMarker(row);
+  if (markerX === null || !marker) return null;
+  const textIndex = row.elementList.findIndex(
+    el => el.value !== ZERO && el.type !== ElementType.TAB
+  );
+  const textPosition =
+    textIndex >= 0
+      ? zone.positionList[row.startIndex + textIndex]
+      : firstPosition;
+  const textX = textPosition.coordinate.leftTop[0];
+  if (textX - markerX <= 0) return null;
+  return {
+    marker,
+    indent: (textX - zone.startX) / ctx.scale,
+    hanging: (textX - markerX) / ctx.scale
+  };
+}
+
+function isNativeListStart(ctx: IExportContext, row: IRow, zone: IZone) {
+  if (!isListItemStart(row) || hasInlineImage(row)) return false;
+  const listId = rowListId(row);
+  if (!listId || !ctx.lists.get(listId)?.native) return false;
+  if (row.elementList.some(el => el.type === ElementType.SEPARATOR)) {
+    return false;
+  }
+  return !!listMarkerGeometry(ctx, row, zone);
+}
+
+// wrapped rows of the same item join its paragraph while they share the
+// line height (a paragraph has one exact line height)
+function isListContinuation(start: IRow, row: IRow) {
+  return (
+    !!row.isList &&
+    !isListItemStart(row) &&
+    rowListId(row) === rowListId(start) &&
+    row.height === start.height &&
+    row.ascent === start.ascent &&
+    !row.offsetY &&
+    !row.spaceAbove &&
+    !hasInlineImage(row) &&
+    !row.elementList.some(
+      el => el.type === ElementType.TABLE || el.type === ElementType.SEPARATOR
+    )
+  );
+}
+
+function listLead(ctx: IExportContext, row: IRow, options: IRowOptions) {
+  return (
+    tw(ctx, (row.offsetY || 0) + (row.spaceAbove || 0)) +
+    pxTw(options.padTop || 0)
+  );
+}
+
+// One numbered paragraph per list item; its rows are joined with line
+// breaks at windoc's wrap points. Every line is exactly the row height, so
+// Word's baseline (80% of the line) is moved onto row.ascent with
+// w:position, which only resolves to half-points (~0.33px).
+async function serializeListItem(
+  ctx: IExportContext,
+  rows: IRow[],
+  zone: IZone,
+  options: IRowOptions
+) {
+  const { scale } = ctx;
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  const geometry = listMarkerGeometry(ctx, first, zone)!;
+  const plan = ctx.lists.get(rowListId(first)!)!;
+  const height = first.height / scale;
+  const raise = Math.round(
+    (EXACT_BASELINE_RATIO * height - first.ascent / scale) * 1.5
+  );
+  const position = raise ? (`${raise}` as `${number}pt`) : undefined;
+  const line: ILine = {
+    children: [],
+    tabStops: [],
+    pen: geometry.indent,
+    started: true,
+    indent: geometry.indent,
+    position
+  };
+  for (let i = 0; i < rows.length; i++) {
+    if (i > 0) {
+      line.children.push(new TextRun({ break: 1 }));
+      line.pen = geometry.indent;
+    }
+    await appendRowRuns(ctx, rows[i], zone, line);
+  }
+  return new Paragraph({
+    children: line.children,
+    numbering: {
+      reference: plan.reference,
+      level: Math.min(first.elementList[0].listLevel ?? 0, 8)
+    },
+    // the number is drawn with the paragraph mark's formatting
+    run: { ...runStyle(ctx, geometry.marker.styleElement), position },
+    pageBreakBefore: options.pageBreakBefore,
+    widowControl: false,
+    tabStops: [...new Set(line.tabStops)].map(tabPosition => ({
+      type: TabStopType.LEFT,
+      position: tabPosition
+    })),
+    indent: {
+      left: pxTw(geometry.indent),
+      hanging: pxTw(geometry.hanging),
+      right: RIGHT_SLACK_TWIP
+    },
+    spacing: {
+      before: options.skipLead ? 0 : listLead(ctx, first, options),
+      after:
+        tw(ctx, last.spaceBelow || 0) +
+        pxTw(options.padBottom || 0) +
+        (options.extraAfter || 0),
+      line: pxTw(height),
+      lineRule: LineRuleType.EXACT
+    }
   });
 }
 
@@ -590,10 +958,7 @@ function createLineImage(
   ctx.moveTo(0, canvas.height / 2);
   ctx.lineTo(canvas.width, canvas.height / 2);
   ctx.stroke();
-  const binary = atob(canvas.toDataURL('image/png').split(',')[1]);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+  return canvasToPng(canvas);
 }
 
 // Word appends a full-height empty paragraph when a header, footer or cell
@@ -605,11 +970,19 @@ function endWithParagraph(children: FileChild[]) {
   return children;
 }
 
-function createSpacerParagraph(pageBreakBefore: boolean, height = 0) {
+// The paragraph mark is 1pt too: Word sizes an empty paragraph by its mark
+function createSpacerParagraph(
+  pageBreakBefore: boolean,
+  height = 0,
+  anchor?: ParagraphChild
+) {
   return new Paragraph({
     pageBreakBefore,
     widowControl: false,
-    children: [new TextRun({ text: '', size: 2 })],
+    run: { size: 2 },
+    children: anchor
+      ? [anchor, new TextRun({ text: '', size: 2 })]
+      : [new TextRun({ text: '', size: 2 })],
     spacing: {
       before: 0,
       after: 0,
@@ -785,19 +1158,21 @@ function mapVerticalAlign(verticalAlign?: VerticalAlign) {
   }
 }
 
-// Footer band: Word footers cannot be colored, so the bar is a 1x1 table that
-// spans the full page width (negative indent) with the footer rows inside.
-// The page number joins the footer row closest to its baseline (tab + shift).
+// Footer band: Word footers cannot be colored, so the bar is a picture
+// anchored to the page (full width, behind text) and the footer rows are
+// plain paragraphs placed where windoc draws them. Nothing in the footer
+// takes more room than its text, so the body area is never squeezed.
 async function serializeFooter(
   ctx: IExportContext,
   pageWidth: number,
   pageHeight: number,
   margins: number[]
-): Promise<FileChild[]> {
+): Promise<{ children: FileChild[]; distance: number }> {
   const { draw, scale } = ctx;
   const footer = draw.getFooter();
   const opts = draw.getOptions();
   const barHeight = footer.getHeight() / scale;
+  const footerBottom = footer.getFooterBottom() / scale;
   const contentHeight = footer.getRowHeight() / scale;
   const paddingTop =
     Math.floor(Math.max(0, (barHeight - contentHeight) / 2) * scale) / scale;
@@ -821,62 +1196,86 @@ async function serializeFooter(
       }
     }
   }
+  const band = opts.footer.backgroundColor
+    ? createBandImage(
+        pageWidth,
+        pageHeight - footerBottom - barHeight,
+        barHeight,
+        opts.footer.backgroundColor
+      )
+    : undefined;
   const children: FileChild[] = [];
   for (let r = 0; r < rowList.length; r++) {
     const row = rowList[r];
-    const rowOptions: IRowOptions = { padTop: r === 0 ? paddingTop : 0 };
-    if (r !== pageNumberRow) {
-      children.push(...(await serializeRows(ctx, [row], zone, rowOptions)));
-      continue;
-    }
-    const top = zone.positionList[row.startIndex].coordinate.leftTop[1] / scale;
-    const shift = pageNumber!.baseline - (top + row.ascent / scale);
-    children.push(
-      await serializeRow(ctx, row, zone, rowOptions, {
+    let suffix: Parameters<typeof serializeRow>[4];
+    if (r === pageNumberRow) {
+      const top =
+        zone.positionList[row.startIndex].coordinate.leftTop[1] / scale;
+      suffix = {
         tabStop: pageNumber!.tabStop,
         tabType: pageNumber!.tabType,
-        children: pageNumber!.runs(shift),
+        children: pageNumber!.runs(
+          pageNumber!.baseline - (top + row.ascent / scale)
+        ),
         style: PAGE_NUMBER_STYLE
-      })
+      };
+    }
+    children.push(
+      await serializeRow(ctx, row, zone, {}, suffix, r === 0 ? band : undefined)
     );
   }
-  const fill = opts.footer.backgroundColor
-    ? normalizeHexColor(opts.footer.backgroundColor, 'FFFFFF')
-    : undefined;
-  const none = { style: BorderStyle.NONE, size: 0, color: 'auto' };
-  const band = new Table({
-    layout: TableLayoutType.FIXED,
-    width: { size: pxTw(pageWidth), type: WidthType.DXA },
-    columnWidths: [pxTw(pageWidth)],
-    indent: { size: -pxTw(margins[3]), type: WidthType.DXA },
-    borders: noTableBorders(),
-    rows: [
-      new TableRow({
-        cantSplit: true,
-        height: { value: pxTw(barHeight), rule: HeightRule.EXACT },
-        children: [
-          new TableCell({
-            width: { size: pxTw(pageWidth), type: WidthType.DXA },
-            margins: {
-              top: 0,
-              bottom: 0,
-              left: pxTw(margins[3]),
-              right: pxTw(margins[1]),
-              marginUnitType: WidthType.DXA
-            },
-            shading: fill
-              ? { fill, type: ShadingType.CLEAR, color: 'auto' }
-              : undefined,
-            borders: { top: none, right: none, bottom: none, left: none },
-            children: children.length
-              ? children
-              : [createSpacerParagraph(false)]
-          })
-        ]
-      })
-    ]
+  if (!children.length && band) {
+    children.push(createSpacerParagraph(false, 0, band));
+  }
+  // the footer's last line ends where windoc's footer content ends
+  const contentTop = pageHeight - footerBottom - barHeight + paddingTop;
+  const distance = Math.max(0, pageHeight - contentTop - contentHeight);
+  return { children, distance };
+}
+
+const EMU_PER_PX = 9525;
+
+function createBandImage(
+  width: number,
+  top: number,
+  height: number,
+  color: string
+) {
+  return new ImageRun({
+    type: 'png',
+    data: createFillImage(color),
+    transformation: { width, height },
+    floating: {
+      horizontalPosition: {
+        relative: HorizontalPositionRelativeFrom.PAGE,
+        offset: 0
+      },
+      verticalPosition: {
+        relative: VerticalPositionRelativeFrom.PAGE,
+        offset: Math.round(top * EMU_PER_PX)
+      },
+      behindDocument: true,
+      allowOverlap: true,
+      wrap: { type: TextWrappingType.NONE }
+    }
   });
-  return [band];
+}
+
+function createFillImage(color: string) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 4;
+  canvas.height = 4;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  return canvasToPng(canvas);
+}
+
+function canvasToPng(canvas: HTMLCanvasElement) {
+  const binary = atob(canvas.toDataURL('image/png').split(',')[1]);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
 }
 
 const PAGE_NUMBER_STYLE = 'WindocPageNumber';
@@ -987,12 +1386,25 @@ function createPageNumberRuns(
   };
 }
 
+// character formatting of an element, as createTextRun writes it
+function runStyle(ctx: IExportContext, element: IElement) {
+  const opts = ctx.draw.getOptions();
+  return {
+    font: mapFont(element.font || opts.defaultFont),
+    size: Math.round(getSize(ctx, element) * 2),
+    bold: !!element.bold,
+    italics: !!element.italic,
+    color: normalizeHexColor(element.color || opts.defaultColor, '000000')
+  };
+}
+
 function createTextRun(
   ctx: IExportContext,
   text: string,
   element: IElement,
   shading?: { fill: string; type: typeof ShadingType.CLEAR; color: string },
-  characterSpacing?: number
+  characterSpacing?: number,
+  position?: `${number}pt`
 ): ParagraphChild {
   const opts = ctx.draw.getOptions();
   const isLink = element.type === ElementType.HYPERLINK;
@@ -1022,7 +1434,8 @@ function createTextRun(
       (highlight
         ? { fill: highlight, type: ShadingType.CLEAR, color: 'auto' }
         : undefined),
-    characterSpacing
+    characterSpacing,
+    position
   });
   if (isLink && element.url) {
     return new ExternalHyperlink({ link: element.url, children: [textRun] });
