@@ -3,6 +3,13 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.28] — 2026-10-09
+
+### Fixed
+- Keep DOCX header/footer and picture rows stable in Word (no extra space under the footer band, logo no longer shifted)
+- Start nested list markers at the parent item's text
+
+
 ## [0.3.27] — 2026-10-09
 
 ### Fixed
