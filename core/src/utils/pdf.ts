@@ -1373,14 +1373,13 @@ function layoutParagraph(
       token.run.type === 'text'
     ) {
       const segments = splitTextToken(token, availableWidth, context);
-      for (
-        let segmentIndex = 0;
-        segmentIndex < segments.length;
-        segmentIndex++
-      ) {
-        tokens.splice(i + segmentIndex, 0, segments[segmentIndex]);
+      if (segments.length > 1) {
+        // Replace the original token and process every segment exactly once.
+        tokens.splice(i, 1, ...segments);
+        i--;
+        continue;
       }
-      continue;
+      // A single glyph may exceed the column width; consume it to make progress.
     }
     if (line.width + token.width > availableWidth && line.fragments.length) {
       commitLine();
