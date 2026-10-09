@@ -3,6 +3,13 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.27] — 2026-10-09
+
+### Fixed
+- Match DOCX export to the canvas layout: same line breaks, page breaks, list markers, table padding/borders, colored footer band and live page numbers
+- Consume split tokens in PDF paragraph layout so oversized tokens no longer stall it
+
+
 ## [0.3.26] — 2026-04-20
 
 ### Fixed
