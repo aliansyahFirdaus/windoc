@@ -131,6 +131,8 @@ async function createDocument(ctx: IExportContext) {
     : await serializeFooter(ctx, width, height, margins);
 
   const { pageNumber } = draw.getOptions();
+  endWithParagraph(headerChildren);
+  endWithParagraph(footerChildren);
   return new Document({
     compatabilityModeVersion: 15,
     // LibreOffice formats PAGE/NUMPAGES results from the paragraph style
@@ -422,6 +424,7 @@ async function serializeRow(
   }
   return new Paragraph({
     children,
+    run: hasInlineImage(row) ? { size: IMAGE_MARK_HALF_POINTS } : undefined,
     style: suffix?.style,
     pageBreakBefore,
     widowControl: false,
@@ -437,6 +440,17 @@ async function serializeRow(
 // row's total height unchanged.
 const EXACT_BASELINE_RATIO = 0.8;
 
+// An inline picture taller than an exact line gets clipped or moved, so
+// picture rows use "at least": the line is the picture plus the paragraph
+// mark's descent (a 1pt mark keeps that tiny) and the baseline lands on
+// row.ascent like any other row.
+const IMAGE_MARK_HALF_POINTS = 2;
+const IMAGE_MARK_DESCENT_PX = 0.3;
+
+function hasInlineImage(row: IRow) {
+  return row.elementList.some(el => el.type === ElementType.IMAGE);
+}
+
 function rowLine(
   ctx: IExportContext,
   row: IRow,
@@ -444,6 +458,15 @@ function rowLine(
 ) {
   const { scale } = ctx;
   const height = row.height / scale;
+  if (hasInlineImage(row)) {
+    const lineTw = pxTw(Math.min(baseline, height) + IMAGE_MARK_DESCENT_PX);
+    return {
+      lineTw,
+      beforeTw: 0,
+      afterTw: Math.max(0, pxTw(height) - lineTw),
+      atLeast: true
+    };
+  }
   const ascent = Math.min(baseline, height);
   const line = Math.min(
     ascent / EXACT_BASELINE_RATIO,
@@ -455,7 +478,7 @@ function rowLine(
     pxTw(ascent) - Math.round(lineTw * EXACT_BASELINE_RATIO)
   );
   const afterTw = Math.max(0, pxTw(height) - lineTw - beforeTw);
-  return { lineTw, beforeTw, afterTw };
+  return { lineTw, beforeTw, afterTw, atLeast: false };
 }
 
 // all space above the row's line box, in twips
@@ -480,7 +503,7 @@ function rowLead(ctx: IExportContext, row: IRow, options: IRowOptions) {
 }
 
 function rowSpacing(ctx: IExportContext, row: IRow, options: IRowOptions) {
-  const { lineTw, afterTw } = rowLine(ctx, row);
+  const { lineTw, afterTw, atLeast } = rowLine(ctx, row);
   return {
     before: options.skipLead ? 0 : rowLead(ctx, row, options),
     after:
@@ -489,7 +512,7 @@ function rowSpacing(ctx: IExportContext, row: IRow, options: IRowOptions) {
       pxTw(options.padBottom || 0) +
       (options.extraAfter || 0),
     line: lineTw,
-    lineRule: LineRuleType.EXACT
+    lineRule: atLeast ? LineRuleType.AT_LEAST : LineRuleType.EXACT
   };
 }
 
@@ -573,6 +596,15 @@ function createLineImage(
   return bytes;
 }
 
+// Word appends a full-height empty paragraph when a header, footer or cell
+// ends with a table; end it with a 1-twip one instead
+function endWithParagraph(children: FileChild[]) {
+  if (children[children.length - 1] instanceof Table) {
+    children.push(createSpacerParagraph(false));
+  }
+  return children;
+}
+
 function createSpacerParagraph(pageBreakBefore: boolean, height = 0) {
   return new Paragraph({
     pageBreakBefore,
@@ -626,7 +658,7 @@ async function serializeTable(
       cells.push(
         new TableCell({
           children: cellChildren.length
-            ? cellChildren
+            ? endWithParagraph(cellChildren)
             : [createSpacerParagraph(false)],
           columnSpan: td.colspan > 1 ? td.colspan : undefined,
           rowSpan: td.rowspan > 1 ? td.rowspan : undefined,
