@@ -3,6 +3,13 @@
 All notable changes to this project will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.29] — 2026-10-09
+
+### Fixed
+- DOCX footer band is a page-anchored picture: full page width down to the bottom edge, and the footer no longer squeezes the page body in Word
+- DOCX lists use native Word numbering (Enter continues the numbering) while keeping windoc's marker position and font
+
+
 ## [0.3.28] — 2026-10-09
 
 ### Fixed
