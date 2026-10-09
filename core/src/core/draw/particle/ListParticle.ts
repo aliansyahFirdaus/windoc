@@ -388,14 +388,11 @@ export class ListParticle {
     return cycle[level % cycle.length];
   }
 
-  public drawListStyle(
-    ctx: CanvasRenderingContext2D,
-    row: IRow,
-    position: IElementPosition
-  ) {
-    const { elementList, offsetX, listIndex, ascent } = row;
+  // Marker x for a list row's first line (shared by canvas drawing and export)
+  public getListMarkerX(row: IRow, position: IElementPosition): number | null {
+    const { elementList, offsetX } = row;
     const startElement = elementList[0];
-    if (startElement.value !== ZERO || startElement.listWrap) return;
+    if (startElement.value !== ZERO || startElement.listWrap) return null;
     // tab width
     let tabWidth = 0;
     const { defaultTabWidth, scale } = this.options;
@@ -406,13 +403,38 @@ export class ListParticle {
     }
     const {
       coordinate: {
-        leftTop: [startX, startY]
+        leftTop: [startX]
       }
     } = position;
     // Add indent for nested lists
     const indentWidth = this.getListIndentWidth(startElement);
-    const x = startX - offsetX! + tabWidth + indentWidth;
-    const y = startY + ascent;
+    return startX - offsetX! + tabWidth + indentWidth;
+  }
+
+  public getListMarker(
+    row: IRow
+  ): { text: string; styleElement: IElement } | null {
+    const startElement = row.elementList[0];
+    if (startElement.listStyle === ListStyle.CHECKBOX) return null;
+    const text = this._getListMarkerText(startElement, row.listIndex!);
+    if (!text) return null;
+    return {
+      text,
+      styleElement: this._getListMarkerStyleElement(row.elementList)
+    };
+  }
+
+  public drawListStyle(
+    ctx: CanvasRenderingContext2D,
+    row: IRow,
+    position: IElementPosition
+  ) {
+    const { elementList, ascent } = row;
+    const startElement = elementList[0];
+    const x = this.getListMarkerX(row, position);
+    if (x === null) return;
+    const { scale } = this.options;
+    const y = position.coordinate.leftTop[1] + ascent;
     if (startElement.listStyle === ListStyle.CHECKBOX) {
       const { width, height, gap } = this.options.checkbox;
       const checkboxRowElement: IRowElement = {
@@ -437,12 +459,11 @@ export class ListParticle {
         }
       });
     } else {
-      const text = this._getListMarkerText(startElement, listIndex!);
-      if (!text) return;
-      const markerStyleElement = this._getListMarkerStyleElement(elementList);
+      const marker = this.getListMarker(row);
+      if (!marker) return;
       ctx.save();
-      ctx.font = this.draw.getElementFont(markerStyleElement, scale);
-      ctx.fillText(text, x, y);
+      ctx.font = this.draw.getElementFont(marker.styleElement, scale);
+      ctx.fillText(marker.text, x, y);
       ctx.restore();
     }
   }

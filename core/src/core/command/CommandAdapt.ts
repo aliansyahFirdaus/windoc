@@ -100,7 +100,7 @@ import {
   isNumber,
   isObjectEqual
 } from '../../utils';
-import { exportEditorDataToDocx } from '../../utils/docx';
+import { exportDrawToDocx } from '../../utils/docxLayout';
 import { exportEditorDataToPdf } from '../../utils/pdf';
 import {
   createDomFromElementList,
@@ -1453,8 +1453,7 @@ export class CommandAdapt {
   }
 
   public async exportDocx(payload: IExportDocxOption = {}) {
-    const result = this.draw.getValue();
-    const { blob, fileName } = await exportEditorDataToDocx(result, payload);
+    const { blob, fileName } = await exportDrawToDocx(this.draw, payload);
     downloadBlob(blob, fileName);
   }
 
