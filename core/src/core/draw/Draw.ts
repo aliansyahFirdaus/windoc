@@ -2000,14 +2000,12 @@ export class Draw {
         boundingBoxAscent: 0,
         boundingBoxDescent: 0
       };
+      const listMarkerWidth =
+        (element.listId && listStyleMap.get(element.listId)) || 0;
       const listIndentWidth = element.listId
-        ? this.listParticle.getListIndentWidth(element)
+        ? this.listParticle.getListIndentWidth(element, listMarkerWidth)
         : 0;
-      const offsetX =
-        curRow.offsetX ||
-        ((element.listId && listStyleMap.get(element.listId)) || 0) +
-          listIndentWidth ||
-        0;
+      const offsetX = curRow.offsetX || listMarkerWidth + listIndentWidth || 0;
       const availableWidth = innerWidth - offsetX;
       const isStartElement = curRow.elementList.length === 1;
       x += isStartElement ? offsetX : 0;
@@ -2958,7 +2956,10 @@ export class Draw {
         if (element.listId) {
           row.isList = true;
           const baseListOffset = listStyleMap.get(element.listId!) || 0;
-          const rowListIndent = this.listParticle.getListIndentWidth(element);
+          const rowListIndent = this.listParticle.getListIndentWidth(
+            element,
+            baseListOffset
+          );
           row.offsetX = baseListOffset + rowListIndent;
           row.listIndex = listState.listIndex;
         }

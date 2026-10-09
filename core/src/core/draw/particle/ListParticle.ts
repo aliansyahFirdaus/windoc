@@ -3,7 +3,6 @@ import {
   ulStyleMapping,
   olPresetCycles,
   ulPresetCycles,
-  INDENT_PER_LEVEL,
   MAX_LIST_LEVEL
 } from '../../../dataset/constant/List';
 import { ElementType } from '../../../dataset/enum/Element';
@@ -253,10 +252,11 @@ export class ListParticle {
     this.draw.render({ curIndex, isSetCursor });
   }
 
-  public getListIndentWidth(element: IElement): number {
-    const { scale } = this.options;
+  // Each level indents by the list's marker column, so a nested marker starts
+  // exactly where its parent's text starts
+  public getListIndentWidth(element: IElement, markerWidth: number): number {
     const level = element.listLevel ?? 0;
-    return level * INDENT_PER_LEVEL * scale;
+    return level * markerWidth;
   }
 
   private _getListMarkerStyleElement(
@@ -406,9 +406,11 @@ export class ListParticle {
         leftTop: [startX]
       }
     } = position;
-    // Add indent for nested lists
-    const indentWidth = this.getListIndentWidth(startElement);
-    return startX - offsetX! + tabWidth + indentWidth;
+    // offsetX = marker column * (level + 1), so the marker sits one column
+    // left of the text
+    const level = startElement.listLevel ?? 0;
+    const markerWidth = offsetX! / (level + 1);
+    return startX - markerWidth + tabWidth;
   }
 
   public getListMarker(
